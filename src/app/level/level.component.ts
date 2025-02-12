@@ -32,11 +32,6 @@ export class LevelComponent {
 
       const c = this.canvas();
 
-      if (c) {
-        // c.nativeElement.width = 2000;
-        // c.nativeElement.height = 768;
-      }
-
       if (context && tilesMap) {
         render(context, tilesMap);
       }
@@ -50,6 +45,13 @@ type Palette = {
   y: number;
 };
 
+type PaletteOffset = {
+  overworld: Palette;
+  underworld: Palette;
+  underwater: Palette;
+  snow: Palette;
+}
+
 async function render(
   context: CanvasRenderingContext2D,
   tiles: Blob
@@ -57,57 +59,98 @@ async function render(
   const bitmap = await createImageBitmap(tiles);
 
   context.scale(3, 3);
-  const p1 = {
+  const p1Base: Palette = {
     x: 0,
     y: 16,
   };
 
-  const p3 = {
+  const p1Offset: PaletteOffset = {
+    overworld: { x: 0, y: 0},
+    underworld: { x: 8 * (SIZE+1) +11, y: 0},
+    underwater: { x: 8 * (SIZE+1) +11, y: 4 * (SIZE+1) +16},
+    snow: { x: 0, y: 4 * (SIZE+1) +16},
+  }
+
+  p1Base.x += p1Offset.snow.x;
+  p1Base.y += p1Offset.snow.y;
+
+  const p3Base: Palette = {
     x: 298,
     y: 78,
   };
 
-  const p2 = {
+  const p3Offset: PaletteOffset = {
+    overworld: { x: 0, y: 0},
+    underworld: { x: 5 * (SIZE+1) +11, y: 0},
+    snow: { x: 5*2 * (SIZE+1) +11*2, y: 0},
+    underwater: { x: 5*3 * (SIZE+1) +11*3, y: 0},
+  }
+
+  p3Base.x += p3Offset.snow.x;
+  p3Base.y += p3Offset.snow.y;
+
+  const p2Base: Palette = {
     x: 298,
     y: 78 - 62,
   };
 
-  const p0 = {
+  const p2Offset: PaletteOffset = {
+    overworld: { x: 0, y: 0},
+    underworld: { x: 5 * (SIZE+1) +11, y: 0},
+    snow: { x: 5*2 * (SIZE+1) +11*2, y: 0},
+    underwater: { x: 5*3 * (SIZE+1) +11*3, y: 0},
+  }
+
+  p2Base.x += p2Offset.underwater.x;
+  p2Base.y += p2Offset.underwater.y;
+
+  const p0Base: Palette = {
     x: 0,
     y: 12 * (SIZE + 1) - 8,
   };
 
-  const cloudTopLeft = await getTile(bitmap, p2, 0, 0);
-  const cloudTopMiddle = await getTile(bitmap, p2, 1, 0);
-  const cloudTopRight = await getTile(bitmap, p2, 2, 0);
-  const cloudBottomLeft = await getTile(bitmap, p2, 0, 1);
-  const cloudBottomMiddle = await getTile(bitmap, p2, 1, 1);
-  const cloudBottomRight = await getTile(bitmap, p2, 2, 1);
-  const waves = await getTile(bitmap, p2, 3, 0);
-  const water = await getTile(bitmap, p2, 3, 1);
-  const floor = await getTile(bitmap, p1, 0, 0);
-  const brick = await getTile(bitmap, p1, 1, 0);
-  const stump = await getTile(bitmap, p1, 1, 3);
-  const qm = await getTile(bitmap, p3, 0, 0);
-  const coin = await getTile(bitmap, p3, 0, 1);
-  const topLeft = await getTile(bitmap, p0, 0, 0);
-  const topMiddle = await getTile(bitmap, p0, 1, 0);
-  const topRight = await getTile(bitmap, p0, 2, 0);
-  const bushLeft = await getTile(bitmap, p0, 0, 1);
-  const bushMiddle = await getTile(bitmap, p0, 1, 1);
-  const bushRight = await getTile(bitmap, p0, 2, 1);
-  const hillLeft = await getTile(bitmap, p0, 0, 3);
-  const hillInnerLeft = await getTile(bitmap, p0, 1, 3);
-  const hillMiddle = await getTile(bitmap, p0, 2, 3);
-  const hillInnerRight = await getTile(bitmap, p0, 3, 3);
-  const hillRight = await getTile(bitmap, p0, 4, 3);
-  const hillTop = await getTile(bitmap, p0, 2, 2);
-  const pipeTopLeft = await getTile(bitmap, p0, 7, 0);
-  const pipeLeft = await getTile(bitmap, p0, 7, 1);
-  const pipeTopRight = await getTile(bitmap, p0, 8, 0);
-  const pipeRight = await getTile(bitmap, p0, 8, 1);
-  const treeTop = await getTile(bitmap, p0, 6, 0);
-  const treeBottom = await getTile(bitmap, p0, 6, 1);
+  const p0Offset: PaletteOffset = {
+    overworld: { x: 0, y: 0},
+    underworld: { x: 9 * (SIZE+1) +11, y: 0},
+    underwater: { x: 9 * (SIZE+1) +11, y: 4 * (SIZE+1) +16},
+    snow: { x: 0, y: 4 * (SIZE+1) +16},
+  }
+
+  p0Base.x += p0Offset.snow.x;
+  p0Base.y += p0Offset.snow.y;
+
+
+  const cloudTopLeft = await getTile(bitmap, p2Base, 0, 0);
+  const cloudTopMiddle = await getTile(bitmap, p2Base, 1, 0);
+  const cloudTopRight = await getTile(bitmap, p2Base, 2, 0);
+  const cloudBottomLeft = await getTile(bitmap, p2Base, 0, 1);
+  const cloudBottomMiddle = await getTile(bitmap, p2Base, 1, 1);
+  const cloudBottomRight = await getTile(bitmap, p2Base, 2, 1);
+  const waves = await getTile(bitmap, p2Base, 3, 0);
+  const water = await getTile(bitmap, p2Base, 3, 1);
+  const floor = await getTile(bitmap, p1Base, 0, 0);
+  const brick = await getTile(bitmap, p1Base, 1, 0);
+  const stump = await getTile(bitmap, p1Base, 1, 3);
+  const qm = await getTile(bitmap, p3Base, 0, 0);
+  const coin = await getTile(bitmap, p3Base, 0, 1);
+  const topLeft = await getTile(bitmap, p0Base, 0, 0);
+  const topMiddle = await getTile(bitmap, p0Base, 1, 0);
+  const topRight = await getTile(bitmap, p0Base, 2, 0);
+  const bushLeft = await getTile(bitmap, p0Base, 0, 1);
+  const bushMiddle = await getTile(bitmap, p0Base, 1, 1);
+  const bushRight = await getTile(bitmap, p0Base, 2, 1);
+  const hillLeft = await getTile(bitmap, p0Base, 0, 3);
+  const hillInnerLeft = await getTile(bitmap, p0Base, 1, 3);
+  const hillMiddle = await getTile(bitmap, p0Base, 2, 3);
+  const hillInnerRight = await getTile(bitmap, p0Base, 3, 3);
+  const hillRight = await getTile(bitmap, p0Base, 4, 3);
+  const hillTop = await getTile(bitmap, p0Base, 2, 2);
+  const pipeTopLeft = await getTile(bitmap, p0Base, 7, 0);
+  const pipeLeft = await getTile(bitmap, p0Base, 7, 1);
+  const pipeTopRight = await getTile(bitmap, p0Base, 8, 0);
+  const pipeRight = await getTile(bitmap, p0Base, 8, 1);
+  const treeTop = await getTile(bitmap, p0Base, 6, 0);
+  const treeBottom = await getTile(bitmap, p0Base, 6, 1);
 
   const treeCrown = [[treeTop], [treeBottom]];
 
@@ -183,6 +226,30 @@ async function render(
     repeatCol: 2,
     repeatRow: 2,
   });
+
+  drawTile(context, floor, {
+    col: 0,
+    row: 7,
+    repeatCol: 20,
+    repeatRow: 2,
+  });
+
+  drawTile(context, pipeTop, {
+    col: 6,
+    row: 3,
+  });
+  drawTile(context, pipeSegment, {
+    col: 6,
+    row: 5,
+    repeatRow: 2,
+  });
+
+  drawTile(context, qm, {
+    col: 0,
+    row: 4,
+    repeatRow: 1,
+  });
+
 }
 
 type Tile = ImageBitmap | ImageBitmap[] | ImageBitmap[][];

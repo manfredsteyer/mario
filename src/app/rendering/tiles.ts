@@ -1,6 +1,5 @@
-import { getPalettes, Palette, Palettes, Style } from './palettes';
-
-export const SIZE = 16;
+import { replaceColor } from './color-utils';
+import { getPalettes, Palette, Palettes, SIZE, Style } from './palettes';
 
 export type Tile =
   | ImageBitmap
@@ -100,7 +99,7 @@ export async function loadTiles(
 
     // Ground tiles
     floor: getTile(bitmap, palettes.p1, 0, 0),
-    brick: getTile(bitmap, palettes.p1, 1, 0),
+    brick: getTile(bitmap, palettes.p1, 2, 0),
     stump: getTile(bitmap, palettes.p1, 1, 3),
 
     // Interactive tiles
@@ -231,18 +230,22 @@ async function getTile(
   row: number,
   col: number
 ) {
-  return await createImageBitmap(
+  const image = await createImageBitmap(
     bitmap,
     p.x + row * (SIZE + 1),
     p.y + col * (SIZE + 1),
     SIZE,
     SIZE
   );
+
+  return image;
 }
 
-export async function extractTiles(tilesMap: Blob, style: Style) {
+export async function extractTiles(tilesMap: Blob, style: Style, bgColor: string) {
   const bitmap = await createImageBitmap(tilesMap);
+  const correctedBitmap = await replaceColor(bitmap, '#9494ff', bgColor);
   const palettes = getPalettes(style);
-  const tiles = await loadTiles(bitmap, palettes);
+  console.log('palettes', palettes);
+  const tiles = await loadTiles(correctedBitmap, palettes);
   return tiles;
 }

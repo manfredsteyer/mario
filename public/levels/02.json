@@ -1,0 +1,41 @@
+{
+    "backgroundColor": "#000000",
+    "items": [
+       
+        {
+            "tileKey": "brick",
+            "col": 0,
+            "row": 7,
+            "repeatCol": 20,
+            "repeatRow": 2
+        },
+        {
+            "tileKey": "pipeTop",
+            "col": 6,
+            "row": 3
+        },
+        {
+            "tileKey": "pipeSegment",
+            "col": 6,
+            "row": 5,
+            "repeatRow": 2
+        },
+        {
+            "tileKey": "pipeTop",
+            "col": 12,
+            "row": 3
+        },
+        {
+            "tileKey": "pipeSegment",
+            "col": 12,
+            "row": 5,
+            "repeatRow": 2
+        },
+        {
+            "tileKey": "coin",
+            "col": 0,
+            "row": 4,
+            "repeatRow": 5
+        }
+    ]
+}

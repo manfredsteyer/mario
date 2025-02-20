@@ -1,4 +1,4 @@
-import { SIZE } from "./tiles";
+export const SIZE = 16;
 
 export type Palette = {
   x: number;
@@ -15,10 +15,10 @@ export type PaletteOffset = {
 export type Style = keyof PaletteOffset;
 
 export type Palettes = {
-    p0: Palette;
-    p1: Palette;
-    p2: Palette;
-    p3: Palette;
+  p0: Palette;
+  p1: Palette;
+  p2: Palette;
+  p3: Palette;
 };
 
 const p1Base: Palette = {
@@ -70,22 +70,22 @@ const p0Offsets: PaletteOffset = {
 };
 
 function addOffset(p: Palette, offset: Palette): Palette {
-    return {
-        x: p.x + offset.x,
-        y: p.y + offset.y
-    };
+  return {
+    x: p.x + offset.x,
+    y: p.y + offset.y,
+  };
 }
 
 export function getPalettes(theme: Style): Palettes {
-    const p0Offset = p0Offsets[theme];
-    const p1Offset = p1Offsets[theme];
-    const p2Offset = p2Offsets[theme];
-    const p3Offset = p3Offsets[theme];
-    
-    return {
-        p0: addOffset(p0Base, p0Offset),
-        p1: addOffset(p1Base, p1Offset),
-        p2: addOffset(p2Base, p2Offset),
-        p3: addOffset(p3Base, p3Offset),
-    };
+  const p0Offset = p0Offsets[theme];
+  const p1Offset = p1Offsets[theme];
+  const p2Offset = p2Offsets[theme];
+  const p3Offset = p3Offsets[theme];
+
+  return {
+    p0: addOffset(p0Base, p0Offset),
+    p1: addOffset(p1Base, p1Offset),
+    p2: addOffset(p2Base, p2Offset),
+    p3: addOffset(p3Base, p3Offset),
+  };
 }

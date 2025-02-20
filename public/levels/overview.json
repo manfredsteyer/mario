@@ -1,0 +1,12 @@
+{
+    "levels": [
+        {
+            "title": "Level 1-1: Getting Started",
+            "fileName": "01.json"
+        },
+        {
+            "title": "Level 1-2: Sewer Tunnel",
+            "fileName": "02.json"
+        }
+    ]
+}

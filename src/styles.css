@@ -15,22 +15,23 @@ canvas {
   margin: 30px 0;
 }
 
-button, label, select {
-    display: inline-block;
-    margin: 0 5px;
-
+button,
+label,
+select {
+  display: inline-block;
+  margin: 0 5px;
 }
 
 button {
-    padding: 3px 10px;
+  padding: 3px 10px;
 }
 
 .bottom {
-    display: flex;
-    flex-direction: column;
-    justify-content:  center /* Inhalte unten ausrichten */
-  }
-  
-  h1 {
-    margin: 0px;
-  }
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Inhalte unten ausrichten */
+}
+
+h1 {
+  margin: 0px;
+}

@@ -16,7 +16,7 @@ export type AnimateOptions = {
   abortSignal?: AbortSignal;
 };
 
-export function animate(options: AnimateOptions) {
+export function animateLevel(options: AnimateOptions) {
   const { canvas, level, tiles } = options;
 
   const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
@@ -27,7 +27,7 @@ export function animate(options: AnimateOptions) {
 
   const abortSignal = options.abortSignal ?? new AbortController().signal;
 
-  step({ canvas, context, level, tiles, offset: 0, speed: 2, abortSignal });
+  step({ canvas, context, level, tiles, offset: 0, speed: 1, abortSignal });
 }
 
 type StepOptions = {

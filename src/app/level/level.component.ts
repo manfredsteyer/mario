@@ -4,6 +4,7 @@ import {
   effect,
   ElementRef,
   inject,
+  OnDestroy,
   resource,
   signal,
   viewChild,
@@ -13,14 +14,15 @@ import { Style } from '../rendering/palettes';
 import { extractTiles } from '../rendering/tiles';
 import { LevelLoader } from './level.loader';
 import { HttpResourceRef } from '@angular/common/http';
-import { render as renderLevel } from '../rendering/level';
+import { animateLevel, render as renderLevel } from '../rendering/level';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-level',
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './level.component.html',
 })
-export class LevelComponent {
+export class LevelComponent implements OnDestroy {
   private tilesMapLoader = inject(TilesMapLoader);
   private levelLoader = inject(LevelLoader);
 
@@ -32,42 +34,16 @@ export class LevelComponent {
 
   tilesMapResource = this.tilesMapLoader.getTilesMapResource();
   levelResource = this.levelLoader.getLevelResource(this.levelKey);
-  
+
   levelBackground = computed(() => this.levelResource.value().backgroundColor);
 
-  tilesResource = createTilesResource(this.tilesMapResource, this.style, this.levelBackground);
+  tilesResource = createTilesResource(
+    this.tilesMapResource,
+    this.style,
+    this.levelBackground
+  );
 
-  async animate() {
-    // const tilesMap = this.tilesMap();
-    // const canvas = this.canvas();
-
-    // if (!tilesMap || !canvas) {
-    //   return;
-    // }
-
-    // const style = this.style();
-    // const tiles = await extractTiles(tilesMap, style);
-    // const level = this.level();
-
-    // animate({ canvas, level, tiles });
-  }
-
-  render() {
-    const tiles = this.tilesResource.value();
-    const level = this.levelResource.value();
-    const canvas = this.canvas();
-
-    if (!tiles || !canvas) {
-      return;
-    }
-
-    console.log('tiles', tiles);
-    renderLevel({
-      canvas,
-      level,
-      tiles
-    });
-  }
+  animationAbortController?: AbortController;
 
   constructor() {
     effect(() => {
@@ -79,12 +55,54 @@ export class LevelComponent {
     });
   }
 
+  ngOnDestroy(): void {
+    this.animationAbortController?.abort();
+  }
+
   private initCanvas() {
     const canvas = this.canvas();
     if (canvas) {
       const context = getContext(canvas);
       context.scale(3, 3);
     }
+  }
+
+  animate() {
+    const tiles = this.tilesResource.value();
+    const level = this.levelResource.value();
+    const canvas = this.canvas();
+
+    if (!tiles || !canvas) {
+      return;
+    }
+
+    this.animationAbortController?.abort();
+    this.animationAbortController = new AbortController();
+
+    animateLevel({
+      canvas,
+      level,
+      tiles,
+      abortSignal: this.animationAbortController.signal,
+    });
+  }
+
+  render() {
+    const tiles = this.tilesResource.value();
+    const level = this.levelResource.value();
+    const canvas = this.canvas();
+
+    if (!tiles || !canvas) {
+      return;
+    }
+
+    this.animationAbortController?.abort();
+
+    renderLevel({
+      canvas,
+      level,
+      tiles,
+    });
   }
 }
 
@@ -96,7 +114,11 @@ function getContext(canvas: HTMLCanvasElement) {
   return context;
 }
 
-function toTilesRequest(tilesMap: () => Blob | undefined, style: () => Style, bgColor: () => string) {
+function toTilesRequest(
+  tilesMap: () => Blob | undefined,
+  style: () => Style,
+  bgColor: () => string
+) {
   const tilesMapValue = tilesMap();
   if (typeof tilesMapValue === 'undefined') {
     return undefined;
@@ -114,9 +136,14 @@ function toTilesRequest(tilesMap: () => Blob | undefined, style: () => Style, bg
 // we see the high-level data flow more clearly in the component
 // Is this observation correct?
 //
-function createTilesResource(tilesMapResource: HttpResourceRef<Blob | undefined>, style: () => Style, bgColor: () => string) {
-
-  const tilesRequest = computed(() => toTilesRequest(tilesMapResource.value, style, bgColor));
+function createTilesResource(
+  tilesMapResource: HttpResourceRef<Blob | undefined>,
+  style: () => Style,
+  bgColor: () => string
+) {
+  const tilesRequest = computed(() =>
+    toTilesRequest(tilesMapResource.value, style, bgColor)
+  );
 
   const tilesResource = resource({
     request: tilesRequest,
@@ -131,8 +158,8 @@ function createTilesResource(tilesMapResource: HttpResourceRef<Blob | undefined>
       }
 
       const { tilesMap, style, bgColor } = params.request;
-      return extractTiles(tilesMap, style, bgColor)
-    }
+      return extractTiles(tilesMap, style, bgColor);
+    },
   });
 
   return tilesResource;

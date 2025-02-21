@@ -4,7 +4,7 @@
       <h1>ngMario</h1>
       <div class="bottom">
         <div>
-      
+        <div class="progress">{{ tilesMapProgress() }}</div>
         <select [(ngModel)]="levelKey">
           <option value="01">Level 01</option>
           <option value="02">Level 02</option>
@@ -16,7 +16,7 @@
           <option value="snow">Snow</option>
         </select>
         <button (click)="animate()">Scroll</button>
-        <a>Hallo</a>
+        <button (click)="reload()">Reload</button>
     </div>
       </div>
     </div>

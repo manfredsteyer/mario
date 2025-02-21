@@ -9,13 +9,14 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { TilesMapLoader } from './tiles-map.loader';
+import { TilesMapLoader } from '../data/tiles-map.loader';
 import { Style } from '../rendering/palettes';
 import { extractTiles } from '../rendering/tiles';
-import { LevelLoader } from './level.loader';
-import { HttpResourceRef } from '@angular/common/http';
+import { LevelLoader } from '../data/level.loader';
+import { HttpProgressEvent, HttpResourceRef } from '@angular/common/http';
 import { animateLevel, render as renderLevel } from '../rendering/level';
 import { FormsModule } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-level',
@@ -41,6 +42,14 @@ export class LevelComponent implements OnDestroy {
     this.tilesMapResource,
     this.style,
     this.levelBackground
+  );
+
+  tilesMapProgress = computed(() =>
+    calcProgress(this.tilesMapResource.progress())
+  );
+
+  levelProgress = computed(() =>
+    calcProgress(this.levelResource.progress())
   );
 
   animationAbortController?: AbortController;
@@ -104,6 +113,11 @@ export class LevelComponent implements OnDestroy {
       tiles,
     });
   }
+
+  reload() {
+    this.tilesMapResource.reload();
+    this.levelResource.reload();
+  }
 }
 
 function getContext(canvas: HTMLCanvasElement) {
@@ -163,4 +177,18 @@ function createTilesResource(
   });
 
   return tilesResource;
+}
+
+function calcProgress(progress: HttpProgressEvent | undefined): string {
+  if (!progress) {
+    return '-';
+  }
+
+  if (progress.total) {
+    const percent = Math.round(progress.loaded / progress.total * 100);
+    return percent + '%';
+  }
+
+  const kb = Math.round(progress.loaded / 1024);
+  return kb + ' KB';
 }

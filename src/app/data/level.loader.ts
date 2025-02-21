@@ -1,8 +1,8 @@
 import { httpResource } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Level } from '../rendering/level';
-import { initLevel } from '../data/init-level';
-import { initLevelOverview, LevelOverview } from '../data/level-info';
+import { initLevel } from './init-level';
+import { initLevelOverview, LevelOverview } from './level-info';
 
 //
 //  The following methods ending with 1, 2, 3, ... are just to show

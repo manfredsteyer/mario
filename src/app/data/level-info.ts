@@ -1,12 +1,12 @@
 export type LevelInfo = {
-    title: string;
-    levelKey: string;
+  title: string;
+  levelKey: string;
 };
 
 export type LevelOverview = {
-    levels: LevelInfo[];
+  levels: LevelInfo[];
 };
 
 export const initLevelOverview: LevelOverview = {
-    levels: []
+  levels: [],
 };

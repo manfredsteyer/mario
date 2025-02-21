@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { LevelComponent } from "./level/level.component";
+import { LevelComponent } from './level/level.component';
 
 @Component({
   selector: 'app-root',

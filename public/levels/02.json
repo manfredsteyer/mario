@@ -1,114 +1,114 @@
 {
-    "levelId": 2,
-    "backgroundColor": "#000000",
-    "items": [
-        {
-            "tileKey": "brick",
-            "col": 0,
-            "row": 13,
-            "repeatCol": 58,
-            "repeatRow": 2
-        },
-        {
-            "tileKey": "brick",
-            "col": 0,
-            "row": 0,
-            "repeatCol": 1,
-            "repeatRow": 13
-        },
-        {
-            "tileKey": "brick",
-            "col": 6,
-            "row": 0,
-            "repeatCol": 51
-        },
-        {
-            "tileKey": "questionMark",
-            "col": 10,
-            "row": 9,
-            "repeatCol": 5,
-            "repeatRow": 1
-        },
-        {
-            "tileKey": "solid",
-            "col": 17,
-            "row": 12,
-            "repeatRow": 1
-        },
-        {
-            "tileKey": "solid",
-            "col": 19,
-            "row": 11,
-            "repeatRow": 2
-        },
-        {
-            "tileKey": "solid",
-            "col": 21,
-            "row": 10,
-            "repeatRow": 3
-        },
-        {
-            "tileKey": "solid",
-            "col": 23,
-            "row": 9,
-            "repeatRow": 4
-        },
-        {
-            "tileKey": "solid",
-            "col": 25,
-            "row": 9,
-            "repeatRow": 4
-        },
-        {
-            "tileKey": "solid",
-            "col": 27,
-            "row": 10,
-            "repeatRow": 3
-        },
-        {
-            "tileKey": "brick",
-            "col": 29,
-            "row": 8
-        },
-        {
-            "tileKey": "solid",
-            "col": 31,
-            "row": 10,
-            "repeatRow": 3
-        },
-        {
-            "tileKey": "solid",
-            "col": 33,
-            "row": 11,
-            "repeatRow": 2
-        },
+  "levelId": 2,
+  "backgroundColor": "#000000",
+  "items": [
+    {
+      "tileKey": "brick",
+      "col": 0,
+      "row": 13,
+      "repeatCol": 58,
+      "repeatRow": 2
+    },
+    {
+      "tileKey": "brick",
+      "col": 0,
+      "row": 0,
+      "repeatCol": 1,
+      "repeatRow": 13
+    },
+    {
+      "tileKey": "brick",
+      "col": 6,
+      "row": 0,
+      "repeatCol": 51
+    },
+    {
+      "tileKey": "questionMark",
+      "col": 10,
+      "row": 9,
+      "repeatCol": 5,
+      "repeatRow": 1
+    },
+    {
+      "tileKey": "solid",
+      "col": 17,
+      "row": 12,
+      "repeatRow": 1
+    },
+    {
+      "tileKey": "solid",
+      "col": 19,
+      "row": 11,
+      "repeatRow": 2
+    },
+    {
+      "tileKey": "solid",
+      "col": 21,
+      "row": 10,
+      "repeatRow": 3
+    },
+    {
+      "tileKey": "solid",
+      "col": 23,
+      "row": 9,
+      "repeatRow": 4
+    },
+    {
+      "tileKey": "solid",
+      "col": 25,
+      "row": 9,
+      "repeatRow": 4
+    },
+    {
+      "tileKey": "solid",
+      "col": 27,
+      "row": 10,
+      "repeatRow": 3
+    },
+    {
+      "tileKey": "brick",
+      "col": 29,
+      "row": 8
+    },
+    {
+      "tileKey": "solid",
+      "col": 31,
+      "row": 10,
+      "repeatRow": 3
+    },
+    {
+      "tileKey": "solid",
+      "col": 33,
+      "row": 11,
+      "repeatRow": 2
+    },
 
-        {"tileKey": "coin", "col": 40, "row": 8},
-        {"tileKey": "coin", "col": 40, "row": 7},
-        {"tileKey": "coin", "col": 40, "row": 6},
-        {"tileKey": "coin", "col": 40, "row": 5},
-        {"tileKey": "coin", "col": 40, "row": 4},
-        {"tileKey": "coin", "col": 41, "row": 5},
-        {"tileKey": "coin", "col": 42, "row": 6},
-        {"tileKey": "coin", "col": 43, "row": 4},
-        {"tileKey": "coin", "col": 43, "row": 5},
-        {"tileKey": "coin", "col": 43, "row": 6},
-        {"tileKey": "coin", "col": 43, "row": 7},
-        {"tileKey": "coin", "col": 43, "row": 8},
-      
-        {"tileKey": "coin", "col": 45, "row": 4},
-        {"tileKey": "coin", "col": 46, "row": 4},
-        {"tileKey": "coin", "col": 47, "row": 4},
-        {"tileKey": "coin", "col": 48, "row": 4},
-        {"tileKey": "coin", "col": 45, "row": 5},
-        {"tileKey": "coin", "col": 45, "row": 6},
-        {"tileKey": "coin", "col": 45, "row": 7},
-        {"tileKey": "coin", "col": 45, "row": 8},
-        {"tileKey": "coin", "col": 46, "row": 8},
-        {"tileKey": "coin", "col": 47, "row": 8},
-        {"tileKey": "coin", "col": 48, "row": 8},
-        {"tileKey": "coin", "col": 48, "row": 7},
-        {"tileKey": "coin", "col": 48, "row": 6},
-        {"tileKey": "coin", "col": 47, "row": 6}
-    ]
+    { "tileKey": "coin", "col": 40, "row": 8 },
+    { "tileKey": "coin", "col": 40, "row": 7 },
+    { "tileKey": "coin", "col": 40, "row": 6 },
+    { "tileKey": "coin", "col": 40, "row": 5 },
+    { "tileKey": "coin", "col": 40, "row": 4 },
+    { "tileKey": "coin", "col": 41, "row": 5 },
+    { "tileKey": "coin", "col": 42, "row": 6 },
+    { "tileKey": "coin", "col": 43, "row": 4 },
+    { "tileKey": "coin", "col": 43, "row": 5 },
+    { "tileKey": "coin", "col": 43, "row": 6 },
+    { "tileKey": "coin", "col": 43, "row": 7 },
+    { "tileKey": "coin", "col": 43, "row": 8 },
+
+    { "tileKey": "coin", "col": 45, "row": 4 },
+    { "tileKey": "coin", "col": 46, "row": 4 },
+    { "tileKey": "coin", "col": 47, "row": 4 },
+    { "tileKey": "coin", "col": 48, "row": 4 },
+    { "tileKey": "coin", "col": 45, "row": 5 },
+    { "tileKey": "coin", "col": 45, "row": 6 },
+    { "tileKey": "coin", "col": 45, "row": 7 },
+    { "tileKey": "coin", "col": 45, "row": 8 },
+    { "tileKey": "coin", "col": 46, "row": 8 },
+    { "tileKey": "coin", "col": 47, "row": 8 },
+    { "tileKey": "coin", "col": 48, "row": 8 },
+    { "tileKey": "coin", "col": 48, "row": 7 },
+    { "tileKey": "coin", "col": 48, "row": 6 },
+    { "tileKey": "coin", "col": 47, "row": 6 }
+  ]
 }

@@ -1,4 +1,9 @@
-import { Direction, getGameState, setGameState, updateGateState } from './game-state';
+import {
+  Direction,
+  getGameState,
+  setGameState,
+  updateGateState,
+} from './game-state';
 import { SIZE } from './palettes';
 import { DrawOptions, drawTile, TileSet } from './tiles';
 
@@ -42,9 +47,10 @@ export function animateLevel(options: AnimateOptions) {
   abortController = new AbortController();
   const abortSignal = abortController.signal;
 
-  const levelWidth = level.items
-    .map(i => i.col + (i.repeatCol || 1) -1)
-    .reduce((prev, curr) => Math.max(prev, curr), 0) * SIZE;
+  const levelWidth =
+    level.items
+      .map((i) => i.col + (i.repeatCol || 1) - 1)
+      .reduce((prev, curr) => Math.max(prev, curr), 0) * SIZE;
 
   const maxOffset = levelWidth - SCREEN_WIDTH;
 
@@ -93,7 +99,18 @@ function getDirection(level: Level): Direction {
 }
 
 function step(options: StepOptions): void {
-  const { canvas, context, level, tiles, offset, speed, timeStamp, formerTimeStamp, maxOffset, direction } = options;
+  const {
+    canvas,
+    context,
+    level,
+    tiles,
+    offset,
+    speed,
+    timeStamp,
+    formerTimeStamp,
+    maxOffset,
+    direction,
+  } = options;
 
   const newDirection = calcDirection(offset, maxOffset, direction);
 
@@ -111,20 +128,20 @@ function step(options: StepOptions): void {
 
   drawLevel({ level, offset, tiles, context, width, height });
 
-  updateGateState(state => ({
+  updateGateState((state) => ({
     ...state,
     levelId: level.levelId,
     offset,
-    direction
+    direction,
   }));
-  
+
   requestAnimationFrame((newTimeStamp) => {
     step({
       ...options,
       offset: newOffset,
       formerTimeStamp: timeStamp,
       timeStamp: newTimeStamp,
-      direction: newDirection
+      direction: newDirection,
     });
   });
 }
@@ -171,7 +188,11 @@ function drawLevel(options: DrawLevelOptions) {
   }
 }
 
-function calcDirection(offset: number, maxOffset: number, currentDirection: Direction): Direction {
+function calcDirection(
+  offset: number,
+  maxOffset: number,
+  currentDirection: Direction,
+): Direction {
   if (offset < -maxOffset) {
     return 'left';
   }
@@ -182,4 +203,3 @@ function calcDirection(offset: number, maxOffset: number, currentDirection: Dire
 
   return currentDirection;
 }
-

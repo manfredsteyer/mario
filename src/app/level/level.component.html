@@ -4,21 +4,24 @@
       <h1>ngMario</h1>
       <div class="bottom">
         <div>
-        <div class="progress">{{ tilesMapProgress() }}</div>
-        <select [(ngModel)]="levelKey">
-          @for(level of levelOverviewResource.value().levels; track level.levelKey) {
-            <option [value]="level.levelKey">{{ level.title }}</option>
-          }
-        </select>
-        <select [(ngModel)]="style">
-          <option value="overworld">Overworld</option>
-          <option value="underworld">Underworld</option>
-          <option value="underwater">Underwater</option>
-          <option value="castle">Castle</option>
-        </select>
-        <button (click)="toggleAnimation()">Toggle Animation</button>
-        <button (click)="reload()">Reload</button>
-    </div>
+          <div class="progress">{{ tilesMapProgress() }}</div>
+          <select [(ngModel)]="levelKey">
+            @for (
+              level of levelOverviewResource.value().levels;
+              track level.levelKey
+            ) {
+              <option [value]="level.levelKey">{{ level.title }}</option>
+            }
+          </select>
+          <select [(ngModel)]="style">
+            <option value="overworld">Overworld</option>
+            <option value="underworld">Underworld</option>
+            <option value="underwater">Underwater</option>
+            <option value="castle">Castle</option>
+          </select>
+          <button (click)="toggleAnimation()">Toggle Animation</button>
+          <button (click)="reload()">Reload</button>
+        </div>
       </div>
     </div>
     <canvas #canvas width="1024" height="720"></canvas>

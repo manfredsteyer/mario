@@ -1,12 +1,12 @@
 {
-    "levels": [
-        {
-            "levelKey": "01",
-            "title": "Level 1"
-        },
-        {
-            "levelKey": "02",
-            "title": "Level 2"
-        }
-    ]
+  "levels": [
+    {
+      "levelKey": "01",
+      "title": "Level 1"
+    },
+    {
+      "levelKey": "02",
+      "title": "Level 2"
+    }
+  ]
 }

@@ -3,6 +3,7 @@
 Example for the experimental `httpResource` in Angular 19.2.
 
 Please note:
+
 - The game "engine" is treated as a black box.
 - The level is constructed via the tiles map in `public/tiles.png` (see below)
 - The level structure is defined via json files in `public/levels`.

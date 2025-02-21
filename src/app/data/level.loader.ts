@@ -11,7 +11,6 @@ import { initLevelOverview, LevelOverview } from './level-info';
 
 @Injectable({ providedIn: 'root' })
 export class LevelLoader {
-    
   getLevelOverviewResource() {
     return httpResource<LevelOverview>('/levels/overview.json', {
       defaultValue: initLevelOverview,
@@ -71,7 +70,7 @@ export class LevelLoader {
         transferCache: false,
         withCredentials: false,
       }),
-      { defaultValue: initLevel }
+      { defaultValue: initLevel },
     );
   }
 
@@ -97,7 +96,7 @@ export class LevelLoader {
           withCredentials: false,
         };
       },
-      { defaultValue: initLevel }
+      { defaultValue: initLevel },
     );
   }
 }

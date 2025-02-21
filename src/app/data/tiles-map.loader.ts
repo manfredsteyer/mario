@@ -1,16 +1,16 @@
 import { httpResource, HttpResourceRef } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class TilesMapLoader {
-    getTilesMapResource(): HttpResourceRef<Blob | undefined> {
-        return httpResource.blob({
-            url: '/tiles.png',
-            reportProgress: true
-        });
-    }
+  getTilesMapResource(): HttpResourceRef<Blob | undefined> {
+    return httpResource.blob({
+      url: '/tiles.png',
+      reportProgress: true,
+    });
+  }
 
-    getTilesMapResource2(): HttpResourceRef<Blob | undefined> {
-        return httpResource.blob('/tiles.png');
-    }
+  getTilesMapResource2(): HttpResourceRef<Blob | undefined> {
+    return httpResource.blob('/tiles.png');
+  }
 }

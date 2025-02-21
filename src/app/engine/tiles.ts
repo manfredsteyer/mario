@@ -83,7 +83,7 @@ export type TileSize = {
 
 export async function loadTiles(
   bitmap: ImageBitmap,
-  palettes: Palettes
+  palettes: Palettes,
 ): Promise<TileSet> {
   const tiles = await createTiles(bitmap, palettes);
   const collections = createCollections(tiles);
@@ -179,9 +179,9 @@ async function createTiles(bitmap: ImageBitmap, palettes: Palettes) {
     (resolvedTiles) => {
       const tileNames = Object.keys(tilePromises);
       return Object.fromEntries(
-        tileNames.map((name, index) => [name, resolvedTiles[index]])
+        tileNames.map((name, index) => [name, resolvedTiles[index]]),
       ) as BaseTileSet;
-    }
+    },
   );
   return tiles;
 }
@@ -190,7 +190,7 @@ export function drawTile(
   context: CanvasRenderingContext2D,
   tile: Tile,
   offset: number,
-  options: DrawOptions
+  options: DrawOptions,
 ): void {
   const normOptions: NormalizedDrawTileOptions = {
     ...defaultDrawTileOptions,
@@ -237,14 +237,14 @@ async function getTile(
   bitmap: ImageBitmap,
   p: Palette,
   row: number,
-  col: number
+  col: number,
 ) {
   const image = await createImageBitmap(
     bitmap,
     p.x + row * (SIZE + 1),
     p.y + col * (SIZE + 1),
     SIZE,
-    SIZE
+    SIZE,
   );
 
   return image;

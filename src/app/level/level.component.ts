@@ -41,13 +41,10 @@ export class LevelComponent implements OnDestroy {
   levelResource = this.levelLoader.getLevelResource(this.levelKey);
   levelOverviewResource = this.levelLoader.getLevelOverviewResource();
 
-  tilesResource = createTilesResource(
-    this.tilesMapResource,
-    this.style,
-  );
+  tilesResource = createTilesResource(this.tilesMapResource, this.style);
 
   tilesMapProgress = computed(() =>
-    calcProgress(this.tilesMapResource.progress())
+    calcProgress(this.tilesMapResource.progress()),
   );
 
   constructor() {
@@ -64,6 +61,15 @@ export class LevelComponent implements OnDestroy {
     stopAnimation();
   }
 
+  toggleAnimation() {
+    this.animation.update((animation) => !animation);
+  }
+
+  reload() {
+    this.tilesMapResource.reload();
+    this.levelResource.reload();
+  }
+
   private initCanvas() {
     const canvas = this.canvas();
     if (canvas) {
@@ -72,11 +78,7 @@ export class LevelComponent implements OnDestroy {
     }
   }
 
-  toggleAnimation() {
-    this.animation.update(animation => !animation);
-  }
-
-  render() {
+  private render() {
     const tiles = this.tilesResource.value();
     const level = this.levelResource.value();
     const canvas = this.canvas();
@@ -88,26 +90,20 @@ export class LevelComponent implements OnDestroy {
 
     // If the game is already running, stop it
     stopAnimation();
-    
+
     if (animation) {
       animateLevel({
         canvas,
         level,
         tiles,
-      })
-    }
-    else {
+      });
+    } else {
       renderLevel({
         canvas,
         level,
         tiles,
       });
     }
-  }
-
-  reload() {
-    this.tilesMapResource.reload();
-    this.levelResource.reload();
   }
 }
 
@@ -119,10 +115,7 @@ function getContext(canvas: HTMLCanvasElement) {
   return context;
 }
 
-function toTilesRequest(
-  tilesMap: () => Blob | undefined,
-  style: () => Style,
-) {
+function toTilesRequest(tilesMap: () => Blob | undefined, style: () => Style) {
   const tilesMapValue = tilesMap();
   if (typeof tilesMapValue === 'undefined') {
     return undefined;
@@ -144,7 +137,7 @@ function createTilesResource(
   style: () => Style,
 ) {
   const tilesRequest = computed(() =>
-    toTilesRequest(tilesMapResource.value, style)
+    toTilesRequest(tilesMapResource.value, style),
   );
 
   const tilesResource = resource({
@@ -173,7 +166,7 @@ function calcProgress(progress: HttpProgressEvent | undefined): string {
   }
 
   if (progress.total) {
-    const percent = Math.round(progress.loaded / progress.total * 100);
+    const percent = Math.round((progress.loaded / progress.total) * 100);
     return percent + '%';
   }
 

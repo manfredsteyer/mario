@@ -27,7 +27,17 @@ export function animateLevel(options: AnimateOptions) {
 
   const abortSignal = options.abortSignal ?? new AbortController().signal;
 
-  step({ canvas, context, level, tiles, offset: 0, speed: 1, abortSignal });
+  step({
+    canvas,
+    context,
+    level,
+    tiles,
+    offset: 0,
+    speed: 10,
+    abortSignal,
+    timeStamp: 0,
+    formerTimeStamp: 0
+  });
 }
 
 type StepOptions = {
@@ -37,11 +47,13 @@ type StepOptions = {
   tiles: TileSet;
   offset: number;
   speed: number;
+  timeStamp: number;
+  formerTimeStamp: number;
   abortSignal: AbortSignal;
 };
 
 function step(options: StepOptions): void {
-  const { canvas, context, level, tiles, offset, speed } = options;
+  const { canvas, context, level, tiles, offset, speed, timeStamp, formerTimeStamp } = options;
 
   if (offset < -150) {
     return;
@@ -54,9 +66,19 @@ function step(options: StepOptions): void {
   const width = canvas.width;
   const height = canvas.height;
 
+  const delta = formerTimeStamp ? (timeStamp - formerTimeStamp) / speed : 0;
+  const newOffset = offset - delta;
+
   drawLevel({ level, offset, tiles, context, width, height });
 
-  requestAnimationFrame(() => step({ ...options, offset: offset - speed }));
+  requestAnimationFrame((newTimeStamp) => {
+    step({
+      ...options,
+      offset: newOffset,
+      formerTimeStamp: timeStamp,
+      timeStamp: newTimeStamp
+    });
+  });
 }
 
 export type RenderOptions = {

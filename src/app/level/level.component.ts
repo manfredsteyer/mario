@@ -16,7 +16,6 @@ import { LevelLoader } from '../data/level.loader';
 import { HttpProgressEvent, HttpResourceRef } from '@angular/common/http';
 import { animateLevel, render as renderLevel } from '../rendering/level';
 import { FormsModule } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-level',

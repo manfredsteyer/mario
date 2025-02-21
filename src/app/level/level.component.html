@@ -6,16 +6,17 @@
         <div>
         <div class="progress">{{ tilesMapProgress() }}</div>
         <select [(ngModel)]="levelKey">
-          <option value="01">Level 01</option>
-          <option value="02">Level 02</option>
+          @for(level of levelOverviewResource.value().levels; track level.levelKey) {
+            <option [value]="level.levelKey">{{ level.title }}</option>
+          }
         </select>
         <select [(ngModel)]="style">
           <option value="overworld">Overworld</option>
           <option value="underworld">Underworld</option>
           <option value="underwater">Underwater</option>
-          <option value="snow">Snow</option>
+          <option value="castle">Castle</option>
         </select>
-        <button (click)="animate()">Scroll</button>
+        <button (click)="toggleAnimation()">Toggle Animation</button>
         <button (click)="reload()">Reload</button>
     </div>
       </div>

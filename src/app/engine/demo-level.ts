@@ -1,6 +1,7 @@
 import { Level } from "./level";
 
 export const demoLevel: Level = {
+    levelId: 0,
     backgroundColor: '#9494ff',
     items: [
         {

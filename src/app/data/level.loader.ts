@@ -1,6 +1,6 @@
 import { httpResource } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Level } from '../rendering/level';
+import { Level } from '../engine/level';
 import { initLevel } from './init-level';
 import { initLevelOverview, LevelOverview } from './level-info';
 

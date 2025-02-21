@@ -9,13 +9,17 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { TilesMapLoader } from '../data/tiles-map.loader';
-import { Style } from '../rendering/palettes';
-import { extractTiles } from '../rendering/tiles';
 import { LevelLoader } from '../data/level.loader';
 import { HttpProgressEvent, HttpResourceRef } from '@angular/common/http';
-import { animateLevel, render as renderLevel } from '../rendering/level';
-import { FormsModule } from '@angular/forms';
+
+//
+//  In this example, we treat the game "engine" as a black box
+//
+import { Style } from '../engine/palettes';
+import { extractTiles } from '../engine/tiles';
+import { animateLevel, renderLevel, stopAnimation } from '../engine/level';
 
 @Component({
   selector: 'app-level',
@@ -29,29 +33,22 @@ export class LevelComponent implements OnDestroy {
   canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
   canvas = computed(() => this.canvasRef()?.nativeElement);
 
-  levelKey = signal<string | undefined>('02');
+  levelKey = signal<string | undefined>('01');
   style = signal<Style>('overworld');
+  animation = signal(false);
 
   tilesMapResource = this.tilesMapLoader.getTilesMapResource();
   levelResource = this.levelLoader.getLevelResource(this.levelKey);
-
-  levelBackground = computed(() => this.levelResource.value().backgroundColor);
+  levelOverviewResource = this.levelLoader.getLevelOverviewResource();
 
   tilesResource = createTilesResource(
     this.tilesMapResource,
     this.style,
-    this.levelBackground
   );
 
   tilesMapProgress = computed(() =>
     calcProgress(this.tilesMapResource.progress())
   );
-
-  levelProgress = computed(() =>
-    calcProgress(this.levelResource.progress())
-  );
-
-  animationAbortController?: AbortController;
 
   constructor() {
     effect(() => {
@@ -64,7 +61,7 @@ export class LevelComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.animationAbortController?.abort();
+    stopAnimation();
   }
 
   private initCanvas() {
@@ -75,42 +72,37 @@ export class LevelComponent implements OnDestroy {
     }
   }
 
-  animate() {
-    const tiles = this.tilesResource.value();
-    const level = this.levelResource.value();
-    const canvas = this.canvas();
-
-    if (!tiles || !canvas) {
-      return;
-    }
-
-    this.animationAbortController?.abort();
-    this.animationAbortController = new AbortController();
-
-    animateLevel({
-      canvas,
-      level,
-      tiles,
-      abortSignal: this.animationAbortController.signal,
-    });
+  toggleAnimation() {
+    this.animation.update(animation => !animation);
   }
 
   render() {
     const tiles = this.tilesResource.value();
     const level = this.levelResource.value();
     const canvas = this.canvas();
+    const animation = this.animation();
 
     if (!tiles || !canvas) {
       return;
     }
 
-    this.animationAbortController?.abort();
-
-    renderLevel({
-      canvas,
-      level,
-      tiles,
-    });
+    // If the game is already running, stop it
+    stopAnimation();
+    
+    if (animation) {
+      animateLevel({
+        canvas,
+        level,
+        tiles,
+      })
+    }
+    else {
+      renderLevel({
+        canvas,
+        level,
+        tiles,
+      });
+    }
   }
 
   reload() {
@@ -130,7 +122,6 @@ function getContext(canvas: HTMLCanvasElement) {
 function toTilesRequest(
   tilesMap: () => Blob | undefined,
   style: () => Style,
-  bgColor: () => string
 ) {
   const tilesMapValue = tilesMap();
   if (typeof tilesMapValue === 'undefined') {
@@ -139,7 +130,6 @@ function toTilesRequest(
   return {
     tilesMap: tilesMapValue,
     style: style(),
-    bgColor: bgColor(),
   };
 }
 
@@ -152,10 +142,9 @@ function toTilesRequest(
 function createTilesResource(
   tilesMapResource: HttpResourceRef<Blob | undefined>,
   style: () => Style,
-  bgColor: () => string
 ) {
   const tilesRequest = computed(() =>
-    toTilesRequest(tilesMapResource.value, style, bgColor)
+    toTilesRequest(tilesMapResource.value, style)
   );
 
   const tilesResource = resource({
@@ -170,8 +159,8 @@ function createTilesResource(
         throw new Error('I will never occour!');
       }
 
-      const { tilesMap, style, bgColor } = params.request;
-      return extractTiles(tilesMap, style, bgColor);
+      const { tilesMap, style } = params.request;
+      return extractTiles(tilesMap, style);
     },
   });
 

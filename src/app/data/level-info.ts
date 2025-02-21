@@ -1,6 +1,6 @@
 export type LevelInfo = {
     title: string;
-    fileName: string;
+    levelKey: string;
 };
 
 export type LevelOverview = {

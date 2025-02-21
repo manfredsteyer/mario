@@ -6,14 +6,12 @@ function hexToRgba(hex: string): [number, number, number, number] {
     return [r, g, b, 255];
   }
   
-export async function replaceColor(
+export async function addTransparency(
     imageBitmap: ImageBitmap,
     fromColorHex: string,
-    toColorHex: string,
     tolerance: number = 0
   ): Promise<ImageBitmap> {
     const fromColor = hexToRgba(fromColorHex);
-    const toColor = hexToRgba(toColorHex);
   
     const canvas = document.createElement('canvas');
     canvas.width = imageBitmap.width;
@@ -38,7 +36,7 @@ export async function replaceColor(
   
     for (let i = 0; i < data.length; i += 4) {
       if (isColorMatch(i)) {
-        [data[i], data[i + 1], data[i + 2], data[i + 3]] = toColor;
+        data[i + 3] = 0;
       }
     }
   

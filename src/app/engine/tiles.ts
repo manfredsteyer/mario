@@ -1,4 +1,4 @@
-import { replaceColor } from './color-utils';
+import { addTransparency } from './color-utils';
 import { getPalettes, Palette, Palettes, SIZE, Style } from './palettes';
 
 export type Tile =
@@ -17,6 +17,7 @@ export type BaseTileSet = {
   waves: ImageBitmap;
   water: ImageBitmap;
   floor: ImageBitmap;
+  solid: ImageBitmap;
   brick: ImageBitmap;
   stump: ImageBitmap;
   questionMark: ImageBitmap;
@@ -84,6 +85,44 @@ export async function loadTiles(
   bitmap: ImageBitmap,
   palettes: Palettes
 ): Promise<TileSet> {
+  const tiles = await createTiles(bitmap, palettes);
+  const collections = createCollections(tiles);
+  return { ...tiles, ...collections };
+}
+
+function createCollections(tiles: BaseTileSet): TileCollections {
+  return {
+    treeCrown: [[tiles.treeTop], [tiles.treeBottom]],
+    smallHill: [
+      [null, null, tiles.hillTop, null, null],
+      [null, tiles.hillLeft, tiles.hillInnerLeft, tiles.hillRight, null],
+    ],
+    hill: [
+      [null, null, tiles.hillTop, null, null],
+      [null, tiles.hillLeft, tiles.hillMiddle, tiles.hillRight, null],
+      [
+        tiles.hillLeft,
+        tiles.hillInnerLeft,
+        tiles.hillMiddle,
+        tiles.hillInnerRight,
+        tiles.hillRight,
+      ],
+    ],
+    bush: [tiles.bushLeft, tiles.bushMiddle, tiles.bushRight],
+    top: [tiles.topLeft, tiles.topMiddle, tiles.topRight],
+    cloud: [
+      [tiles.cloudTopLeft, tiles.cloudTopMiddle, tiles.cloudTopRight],
+      [tiles.cloudBottomLeft, tiles.cloudBottomMiddle, tiles.cloudBottomRight],
+    ],
+    pipeSegment: [[tiles.pipeLeft, tiles.pipeRight]],
+    pipeTop: [
+      [tiles.pipeTopLeft, tiles.pipeTopRight],
+      [tiles.pipeLeft, tiles.pipeRight],
+    ],
+  };
+}
+
+async function createTiles(bitmap: ImageBitmap, palettes: Palettes) {
   const tilePromises = {
     // Cloud tiles
     cloudTopLeft: getTile(bitmap, palettes.p2, 0, 0),
@@ -100,10 +139,11 @@ export async function loadTiles(
     // Ground tiles
     floor: getTile(bitmap, palettes.p1, 0, 0),
     brick: getTile(bitmap, palettes.p1, 2, 0),
+    solid: getTile(bitmap, palettes.p1, 0, 1),
     stump: getTile(bitmap, palettes.p1, 1, 3),
 
     // Interactive tiles
-    qm: getTile(bitmap, palettes.p3, 0, 0),
+    questionMark: getTile(bitmap, palettes.p3, 0, 0),
     coin: getTile(bitmap, palettes.p3, 0, 1),
 
     // Scenery top tiles
@@ -143,38 +183,7 @@ export async function loadTiles(
       ) as BaseTileSet;
     }
   );
-
-  const collections: TileCollections = {
-    treeCrown: [[tiles.treeTop], [tiles.treeBottom]],
-    smallHill: [
-      [null, null, tiles.hillTop, null, null],
-      [null, tiles.hillLeft, tiles.hillMiddle, tiles.hillRight, null],
-    ],
-    hill: [
-      [null, null, tiles.hillTop, null, null],
-      [null, tiles.hillLeft, tiles.hillMiddle, tiles.hillRight, null],
-      [
-        tiles.hillLeft,
-        tiles.hillInnerLeft,
-        tiles.hillMiddle,
-        tiles.hillInnerRight,
-        tiles.hillRight,
-      ],
-    ],
-    bush: [tiles.bushLeft, tiles.bushMiddle, tiles.bushRight],
-    top: [tiles.topLeft, tiles.topMiddle, tiles.topRight],
-    cloud: [
-      [tiles.cloudTopLeft, tiles.cloudTopMiddle, tiles.cloudTopRight],
-      [tiles.cloudBottomLeft, tiles.cloudBottomMiddle, tiles.cloudBottomRight],
-    ],
-    pipeSegment: [[tiles.pipeLeft, tiles.pipeRight]],
-    pipeTop: [
-      [tiles.pipeTopLeft, tiles.pipeTopRight],
-      [tiles.pipeLeft, tiles.pipeRight],
-    ],
-  };
-
-  return { ...tiles, ...collections };
+  return tiles;
 }
 
 export function drawTile(
@@ -241,9 +250,9 @@ async function getTile(
   return image;
 }
 
-export async function extractTiles(tilesMap: Blob, style: Style, bgColor: string) {
+export async function extractTiles(tilesMap: Blob, style: Style) {
   const bitmap = await createImageBitmap(tilesMap);
-  const correctedBitmap = await replaceColor(bitmap, '#9494ff', bgColor);
+  const correctedBitmap = await addTransparency(bitmap, '#9494ff');
   const palettes = getPalettes(style);
   console.log('palettes', palettes);
   const tiles = await loadTiles(correctedBitmap, palettes);

@@ -1,36 +1,205 @@
 {
+    "levelId": 1,
     "backgroundColor": "#9494ff",
     "items": [
         {
-            "tileKey": "cloud",
+            "tileKey": "floor",
             "col": 0,
-            "row": 0,
-            "repeatCol": 2,
+            "row": 13,
+            "repeatCol": 55,
             "repeatRow": 2
         },
         {
             "tileKey": "floor",
+            "col": 57,
+            "row": 13,
+            "repeatCol": 4,
+            "repeatRow": 2
+        },
+        {
+            "tileKey": "cloud",
+            "col": 12,
+            "row": 1
+        },
+        {
+            "tileKey": "cloud",
+            "col": 23,
+            "row": 1
+        },   
+        {
+            "tileKey": "cloud",
+            "col": 50,
+            "row": 1
+        },      
+        {
+            "tileKey": "questionMark",
+            "col": 5,
+            "row": 9
+        },
+        {
+            "tileKey": "brick",
+            "col": 9,
+            "row": 9
+        },
+        {
+            "tileKey": "questionMark",
+            "col": 10,
+            "row": 9
+        },
+        {
+            "tileKey": "brick",
+            "col": 11,
+            "row": 9
+        },
+        {
+            "tileKey": "questionMark",
+            "col": 12,
+            "row": 9
+        },
+        {
+            "tileKey": "brick",
+            "col": 13,
+            "row": 9
+        },
+        {
+            "tileKey": "questionMark",
+            "col": 11,
+            "row": 5
+        },
+        {
+            "tileKey": "bushLeft",
             "col": 0,
-            "row": 7,
-            "repeatCol": 20,
+            "row": 12
+        },
+        {
+            "tileKey": "bushMiddle",
+            "col": 1,
+            "row": 12
+        },
+        {
+            "tileKey": "bushMiddle",
+            "col": 2,
+            "row": 12
+        },
+        {
+            "tileKey": "bushMiddle",
+            "col": 3,
+            "row": 12
+        },
+        {
+            "tileKey": "bushRight",
+            "col": 4,
+            "row": 12
+        },
+        {
+            "tileKey": "smallHill",
+            "col": 4,
+            "row": 11
+        },
+        {
+            "tileKey": "bush",
+            "col": 12,
+            "row": 12
+        },
+        {
+            "tileKey": "pipeTop",
+            "col": 16,
+            "row": 11
+        },
+        {
+            "tileKey": "pipeTop",
+            "col": 26,
+            "row": 10
+        },
+        {
+            "tileKey": "pipeSegment",
+            "col": 26,
+            "row": 12
+        },
+        {
+            "tileKey": "bush",
+            "col": 29,
+            "row": 12
+        },
+        {
+            "tileKey": "pipeTop",
+            "col": 34,
+            "row": 9
+        },
+        {
+            "tileKey": "pipeSegment",
+            "col": 34,
+            "row": 11,
             "repeatRow": 2
         },
         {
             "tileKey": "pipeTop",
-            "col": 6,
-            "row": 3
+            "col": 45,
+            "row": 9
         },
         {
             "tileKey": "pipeSegment",
-            "col": 6,
-            "row": 5,
+            "col": 45,
+            "row": 11,
             "repeatRow": 2
         },
         {
-            "tileKey": "questionMark",
-            "col": 0,
-            "row": 4,
-            "repeatRow": 1
-        }
+            "tileKey": "hill",
+            "col": 47,
+            "row": 10
+        },
+        {
+            "tileKey": "bushLeft",
+            "col": 36,
+            "row": 12
+        },
+        {
+            "tileKey": "bushMiddle",
+            "col": 37,
+            "row": 12
+        },
+        {
+            "tileKey": "bushMiddle",
+            "col": 38,
+            "row": 12
+        },
+        {
+            "tileKey": "bushRight",
+            "col": 39,
+            "row": 12
+        },
+        {"tileKey": "coin", "col": 30, "row": 5},
+        {"tileKey": "coin", "col": 30, "row": 4},
+        {"tileKey": "coin", "col": 30, "row": 3},
+        {"tileKey": "coin", "col": 30, "row": 2},
+        {"tileKey": "coin", "col": 30, "row": 1},
+        {"tileKey": "coin", "col": 31, "row": 2},
+        {"tileKey": "coin", "col": 32, "row": 3},
+        {"tileKey": "coin", "col": 33, "row": 1},
+        {"tileKey": "coin", "col": 33, "row": 2},
+        {"tileKey": "coin", "col": 33, "row": 3},
+        {"tileKey": "coin", "col": 33, "row": 4},
+        {"tileKey": "coin", "col": 33, "row": 5},
+      
+        {"tileKey": "coin", "col": 35, "row": 1},
+        {"tileKey": "coin", "col": 36, "row": 1},
+        {"tileKey": "coin", "col": 37, "row": 1},
+        {"tileKey": "coin", "col": 38, "row": 1},
+        {"tileKey": "coin", "col": 35, "row": 2},
+        {"tileKey": "coin", "col": 35, "row": 3},
+        {"tileKey": "coin", "col": 35, "row": 4},
+        {"tileKey": "coin", "col": 35, "row": 5},
+        {"tileKey": "coin", "col": 36, "row": 5},
+        {"tileKey": "coin", "col": 37, "row": 5},
+        {"tileKey": "coin", "col": 38, "row": 5},
+        {"tileKey": "coin", "col": 38, "row": 4},
+        {"tileKey": "coin", "col": 38, "row": 3},
+        {"tileKey": "coin", "col": 37, "row": 3}
+
+
+  
+
     ]
 }
+
+  

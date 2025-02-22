@@ -89,7 +89,7 @@ export class LevelComponent implements OnDestroy {
     }
 
     // If the game is already running, stop it
-    stopAnimation();
+    // stopAnimation();
 
     if (animation) {
       animateLevel({

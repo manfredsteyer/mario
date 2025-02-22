@@ -40,9 +40,7 @@ export function animateLevel(options: AnimateOptions) {
     throw new Error('canvas 2d expected!');
   }
 
-  if (abortController) {
-    abortController.abort();
-  }
+  stopAnimation();
 
   abortController = new AbortController();
   const abortSignal = abortController.signal;
@@ -165,6 +163,7 @@ export function renderLevel(options: RenderOptions): void {
   const height = canvas.height;
   const offset = getOffset(level);
 
+  stopAnimation();
   drawLevel({ level, offset, tiles, context, width, height });
 }
 

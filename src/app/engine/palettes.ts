@@ -7,7 +7,7 @@ export type Palette = {
 
 export type PaletteOffset = {
   overworld: Palette;
-  underworld: Palette;
+  underground: Palette;
   underwater: Palette;
   castle: Palette;
 };
@@ -33,7 +33,7 @@ const p1Base: Palette = {
 
 const p1Offsets: PaletteOffset = {
   overworld: { x: 0, y: 0 },
-  underworld: { x: 8 * (SIZE + 1) + 11, y: 0 },
+  underground: { x: 8 * (SIZE + 1) + 11, y: 0 },
   underwater: { x: 8 * (SIZE + 1) + 11, y: 4 * (SIZE + 1) + 16 },
   castle: { x: 0, y: 4 * (SIZE + 1) + 16 },
 };
@@ -45,7 +45,7 @@ const p3Base: Palette = {
 
 const p3Offsets: PaletteOffset = {
   overworld: { x: 0, y: 0 },
-  underworld: { x: 5 * (SIZE + 1) + 11, y: 0 },
+  underground: { x: 5 * (SIZE + 1) + 11, y: 0 },
   castle: { x: 5 * 2 * (SIZE + 1) + 11 * 2, y: 0 },
   underwater: { x: 5 * 3 * (SIZE + 1) + 11 * 3, y: 0 },
 };
@@ -57,7 +57,7 @@ const p2Base: Palette = {
 
 const p2Offsets: PaletteOffset = {
   overworld: { x: 0, y: 0 },
-  underworld: { x: 5 * (SIZE + 1) + 11, y: 0 },
+  underground: { x: 5 * (SIZE + 1) + 11, y: 0 },
   castle: { x: 5 * 2 * (SIZE + 1) + 11 * 2, y: 0 },
   underwater: { x: 5 * 3 * (SIZE + 1) + 11 * 3, y: 0 },
 };
@@ -69,7 +69,7 @@ const p0Base: Palette = {
 
 const p0Offsets: PaletteOffset = {
   overworld: { x: 0, y: 0 },
-  underworld: { x: 9 * (SIZE + 1) + 11, y: 0 },
+  underground: { x: 9 * (SIZE + 1) + 11, y: 0 },
   underwater: { x: 9 * (SIZE + 1) + 11, y: 4 * (SIZE + 1) + 16 },
   castle: { x: 0, y: 4 * (SIZE + 1) + 16 },
 };

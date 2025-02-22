@@ -8,12 +8,13 @@
           <select [(ngModel)]="levelKey">
             @for (
               level of levelOverviewResource.value().levels;
-              track level.levelKey
+              track level.levelKey;
+              let first = $first
             ) {
               <option [value]="level.levelKey">{{ level.title }}</option>
             }
           </select>
-          <select [(ngModel)]="style">
+          <select [(ngModel)]="style">  
             <option value="overworld">Overworld</option>
             <option value="underground">Underground</option>
             <option value="underwater">Underwater</option>

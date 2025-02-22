@@ -4,6 +4,7 @@ import {
   effect,
   ElementRef,
   inject,
+  linkedSignal,
   OnDestroy,
   resource,
   signal,
@@ -33,7 +34,7 @@ export class LevelComponent implements OnDestroy {
   canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
   canvas = computed(() => this.canvasRef()?.nativeElement);
 
-  levelKey = signal<string | undefined>('01');
+  levelKey = linkedSignal<string | undefined>(() => this.getFirstLevelKey());
   style = signal<Style>('overworld');
   animation = signal(false);
 
@@ -68,6 +69,10 @@ export class LevelComponent implements OnDestroy {
   reload() {
     this.tilesMapResource.reload();
     this.levelResource.reload();
+  }
+
+  private getFirstLevelKey(): string | undefined {
+    return this.levelOverviewResource.value()?.levels?.[0].levelKey;
   }
 
   private initCanvas() {

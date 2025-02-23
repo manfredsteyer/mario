@@ -31,8 +31,7 @@ export class LevelComponent implements OnDestroy {
   private tilesMapLoader = inject(TilesMapLoader);
   private levelLoader = inject(LevelLoader);
 
-  canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
-  canvas = computed(() => this.canvasRef()?.nativeElement);
+  canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
 
   levelKey = linkedSignal<string | undefined>(() => this.getFirstLevelKey());
   style = signal<Style>('overworld');
@@ -45,7 +44,7 @@ export class LevelComponent implements OnDestroy {
   tilesResource = createTilesResource(this.tilesMapResource, this.style);
 
   tilesMapProgress = computed(() =>
-    calcProgress(this.tilesMapResource.progress()),
+    calcProgress(this.tilesMapResource.progress())
   );
 
   constructor() {
@@ -55,6 +54,12 @@ export class LevelComponent implements OnDestroy {
 
     effect(() => {
       this.render();
+    });
+
+    effect(() => {
+      console.log('status', this.levelOverviewResource.status());
+      console.log('statusCode', this.levelOverviewResource.statusCode());
+      console.log('headers', this.levelOverviewResource.headers()?.keys());
     });
   }
 
@@ -72,11 +77,11 @@ export class LevelComponent implements OnDestroy {
   }
 
   private getFirstLevelKey(): string | undefined {
-    return this.levelOverviewResource.value()?.levels?.[0].levelKey;
+    return this.levelOverviewResource.value()?.levels?.[0]?.levelKey;
   }
 
   private initCanvas() {
-    const canvas = this.canvas();
+    const canvas = this.canvas()?.nativeElement;
     if (canvas) {
       const context = getContext(canvas);
       context.scale(3, 3);
@@ -86,15 +91,12 @@ export class LevelComponent implements OnDestroy {
   private render() {
     const tiles = this.tilesResource.value();
     const level = this.levelResource.value();
-    const canvas = this.canvas();
+    const canvas = this.canvas()?.nativeElement;
     const animation = this.animation();
 
     if (!tiles || !canvas) {
       return;
     }
-
-    // If the game is already running, stop it
-    // stopAnimation();
 
     if (animation) {
       animateLevel({
@@ -120,49 +122,28 @@ function getContext(canvas: HTMLCanvasElement) {
   return context;
 }
 
-function toTilesRequest(tilesMap: () => Blob | undefined, style: () => Style) {
-  const tilesMapValue = tilesMap();
-  if (typeof tilesMapValue === 'undefined') {
-    return undefined;
-  }
-  return {
-    tilesMap: tilesMapValue,
-    style: style(),
-  };
-}
-
-//
-// I have the impression that it is in general a good idea to
-// hide the creation of a resource in such a function so that
-// we see the high-level data flow more clearly in the component
-// Is this observation correct?
-//
 function createTilesResource(
   tilesMapResource: HttpResourceRef<Blob | undefined>,
-  style: () => Style,
+  style: () => Style
 ) {
-  const tilesRequest = computed(() =>
-    toTilesRequest(tilesMapResource.value, style),
-  );
 
-  const tilesResource = resource({
-    request: tilesRequest,
+  const request = computed(() => {
+    const tilesMap = tilesMapResource.value();
+    return !tilesMap
+      ? undefined
+      : {
+          tilesMap,
+          style: style(),
+        };
+  });
+
+  return resource({
+    request,
     loader: (params) => {
-      console.log('tiles Resource request', params.request);
-      //
-      //  Here, TypeScript does not know that the request cannot be
-      //  undefined and insists on a check
-      //
-      if (!params.request) {
-        throw new Error('I will never occour!');
-      }
-
-      const { tilesMap, style } = params.request;
+      const { tilesMap, style } = params.request!;
       return extractTiles(tilesMap, style);
     },
   });
-
-  return tilesResource;
 }
 
 function calcProgress(progress: HttpProgressEvent | undefined): string {

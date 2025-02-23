@@ -1,4 +1,4 @@
-import { httpResource } from '@angular/common/http';
+import { httpResource, HttpResourceRef } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Level } from '../engine/level';
 import { initLevel } from './init-level';
@@ -11,33 +11,43 @@ import { initLevelOverview, LevelOverview } from './level-info';
 
 @Injectable({ providedIn: 'root' })
 export class LevelLoader {
-  getLevelOverviewResource() {
+  getLevelOverviewResource(): HttpResourceRef<LevelOverview> {
     return httpResource<LevelOverview>('/levels/overview.json', {
       defaultValue: initLevelOverview,
     });
   }
 
-  getLevelOverviewResource1() {
+  getLevelOverviewResource1(): HttpResourceRef<LevelOverview> {
     return httpResource<LevelOverview>('/levels/overview.json', {
       defaultValue: initLevelOverview,
       map: (raw) => {
-        assertOverview(raw);
-        return raw as LevelOverview;
+        return toLevelOverview(raw);
       },
     });
   }
 
-  getLevelResource1(levelKey: () => string) {
-    return httpResource<Level>(() => `/levels/${levelKey()}.json`);
-  }
-
-  getLevelResource2(levelKey: () => string) {
-    return httpResource<Level>(() => `/levels/${levelKey()}.json`, {
+  getLevelResource(
+    levelKey: () => string | undefined
+  ): HttpResourceRef<Level> {
+    return httpResource<Level>(() => !levelKey() ? undefined : `/levels/${levelKey()}.json`, {
       defaultValue: initLevel,
     });
   }
 
-  getLevelResource3(levelKey: () => string) {
+  getLevelResource2(levelKey: () => string): HttpResourceRef<Level> {
+    return httpResource<Level>(() => `/levels/${levelKey()}.json`, {
+      defaultValue: initLevel,
+      map: (raw) => {
+        return toLevel(raw);
+      },
+      // equal
+      // injector
+    });
+  }
+
+  getLevelResource3(
+    levelKey: () => string
+  ): HttpResourceRef<Level | undefined> {
     return httpResource<Level>(() => ({
       url: `/levels/${levelKey()}.json`,
       method: 'GET',
@@ -47,14 +57,14 @@ export class LevelLoader {
       params: {
         levelId: levelKey(),
       },
-      reportProgress: true,
+      reportProgress: false,
       body: null,
       transferCache: false,
       withCredentials: false,
     }));
   }
 
-  getLevelResource4(levelKey: () => string) {
+  getLevelResource4(levelKey: () => string): HttpResourceRef<Level> {
     return httpResource<Level>(
       () => ({
         url: `/levels/${levelKey()}.json`,
@@ -65,16 +75,18 @@ export class LevelLoader {
         params: {
           levelId: levelKey(),
         },
-        reportProgress: true,
+        reportProgress: false,
         body: null,
         transferCache: false,
         withCredentials: false,
       }),
-      { defaultValue: initLevel },
+      { defaultValue: initLevel }
     );
   }
 
-  getLevelResource(levelKey: () => string | undefined) {
+  getLevelResource5(
+    levelKey: () => string | undefined
+  ): HttpResourceRef<Level> {
     return httpResource<Level>(
       () => {
         const key = levelKey();
@@ -96,12 +108,12 @@ export class LevelLoader {
           withCredentials: false,
         };
       },
-      { defaultValue: initLevel },
+      { defaultValue: initLevel }
     );
   }
 }
 
-function assertOverview(raw: unknown): void {
+function toLevelOverview(raw: unknown): LevelOverview {
   const correct =
     typeof raw === 'object' &&
     raw !== null &&
@@ -111,4 +123,23 @@ function assertOverview(raw: unknown): void {
   if (!correct) {
     throw new Error('LevelOverview has an invalid structure!');
   }
+
+  return raw as LevelOverview;
+}
+
+function toLevel(raw: unknown): Level {
+  const correct =
+    typeof raw === 'object' &&
+    raw !== null &&
+    'levelId' in raw &&
+    typeof raw.levelId === 'number' &&
+    'backgroundColor' in raw &&
+    'items' in raw &&
+    Array.isArray(raw.items);
+
+  if (!correct) {
+    throw new Error('Level has an invalid structure!');
+  }
+
+  return raw as Level;
 }

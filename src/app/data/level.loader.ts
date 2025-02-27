@@ -20,7 +20,7 @@ export class LevelLoader {
   getLevelOverviewResource1(): HttpResourceRef<LevelOverview> {
     return httpResource<LevelOverview>('/levels/overview.json', {
       defaultValue: initLevelOverview,
-      map: (raw) => {
+      parse: (raw) => {
         return toLevelOverview(raw);
       },
     });
@@ -37,7 +37,7 @@ export class LevelLoader {
   getLevelResource2(levelKey: () => string): HttpResourceRef<Level> {
     return httpResource<Level>(() => `/levels/${levelKey()}.json`, {
       defaultValue: initLevel,
-      map: (raw) => {
+      parse: (raw) => {
         return toLevel(raw);
       },
       // equal

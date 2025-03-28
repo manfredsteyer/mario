@@ -32,14 +32,15 @@ export class LevelComponent implements OnDestroy {
   private tilesMapLoader = inject(TilesMapLoader);
   private levelLoader = inject(LevelLoader);
 
-  canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
   levelKey = signal('01');
   style = signal<Style>('overworld');
   animation = signal(false);
 
+  canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
+
   tilesMapResource = // TODO
-  levelResource = // TODO
   levelOverviewResource = // TODO
+  levelResource = // TODO
 
   tilesResource = // TODO
 

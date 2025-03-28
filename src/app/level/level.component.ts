@@ -21,6 +21,7 @@ import { HttpProgressEvent, HttpResourceRef } from '@angular/common/http';
 import { Style } from '../engine/palettes';
 import { extractTiles } from '../engine/tiles';
 import { animateLevel, renderLevel, stopAnimation } from '../engine/level';
+import { createTilesResource } from '../utils/tiles';
 
 @Component({
   selector: 'app-level',
@@ -32,20 +33,17 @@ export class LevelComponent implements OnDestroy {
   private levelLoader = inject(LevelLoader);
 
   canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
-
   levelKey = linkedSignal<string | undefined>(() => this.getFirstLevelKey());
   style = signal<Style>('overworld');
   animation = signal(false);
 
-  tilesMapResource = this.tilesMapLoader.getTilesMapResource();
-  levelResource = this.levelLoader.getLevelResource(this.levelKey);
-  levelOverviewResource = this.levelLoader.getLevelOverviewResource();
+  tilesMapResource = // TODO
+  levelResource = // TODO
+  levelOverviewResource = // TODO
 
-  tilesResource = createTilesResource(this.tilesMapResource, this.style);
+  tilesResource = // TODO
 
-  tilesMapProgress = computed(() =>
-    calcProgress(this.tilesMapResource.progress())
-  );
+  tilesMapProgress = computed(() => null); // TODO 
 
   constructor() {
     effect(() => {
@@ -54,12 +52,6 @@ export class LevelComponent implements OnDestroy {
 
     effect(() => {
       this.render();
-    });
-
-    effect(() => {
-      console.log('status', this.levelOverviewResource.status());
-      console.log('statusCode', this.levelOverviewResource.statusCode());
-      console.log('headers', this.levelOverviewResource.headers()?.keys());
     });
   }
 
@@ -72,8 +64,7 @@ export class LevelComponent implements OnDestroy {
   }
 
   reload() {
-    this.tilesMapResource.reload();
-    this.levelResource.reload();
+    // TODO: realod tilesMap and level
   }
 
   private getFirstLevelKey(): string | undefined {
@@ -120,30 +111,6 @@ function getContext(canvas: HTMLCanvasElement) {
     throw new Error('2d context expected');
   }
   return context;
-}
-
-function createTilesResource(
-  tilesMapResource: HttpResourceRef<Blob | undefined>,
-  style: () => Style
-) {
-
-  const request = computed(() => {
-    const tilesMap = tilesMapResource.value();
-    return !tilesMap
-      ? undefined
-      : {
-          tilesMap,
-          style: style(),
-        };
-  });
-
-  return resource({
-    request,
-    loader: (params) => {
-      const { tilesMap, style } = params.request!;
-      return extractTiles(tilesMap, style);
-    },
-  });
 }
 
 function calcProgress(progress: HttpProgressEvent | undefined): string {

@@ -1,17 +1,20 @@
-import { httpResource, HttpResourceRef } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { HttpClient, httpResource, HttpResourceRef } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class TilesMapLoader {
 
-  getTilesMapResource(): HttpResourceRef<Blob | undefined> {
-    return httpResource.blob({
-      url: '/tiles.png',
-      reportProgress: true,
-    });
+  private http = inject(HttpClient);
+
+  loadTilesMap(): Observable<Blob> {
+    return this.http.get('/tiles.png', {
+      responseType: 'blob',
+      reportProgress: true
+    })
   }
 
-  getTilesMapResource2(): HttpResourceRef<Blob | undefined> {
-    return httpResource.blob('/tiles.png');
+  getTilesMapResource(): HttpResourceRef<Blob | undefined> {
+    // TODO
   }
 }

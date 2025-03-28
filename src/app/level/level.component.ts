@@ -33,7 +33,7 @@ export class LevelComponent implements OnDestroy {
   private levelLoader = inject(LevelLoader);
 
   canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
-  levelKey = linkedSignal<string | undefined>(() => this.getFirstLevelKey());
+  levelKey = signal('01');
   style = signal<Style>('overworld');
   animation = signal(false);
 
@@ -126,3 +126,6 @@ function calcProgress(progress: HttpProgressEvent | undefined): string {
   const kb = Math.round(progress.loaded / 1024);
   return kb + ' KB';
 }
+
+
+// levelKey = linkedSignal<string | undefined>(() => this.getFirstLevelKey());

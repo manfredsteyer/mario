@@ -10,12 +10,10 @@ export class LevelLoader {
 
   private http = inject(HttpClient);
 
-  loadLevelOverview(): Observable<LevelOverview> {
-    return this.http.get<LevelOverview>('/levels/overview.json');
-  }
-
   getLevelOverviewResource(): HttpResourceRef<LevelOverview> {
-    // TODO
+    return httpResource<LevelOverview>(() => '/levels/overview.json', {
+      defaultValue: initLevelOverview
+    });
   }
 
   loadLevel(levelKey: number): Observable<Level> {
@@ -25,7 +23,16 @@ export class LevelLoader {
   getLevelResource(
     levelKey: () => string | undefined
   ): HttpResourceRef<Level> {
-   // TODO
+
+    return httpResource<Level>(() => !levelKey() ? undefined : {
+      url: `/levels/${levelKey()}.json`,
+      params: {
+        levelKey: '' + levelKey()
+      },
+    }, {
+      defaultValue: initLevel,
+      parse: (raw) => toLevel(raw)
+    });
   }
 }
 

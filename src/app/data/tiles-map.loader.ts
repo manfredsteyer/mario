@@ -10,11 +10,14 @@ export class TilesMapLoader {
   loadTilesMap(): Observable<Blob> {
     return this.http.get('/tiles.png', {
       responseType: 'blob',
-      reportProgress: true
+      reportProgress: true,
     })
   }
 
   getTilesMapResource(): HttpResourceRef<Blob | undefined> {
-    // TODO
+    return httpResource.blob(() => ({
+      url: '/tiles.png',
+      reportProgress: true,
+    }));
   }
 }

@@ -11,7 +11,4 @@ export class TilesMapLoader {
     });
   }
 
-  getTilesMapResource2(): HttpResourceRef<Blob | undefined> {
-    return httpResource.blob('/tiles.png');
-  }
 }

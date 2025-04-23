@@ -4,25 +4,11 @@ import { Level } from '../engine/level';
 import { initLevel } from './init-level';
 import { initLevelOverview, LevelOverview } from './level-info';
 
-//
-//  The following methods ending with 1, 2, 3, ... are just to show
-//  the different options in the article
-//
-
 @Injectable({ providedIn: 'root' })
 export class LevelLoader {
   getLevelOverviewResource(): HttpResourceRef<LevelOverview> {
-    return httpResource<LevelOverview>('/levels/overview.json', {
+    return httpResource<LevelOverview>(() => '/levels/overview.json', {
       defaultValue: initLevelOverview,
-    });
-  }
-
-  getLevelOverviewResource1(): HttpResourceRef<LevelOverview> {
-    return httpResource<LevelOverview>('/levels/overview.json', {
-      defaultValue: initLevelOverview,
-      parse: (raw) => {
-        return toLevelOverview(raw);
-      },
     });
   }
 
@@ -31,37 +17,8 @@ export class LevelLoader {
   ): HttpResourceRef<Level> {
     return httpResource<Level>(() => !levelKey() ? undefined : `/levels/${levelKey()}.json`, {
       defaultValue: initLevel,
+      // parse: toLevel,
     });
-  }
-
-  getLevelResource2(levelKey: () => string): HttpResourceRef<Level> {
-    return httpResource<Level>(() => `/levels/${levelKey()}.json`, {
-      defaultValue: initLevel,
-      parse: (raw) => {
-        return toLevel(raw);
-      },
-      // equal
-      // injector
-    });
-  }
-
-  getLevelResource3(
-    levelKey: () => string
-  ): HttpResourceRef<Level | undefined> {
-    return httpResource<Level>(() => ({
-      url: `/levels/${levelKey()}.json`,
-      method: 'GET',
-      headers: {
-        accept: 'application/json',
-      },
-      params: {
-        levelId: levelKey(),
-      },
-      reportProgress: false,
-      body: null,
-      transferCache: false,
-      withCredentials: false,
-    }));
   }
 
   getLevelResource4(levelKey: () => string): HttpResourceRef<Level> {
@@ -80,34 +37,6 @@ export class LevelLoader {
         transferCache: false,
         withCredentials: false,
       }),
-      { defaultValue: initLevel }
-    );
-  }
-
-  getLevelResource5(
-    levelKey: () => string | undefined
-  ): HttpResourceRef<Level> {
-    return httpResource<Level>(
-      () => {
-        const key = levelKey();
-        if (!key) {
-          return undefined;
-        }
-        return {
-          url: `/levels/${key}.json`,
-          method: 'GET',
-          headers: {
-            accept: 'application/json',
-          },
-          params: {
-            levelId: key,
-          },
-          reportProgress: true,
-          body: null,
-          transferCache: false,
-          withCredentials: false,
-        };
-      },
       { defaultValue: initLevel }
     );
   }

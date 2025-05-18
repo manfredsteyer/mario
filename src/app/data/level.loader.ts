@@ -13,11 +13,11 @@ export class LevelLoader {
   }
 
   getLevelResource(
-    levelKey: () => string | undefined
+    levelKey: () => string | undefined  // 01, 02
   ): HttpResourceRef<Level> {
     return httpResource<Level>(() => !levelKey() ? undefined : `/levels/${levelKey()}.json`, {
       defaultValue: initLevel,
-      // parse: toLevel,
+      parse: toLevel, // Zod
     });
   }
 
@@ -32,8 +32,8 @@ export class LevelLoader {
         params: {
           levelId: levelKey(),
         },
-        reportProgress: false,
         body: null,
+        reportProgress: false,
         transferCache: false,
         withCredentials: false,
       }),

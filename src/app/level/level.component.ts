@@ -34,6 +34,7 @@ export class LevelComponent implements OnDestroy {
   canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
 
   levelKey = linkedSignal<string | undefined>(() => this.getFirstLevelKey());
+
   style = signal<Style>('overworld');
   animation = signal(false);
 
@@ -127,7 +128,7 @@ function createTilesResource(
   style: () => Style
 ) {
 
-  const request = computed(() => {
+  const params = computed(() => {
     const tilesMap = tilesMapResource.value();
     return !tilesMap
       ? undefined
@@ -138,9 +139,10 @@ function createTilesResource(
   });
 
   return resource({
-    request,
-    loader: (params) => {
-      const { tilesMap, style } = params.request!;
+    // Before this was called request
+    params,
+    loader: (loderParams) => {
+      const { tilesMap, style } = loderParams.params;
       return extractTiles(tilesMap, style);
     },
   });

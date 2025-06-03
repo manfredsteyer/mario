@@ -7,13 +7,14 @@ import { initLevelOverview, LevelOverview } from './level-info';
 @Injectable({ providedIn: 'root' })
 export class LevelLoader {
   getLevelOverviewResource(): HttpResourceRef<LevelOverview> {
-    return httpResource<LevelOverview>(() => '/levels/overview.json', {
+    // Lambda is now always expected!
+    return httpResource<LevelOverview>(() => `/levels/overview.json`, {
       defaultValue: initLevelOverview,
     });
   }
 
   getLevelResource(
-    levelKey: () => string | undefined  // 01, 02
+    levelKey: () => string | undefined  
   ): HttpResourceRef<Level> {
     return httpResource<Level>(() => !levelKey() ? undefined : `/levels/${levelKey()}.json`, {
       defaultValue: initLevel,

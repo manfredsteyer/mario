@@ -5,11 +5,13 @@ import {
   getGameState,
   initHeroState,
   Position,
+  resetGameState,
   setGameState,
   updateGameState,
 } from './game-state';
+import { keyboard } from './keyboard';
 import { SIZE } from './palettes';
-import { DrawOptions, drawTile, HeroTileSet, Tile, TileSet } from './tiles';
+import { BaseTileSet, DrawOptions, drawTile, HeroTileSet, Tile, TileCollections, TileSet } from './tiles';
 
 const SCREEN_WIDTH = 340;
 
@@ -136,8 +138,34 @@ function step(options: StepOptions): void {
 
   drawLevel({ level, offset, tiles, context, width, height });
 
-  applyGravity(gameState, level, delta);
-  checkBottom(height, gameState);
+  let hitGround = false;
+  
+  const isJumping = keyboard.up && timeStamp - gameState.hero.jumpStart < 500;
+
+  if (!isJumping) {
+    gameState.hero.jumpStart = 0;
+    hitGround = applyGravity(gameState, level, delta);
+  }
+  else {
+     gameState.hero.position.y -= 2 * delta;
+  }
+
+  if (keyboard.up && hitGround) { 
+    gameState.hero.jumpStart = timeStamp;
+  }
+
+  if (keyboard.left) {
+    const minX = calcMinX(gameState, level);
+    const candX = gameState.hero.position.x - 1 * delta;
+    const newX = Math.max(candX, minX);
+    gameState.hero.position.x = newX;  
+  }
+  else if (keyboard.right) {
+    const maxX = calcMaxX(gameState, level);
+    const candX = gameState.hero.position.x + 1 * delta;
+    const newX = Math.min(candX, maxX);
+    gameState.hero.position.x = newX;
+  }
 
   drawHero({
     tile: heroTiles.stand,
@@ -145,13 +173,18 @@ function step(options: StepOptions): void {
     context,
   })
 
-  updateGameState((state) => ({
-    ...state,
-    hero: gameState.hero,
-    levelId: level.levelId,
-    offset,
-    direction,
-  }));
+  if (!lostLife(height, gameState)) {
+    updateGameState((state) => ({
+      ...state,
+      hero: gameState.hero,
+      levelId: level.levelId,
+      offset,
+      direction,
+    }));
+  }
+  else {
+    resetGameState();
+  }
 
   requestAnimationFrame((newTimeStamp) => {
     step({
@@ -170,16 +203,12 @@ export type RenderOptions = {
   tiles: TileSet;
 };
 
-function checkBottom(height: number, gameState: GameState) {
+function lostLife(height: number, gameState: GameState): boolean {
   const bottom = height / SCALE;
-  // Game over?
-  if (gameState.hero.position.y > bottom) {
-    const newY = initHeroState.position.y;
-    gameState.hero.position.y = newY;
-  }
+  return (gameState.hero.position.y > bottom);
 }
 
-function applyGravity(gameState: GameState, level: Level, delta: number) {
+function applyGravity(gameState: GameState, level: Level, delta: number): boolean {
   const blockY = gameState.hero.position.y / SIZE;
   const x = gameState.hero.position.x;
 
@@ -187,8 +216,8 @@ function applyGravity(gameState: GameState, level: Level, delta: number) {
     return (
       item.row > blockY  &&
       ((item.col) * SIZE) < x + TOLERANCE_LEFT &&
-      ((item.col + (item.repeatCol || 1)) * SIZE) > x + TOLERANCE_RIGHT &&
-      (item.tileKey === 'floor' || item.tileKey === 'brick')
+      ((item.col + (item.repeatCol || 1) + extraLength(item.tileKey)) * SIZE) > x + TOLERANCE_RIGHT &&
+      isSolid(item.tileKey)
     );
   });
 
@@ -200,7 +229,85 @@ function applyGravity(gameState: GameState, level: Level, delta: number) {
 
   const candY = gameState.hero.position.y + VELOCITY_Y * delta;
   const newY = Math.min(maxY, candY);
+  const hitGround = newY === gameState.hero.position.y;
   gameState.hero.position.y = newY;
+
+  return hitGround;
+}
+
+function isSolid(key: keyof BaseTileSet | keyof TileCollections): boolean {
+  return key === 'floor' 
+    || key === 'brick' 
+    || key.startsWith('pipe') 
+    || key === 'questionMark';
+}
+
+function calcMinY(gameState: GameState, level: Level): number {
+  const blockY = gameState.hero.position.y / SIZE;
+  const x = gameState.hero.position.x;
+
+  const below = level.items.filter((item) => {
+    return (
+      item.row <= blockY  &&
+      ((item.col) * SIZE) < x + TOLERANCE_LEFT &&
+      ((item.col + (item.repeatCol || 1) + extraLength(item.tileKey)) * SIZE) > x + TOLERANCE_RIGHT &&
+      isSolid(item.tileKey)
+    );
+  });
+
+  let minY = -Infinity;
+  if (below.length > 0) {
+    const minRow = Math.max(...below.map(b => b.row));
+    minY = minRow * SIZE;
+  }
+
+  return minY;
+}
+
+function calcMaxX(gameState: GameState, level: Level): number {
+  const blockY = gameState.hero.position.y / SIZE;
+  const x = gameState.hero.position.x;
+
+  const below = level.items.filter((item) => {
+    return (
+      x <= (item.col) * SIZE &&
+      blockY > item.row &&
+      blockY <= item.row + (item.repeatRow || 1) &&
+      isSolid(item.tileKey)
+    );
+  });
+
+  let maxX = Infinity;
+  if (below.length > 0) {
+    console.log('below', below);
+    const minCol = Math.min(...below.map(b => b.col));
+    maxX = minCol * SIZE - SIZE + TOLERANCE_RIGHT;
+  }
+
+  return maxX;
+}
+
+function calcMinX(gameState: GameState, level: Level): number {
+  const blockY = gameState.hero.position.y / SIZE;
+  const x = gameState.hero.position.x;
+
+  const below = level.items.filter((item) => {
+    return (
+      x + SIZE >= (item.col) * SIZE &&
+      blockY > item.row &&
+      blockY <= item.row + (item.repeatRow || 1) &&
+      isSolid(item.tileKey)
+    );
+  });
+
+  let minX = -Infinity;
+  if (below.length > 0) {
+    console.log('below', below);
+    const minCol = Math.max(...below.map(b => b.col + extraLength(b.tileKey)));
+    minX = (minCol + 1) * SIZE - TOLERANCE_RIGHT;
+  }
+
+  return minX;
 }
 
 export function renderLevel(options: RenderOptions): void {
@@ -267,3 +374,12 @@ function calcDirection(
 
   return currentDirection;
 }
+
+function extraLength(tileKey: string): number {
+  if (tileKey.startsWith('pipe')) {
+    return 1; // pipes are one tile wider
+  }
+  return 0;
+}
+
+

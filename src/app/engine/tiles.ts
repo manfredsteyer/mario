@@ -287,7 +287,7 @@ async function loadHeroTiles(bitmap: ImageBitmap) {
 
 export async function extractHeroTiles(tilesMap: Blob) {
   const bitmap = await createImageBitmap(tilesMap);
-  const correctedBitmap = await addTransparency(bitmap, '#9494ff');
+  const correctedBitmap = await addTransparency(bitmap, '#9290ff');
   const tiles = await loadHeroTiles(correctedBitmap);
   return tiles;
 }

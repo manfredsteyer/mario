@@ -1,6 +1,9 @@
+import { SCALE, TOLERANCE_LEFT, TOLERANCE_RIGHT, VELOCITY_Y } from './constants';
 import {
   Direction,
+  GameState,
   getGameState,
+  initHeroState,
   Position,
   setGameState,
   updateGameState,
@@ -123,22 +126,28 @@ function step(options: StepOptions): void {
     return;
   }
 
+  const gameState = getGameState();
+
   const width = canvas.width;
   const height = canvas.height;
 
-  // const delta = formerTimeStamp ? (timeStamp - formerTimeStamp) / speed : 0;
+  const delta = formerTimeStamp ? (timeStamp - formerTimeStamp) / speed : 0;
   // const newOffset = offset - delta * directionFactor;
 
   drawLevel({ level, offset, tiles, context, width, height });
 
+  applyGravity(gameState, level, delta);
+  checkBottom(height, gameState);
+
   drawHero({
     tile: heroTiles.stand,
-    position: getGameState().heroPosition,
+    position: gameState.hero.position,
     context,
   })
 
   updateGameState((state) => ({
     ...state,
+    hero: gameState.hero,
     levelId: level.levelId,
     offset,
     direction,
@@ -160,6 +169,39 @@ export type RenderOptions = {
   level: Level;
   tiles: TileSet;
 };
+
+function checkBottom(height: number, gameState: GameState) {
+  const bottom = height / SCALE;
+  // Game over?
+  if (gameState.hero.position.y > bottom) {
+    const newY = initHeroState.position.y;
+    gameState.hero.position.y = newY;
+  }
+}
+
+function applyGravity(gameState: GameState, level: Level, delta: number) {
+  const blockY = gameState.hero.position.y / SIZE;
+  const x = gameState.hero.position.x;
+
+  const below = level.items.filter((item) => {
+    return (
+      item.row > blockY  &&
+      ((item.col) * SIZE) < x + TOLERANCE_LEFT &&
+      ((item.col + (item.repeatCol || 1)) * SIZE) > x + TOLERANCE_RIGHT &&
+      (item.tileKey === 'floor' || item.tileKey === 'brick')
+    );
+  });
+
+  let maxY = Infinity;
+  if (below.length > 0) {
+    const minRow = Math.min(...below.map(b => b.row));
+    maxY = minRow * SIZE - SIZE;
+  }
+
+  const candY = gameState.hero.position.y + VELOCITY_Y * delta;
+  const newY = Math.min(maxY, candY);
+  gameState.hero.position.y = newY;
+}
 
 export function renderLevel(options: RenderOptions): void {
   const { canvas, level, tiles } = options;

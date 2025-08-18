@@ -1,19 +1,28 @@
 export type Direction = 'right' | 'left';
 
+
+export type HeroState = {
+  position: Position;
+  acceleration: number;
+};
+
 export type Position = {
   x: number;
   y: number;
 }
 
-export const initPosition = {
-  x: 20,
-  y: 20
+export const initHeroState: HeroState = {
+  position: { 
+    x: 4, 
+    y: 16 
+  },
+  acceleration: 0
 }
 
 export type GameState = {
   offset: number;
   levelId: number;
-  heroPosition: Position;
+  hero: HeroState;
   animation: boolean;
   direction: Direction;
 };
@@ -21,7 +30,7 @@ export type GameState = {
 let _state: GameState = {
   offset: 0,
   levelId: 0,
-  heroPosition: initPosition,
+  hero: initHeroState,
   animation: false,
   direction: 'right',
 };

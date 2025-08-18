@@ -4,9 +4,9 @@
   "items": [
     {
       "tileKey": "floor",
-      "col": 0,
+      "col": 1,
       "row": 13,
-      "repeatCol": 55,
+      "repeatCol": 2, 
       "repeatRow": 2
     },
     {

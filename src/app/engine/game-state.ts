@@ -12,8 +12,8 @@ export type Position = {
 };
 
 export const initPosition: Position = {
-  x: 4,
-  y: 16,
+  x: 16,
+  y: 0,
 };
 
 export const initHeroState: HeroState = {

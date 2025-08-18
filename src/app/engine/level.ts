@@ -112,7 +112,7 @@ function step(options: StepOptions): void {
     level,
     tiles,
     heroTiles,
-    offset,
+    //offset,
     speed,
     timeStamp,
     formerTimeStamp,
@@ -138,11 +138,16 @@ function step(options: StepOptions): void {
 
   moveHero(timeStamp, gameState, level, delta);
 
+  gameState.hero.position.x = Math.max(0, gameState.hero.position.x)
+
+  const renderX = Math.min(gameState.hero.position.x, width / SCALE / 2 - SIZE);
+  const offset = -Math.max(0, gameState.hero.position.x - renderX);
+
   drawLevel({ level, offset, tiles, context, width, height });
 
   drawHero({
     tile: heroTiles.stand,
-    position: gameState.hero.position,
+    position: { ...gameState.hero.position, x: renderX },
     context,
   })
 
@@ -303,7 +308,7 @@ function calcMaxX(gameState: GameState, level: Level): number {
     return (
       x <= (item.col) * SIZE &&
       blockY > item.row &&
-      blockY <= item.row + (item.repeatRow || 1) &&
+      blockY <= item.row + (item.repeatRow || 1) + extraHeight(item.tileKey) &&
       isSolid(item.tileKey)
     );
   });
@@ -312,7 +317,7 @@ function calcMaxX(gameState: GameState, level: Level): number {
   if (below.length > 0) {
     console.log('below', below);
     const minCol = Math.min(...below.map(b => b.col));
-    maxX = minCol * SIZE - SIZE + TOLERANCE_RIGHT;
+    maxX = minCol * SIZE - SIZE+ TOLERANCE_RIGHT;
   }
 
   return maxX;
@@ -326,7 +331,7 @@ function calcMinX(gameState: GameState, level: Level): number {
     return (
       x >= (item.col) * SIZE &&
       blockY > item.row &&
-      blockY <= item.row + (item.repeatRow || 1) &&
+      blockY <= item.row + (item.repeatRow || 1) + extraHeight(item.tileKey) &&
       isSolid(item.tileKey)
     );
   });
@@ -407,8 +412,15 @@ function calcDirection(
 }
 
 function extraLength(tileKey: string): number {
-  if (tileKey.startsWith('pipe')) {
+  if (tileKey === 'pipeTop') {
     return 1; // pipes are one tile wider
+  }
+  return 0;
+}
+
+function extraHeight(tileKey: string): number {
+  if (tileKey === 'pipeTop') {
+    return 2; // pipes are one tile higher
   }
   return 0;
 }

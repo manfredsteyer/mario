@@ -19,8 +19,9 @@ import { HttpProgressEvent, HttpResourceRef } from '@angular/common/http';
 //  In this example, we treat the game "engine" as a black box
 //
 import { Style } from '../engine/palettes';
-import { extractTiles } from '../engine/tiles';
+import { extractHeroTiles, extractTiles } from '../engine/tiles';
 import { animateLevel, renderLevel, stopAnimation } from '../engine/level';
+import { HeroMapLoader } from '../data/hero-map-loader';
 
 @Component({
   selector: 'app-level',
@@ -30,6 +31,7 @@ import { animateLevel, renderLevel, stopAnimation } from '../engine/level';
 export class LevelComponent implements OnDestroy {
   private tilesMapLoader = inject(TilesMapLoader);
   private levelLoader = inject(LevelLoader);
+  private heroMapLoader = inject(HeroMapLoader);
 
   canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
 
@@ -37,12 +39,15 @@ export class LevelComponent implements OnDestroy {
 
   style = signal<Style>('overworld');
   animation = signal(false);
-
+  
   tilesMapResource = this.tilesMapLoader.getTilesMapResource();
+  tilesResource = createTilesResource(this.tilesMapResource, this.style);
+
+  heroMapResource = this.heroMapLoader.getHeroMapResource();
+  heroResource = createHeroResource(this.heroMapResource);
+
   levelResource = this.levelLoader.getLevelResource(this.levelKey);
   levelOverviewResource = this.levelLoader.getLevelOverviewResource();
-
-  tilesResource = createTilesResource(this.tilesMapResource, this.style);
 
   tilesMapProgress = computed(() =>
     calcProgress(this.tilesMapResource.progress())
@@ -94,8 +99,9 @@ export class LevelComponent implements OnDestroy {
     const level = this.levelResource.value();
     const canvas = this.canvas()?.nativeElement;
     const animation = this.animation();
+    const heroTiles = this.heroResource.value();
 
-    if (!tiles || !canvas) {
+    if (!tiles || !heroTiles || !canvas) {
       return;
     }
 
@@ -104,6 +110,7 @@ export class LevelComponent implements OnDestroy {
         canvas,
         level,
         tiles,
+        heroTiles
       });
     } else {
       renderLevel({
@@ -143,6 +150,28 @@ function createTilesResource(
     loader: (loderParams) => {
       const { tilesMap, style } = loderParams.params;
       return extractTiles(tilesMap, style);
+    },
+  });
+}
+
+function createHeroResource(
+  heroMapResource: HttpResourceRef<Blob | undefined>,
+) {
+
+  const params = computed(() => {
+    const heroMap = heroMapResource.value();
+    return !heroMap
+      ? undefined
+      : {
+          heroMap,
+        };
+  });
+
+  return resource({
+    params,
+    loader: (loderParams) => {
+      const { heroMap } = loderParams.params;
+      return extractHeroTiles(heroMap);
     },
   });
 }

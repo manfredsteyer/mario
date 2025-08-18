@@ -1,8 +1,19 @@
 export type Direction = 'right' | 'left';
 
+export type Position = {
+  x: number;
+  y: number;
+}
+
+export const initPosition = {
+  x: 20,
+  y: 20
+}
+
 export type GameState = {
   offset: number;
   levelId: number;
+  heroPosition: Position;
   animation: boolean;
   direction: Direction;
 };
@@ -10,6 +21,7 @@ export type GameState = {
 let _state: GameState = {
   offset: 0,
   levelId: 0,
+  heroPosition: initPosition,
   animation: false,
   direction: 'right',
 };
@@ -24,7 +36,7 @@ export function getGameState(): GameState {
 
 export type Updater = (state: GameState) => GameState;
 
-export function updateGateState(updater: Updater): void {
+export function updateGameState(updater: Updater): void {
   const newState = updater(getGameState());
   setGameState(newState);
 }

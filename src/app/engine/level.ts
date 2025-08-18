@@ -1,11 +1,12 @@
 import {
   Direction,
   getGameState,
+  Position,
   setGameState,
-  updateGateState,
+  updateGameState,
 } from './game-state';
 import { SIZE } from './palettes';
-import { DrawOptions, drawTile, TileSet } from './tiles';
+import { DrawOptions, drawTile, HeroTileSet, Tile, TileSet } from './tiles';
 
 const SCREEN_WIDTH = 340;
 
@@ -23,6 +24,7 @@ export type AnimateOptions = {
   canvas: HTMLCanvasElement;
   level: Level;
   tiles: TileSet;
+  heroTiles: HeroTileSet;
 };
 
 let abortController: AbortController | undefined;
@@ -32,7 +34,7 @@ export function stopAnimation(): void {
 }
 
 export function animateLevel(options: AnimateOptions) {
-  const { canvas, level, tiles } = options;
+  const { canvas, level, tiles, heroTiles } = options;
 
   const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
 
@@ -60,6 +62,7 @@ export function animateLevel(options: AnimateOptions) {
     context,
     level,
     tiles,
+    heroTiles,
     offset,
     speed: 10,
     abortSignal,
@@ -75,6 +78,7 @@ type StepOptions = {
   context: CanvasRenderingContext2D;
   level: Level;
   tiles: TileSet;
+  heroTiles: HeroTileSet;
   offset: number;
   speed: number;
   timeStamp: number;
@@ -102,6 +106,7 @@ function step(options: StepOptions): void {
     context,
     level,
     tiles,
+    heroTiles,
     offset,
     speed,
     timeStamp,
@@ -110,9 +115,9 @@ function step(options: StepOptions): void {
     direction,
   } = options;
 
-  const newDirection = calcDirection(offset, maxOffset, direction);
+  // const newDirection = calcDirection(offset, maxOffset, direction);
 
-  const directionFactor = direction === 'right' ? 1 : -1;
+  // const directionFactor = direction === 'right' ? 1 : -1;
 
   if (options.abortSignal.aborted) {
     return;
@@ -121,12 +126,18 @@ function step(options: StepOptions): void {
   const width = canvas.width;
   const height = canvas.height;
 
-  const delta = formerTimeStamp ? (timeStamp - formerTimeStamp) / speed : 0;
-  const newOffset = offset - delta * directionFactor;
+  // const delta = formerTimeStamp ? (timeStamp - formerTimeStamp) / speed : 0;
+  // const newOffset = offset - delta * directionFactor;
 
   drawLevel({ level, offset, tiles, context, width, height });
 
-  updateGateState((state) => ({
+  drawHero({
+    tile: heroTiles.stand,
+    position: getGameState().heroPosition,
+    context,
+  })
+
+  updateGameState((state) => ({
     ...state,
     levelId: level.levelId,
     offset,
@@ -136,10 +147,10 @@ function step(options: StepOptions): void {
   requestAnimationFrame((newTimeStamp) => {
     step({
       ...options,
-      offset: newOffset,
+      // offset: newOffset,
       formerTimeStamp: timeStamp,
       timeStamp: newTimeStamp,
-      direction: newDirection,
+      // direction: newDirection,
     });
   });
 }
@@ -185,6 +196,18 @@ function drawLevel(options: DrawLevelOptions) {
     const tile = tiles[item.tileKey];
     drawTile(context, tile, offset, item);
   }
+}
+
+type DrawHeroOptions = {
+  tile: ImageBitmap;
+  position: Position;
+  context: CanvasRenderingContext2D;
+};
+
+function drawHero(options: DrawHeroOptions): void {
+  const { tile, position, context } = options;
+  const { x, y } = options.position;
+  context.drawImage(tile, x, y);
 }
 
 function calcDirection(

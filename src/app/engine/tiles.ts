@@ -55,6 +55,10 @@ export type TileCollections = {
 
 export type TileSet = BaseTileSet & TileCollections;
 
+export type HeroTileSet = { 
+  stand: ImageBitmap
+};
+
 export type DrawOptions = {
   col: number;
   row: number;
@@ -256,5 +260,34 @@ export async function extractTiles(tilesMap: Blob, style: Style) {
   const palettes = getPalettes(style);
   console.log('palettes', palettes);
   const tiles = await loadTiles(correctedBitmap, palettes);
+  return tiles;
+}
+
+
+async function loadHeroTiles(bitmap: ImageBitmap) {
+
+  const palette: Palette = {
+     x: 0, y: 8
+  };
+
+  const tilePromises = {
+    stand: getTile(bitmap, palette, 0, 0),
+  };
+
+  const tiles = await Promise.all(Object.values(tilePromises)).then(
+    (resolvedTiles) => {
+      const tileNames = Object.keys(tilePromises);
+      return Object.fromEntries(
+        tileNames.map((name, index) => [name, resolvedTiles[index]]),
+      ) as HeroTileSet;
+    },
+  );
+  return tiles;
+}
+
+export async function extractHeroTiles(tilesMap: Blob) {
+  const bitmap = await createImageBitmap(tilesMap);
+  const correctedBitmap = await addTransparency(bitmap, '#9494ff');
+  const tiles = await loadHeroTiles(correctedBitmap);
   return tiles;
 }

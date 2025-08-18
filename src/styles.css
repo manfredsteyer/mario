@@ -42,3 +42,9 @@ h1 {
   display: inline-block;
   margin-right: 5px;
 }
+
+.controls-info {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #666;
+}

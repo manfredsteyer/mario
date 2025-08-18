@@ -147,7 +147,13 @@ function step(options: StepOptions): void {
     hitGround = applyGravity(gameState, level, delta);
   }
   else {
-     gameState.hero.position.y -= 2 * delta;
+    const minY = calcMinY(gameState, level);
+    const candY = gameState.hero.position.y - 2 * delta;
+    const newY = Math.max(candY, minY);
+    if (newY === minY) {
+      gameState.hero.jumpStart = 0;
+    }
+    gameState.hero.position.y = newY;      
   }
 
   if (keyboard.up && hitGround) { 
@@ -248,7 +254,7 @@ function calcMinY(gameState: GameState, level: Level): number {
 
   const below = level.items.filter((item) => {
     return (
-      item.row <= blockY  &&
+      item.row + 1 <= blockY  &&
       ((item.col) * SIZE) < x + TOLERANCE_LEFT &&
       ((item.col + (item.repeatCol || 1) + extraLength(item.tileKey)) * SIZE) > x + TOLERANCE_RIGHT &&
       isSolid(item.tileKey)
@@ -258,7 +264,7 @@ function calcMinY(gameState: GameState, level: Level): number {
   let minY = -Infinity;
   if (below.length > 0) {
     const minRow = Math.max(...below.map(b => b.row));
-    minY = minRow * SIZE;
+    minY = minRow * SIZE + SIZE;
   }
 
   return minY;
@@ -293,7 +299,7 @@ function calcMinX(gameState: GameState, level: Level): number {
 
   const below = level.items.filter((item) => {
     return (
-      x + SIZE >= (item.col) * SIZE &&
+      x >= (item.col) * SIZE &&
       blockY > item.row &&
       blockY <= item.row + (item.repeatRow || 1) &&
       isSolid(item.tileKey)

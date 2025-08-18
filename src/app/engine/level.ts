@@ -136,42 +136,9 @@ function step(options: StepOptions): void {
   const delta = formerTimeStamp ? (timeStamp - formerTimeStamp) / speed : 0;
   // const newOffset = offset - delta * directionFactor;
 
+  moveHero(timeStamp, gameState, level, delta);
+
   drawLevel({ level, offset, tiles, context, width, height });
-
-  let hitGround = false;
-  
-  const isJumping = keyboard.up && timeStamp - gameState.hero.jumpStart < 500;
-
-  if (!isJumping) {
-    gameState.hero.jumpStart = 0;
-    hitGround = applyGravity(gameState, level, delta);
-  }
-  else {
-    const minY = calcMinY(gameState, level);
-    const candY = gameState.hero.position.y - 2 * delta;
-    const newY = Math.max(candY, minY);
-    if (newY === minY) {
-      gameState.hero.jumpStart = 0;
-    }
-    gameState.hero.position.y = newY;      
-  }
-
-  if (keyboard.up && hitGround) { 
-    gameState.hero.jumpStart = timeStamp;
-  }
-
-  if (keyboard.left) {
-    const minX = calcMinX(gameState, level);
-    const candX = gameState.hero.position.x - 1 * delta;
-    const newX = Math.max(candX, minX);
-    gameState.hero.position.x = newX;  
-  }
-  else if (keyboard.right) {
-    const maxX = calcMaxX(gameState, level);
-    const candX = gameState.hero.position.x + 1 * delta;
-    const newX = Math.min(candX, maxX);
-    gameState.hero.position.x = newX;
-  }
 
   drawHero({
     tile: heroTiles.stand,
@@ -209,18 +176,82 @@ export type RenderOptions = {
   tiles: TileSet;
 };
 
+function moveHero(timeStamp: number, gameState: GameState, level: Level, delta: number) {
+  let hitGround = false;
+  let hitTop = false;
+  const isJumping = keyboard.up && timeStamp - gameState.hero.jumpStart < 500;
+
+  if (!isJumping) {
+    gameState.hero.jumpStart = 0;
+    hitGround = applyGravity(gameState, level, delta);
+  }
+  else {
+    hitTop = jump(gameState, level, delta);
+  }
+
+  if (keyboard.up && hitGround) {
+    gameState.hero.jumpStart = timeStamp;
+  }
+
+  if (keyboard.left && !hitTop) {
+    goLeft(gameState, level, delta);
+  }
+  else if (keyboard.right && !hitTop) {
+    goRight(gameState, level, delta);
+  }
+}
+
+function goRight(gameState: GameState, level: Level, delta: number) {
+  const maxX = calcMaxX(gameState, level);
+  const candX = gameState.hero.position.x + 1 * delta;
+  const newX = Math.min(candX, maxX);
+  gameState.hero.position.x = newX;
+}
+
+function goLeft(gameState: GameState, level: Level, delta: number) {
+  const minX = calcMinX(gameState, level);
+  const candX = gameState.hero.position.x - 1 * delta;
+  const newX = Math.max(candX, minX);
+  gameState.hero.position.x = newX;
+}
+
+function jump(gameState: GameState, level: Level, delta: number): boolean {
+  const minY = calcMinY(gameState, level);
+  const candY = gameState.hero.position.y - 2 * delta;
+  const newY = Math.max(candY, minY);
+  
+  gameState.hero.position.y = newY;
+
+  if (newY === minY) {
+    gameState.hero.jumpStart = 0;
+    return true;
+  }
+  return false;
+}
+
 function lostLife(height: number, gameState: GameState): boolean {
   const bottom = height / SCALE;
   return (gameState.hero.position.y > bottom);
 }
 
 function applyGravity(gameState: GameState, level: Level, delta: number): boolean {
+  const maxY = calcMaxY(gameState, level);
+
+  const candY = gameState.hero.position.y + VELOCITY_Y * delta;
+  const newY = Math.min(maxY, candY);
+  const hitGround = newY === gameState.hero.position.y;
+  gameState.hero.position.y = newY;
+
+  return hitGround;
+}
+
+function calcMaxY(gameState: GameState, level: Level) {
   const blockY = gameState.hero.position.y / SIZE;
   const x = gameState.hero.position.x;
 
   const below = level.items.filter((item) => {
     return (
-      item.row > blockY  &&
+      item.row > blockY &&
       ((item.col) * SIZE) < x + TOLERANCE_LEFT &&
       ((item.col + (item.repeatCol || 1) + extraLength(item.tileKey)) * SIZE) > x + TOLERANCE_RIGHT &&
       isSolid(item.tileKey)
@@ -232,13 +263,7 @@ function applyGravity(gameState: GameState, level: Level, delta: number): boolea
     const minRow = Math.min(...below.map(b => b.row));
     maxY = minRow * SIZE - SIZE;
   }
-
-  const candY = gameState.hero.position.y + VELOCITY_Y * delta;
-  const newY = Math.min(maxY, candY);
-  const hitGround = newY === gameState.hero.position.y;
-  gameState.hero.position.y = newY;
-
-  return hitGround;
+  return maxY;
 }
 
 function isSolid(key: keyof BaseTileSet | keyof TileCollections): boolean {

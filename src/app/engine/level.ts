@@ -36,7 +36,7 @@ export function stopAnimation(): void {
   abortController?.abort();
 }
 
-export function animateLevel(options: AnimateOptions) {
+export function playLevel(options: AnimateOptions) {
   const { canvas, level, tiles, heroTiles } = options;
 
   const context: CanvasRenderingContext2D | null = canvas.getContext('2d');

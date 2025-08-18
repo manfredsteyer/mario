@@ -19,7 +19,7 @@ import { HttpProgressEvent, HttpResourceRef } from '@angular/common/http';
 //
 import { Style } from '../engine/palettes';
 import { extractHeroTiles, extractTiles } from '../engine/tiles';
-import { animateLevel, renderLevel, stopAnimation } from '../engine/level';
+import { playLevel, renderLevel, stopAnimation } from '../engine/level';
 import { HeroMapLoader } from '../data/hero-map-loader';
 import { BlurOnChangeDirective } from '../shared/blur-on-change.directive';
 
@@ -38,7 +38,7 @@ export class LevelComponent implements OnDestroy {
   levelKey = signal('01');  // linkedSignal<string | undefined>(() => this.getFirstLevelKey());
 
   style = signal<Style>('overworld');
-  animation = signal(false);
+  play = signal(false);
   
   tilesMapResource = this.tilesMapLoader.getTilesMapResource();
   tilesResource = createTilesResource(this.tilesMapResource, this.style);
@@ -73,8 +73,8 @@ export class LevelComponent implements OnDestroy {
     stopAnimation();
   }
 
-  toggleAnimation() {
-    this.animation.update((animation) => !animation);
+  togglePlay() {
+    this.play.update((animation) => !animation);
   }
 
   reload() {
@@ -98,15 +98,15 @@ export class LevelComponent implements OnDestroy {
     const tiles = this.tilesResource.value();
     const level = this.levelResource.value();
     const canvas = this.canvas()?.nativeElement;
-    const animation = this.animation();
+    const play = this.play();
     const heroTiles = this.heroResource.value();
 
     if (!tiles || !heroTiles || !canvas) {
       return;
     }
 
-    if (animation) {
-      animateLevel({
+    if (play) {
+      playLevel({
         canvas,
         level,
         tiles,

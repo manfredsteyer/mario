@@ -5,23 +5,23 @@ import {
   ElementRef,
   inject,
   OnDestroy,
-  resource,
   signal,
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TilesMapLoader } from '../data/tiles-map.loader';
 import { LevelLoader } from '../data/level.loader';
-import { HttpProgressEvent, HttpResourceRef } from '@angular/common/http';
+import { HttpProgressEvent } from '@angular/common/http';
 
 //
 //  In this example, we treat the game "engine" as a black box
 //
 import { Style } from '../engine/palettes';
-import { extractHeroTiles, extractTiles } from '../engine/tiles';
 import { playLevel, renderLevel, stopAnimation } from '../engine/level';
 import { HeroMapLoader } from '../data/hero-map-loader';
 import { BlurOnChangeDirective } from '../shared/blur-on-change.directive';
+import { createTilesResource } from '../data/tile-resources';
+import { createHeroResource } from '../data/hero-resource';
 
 @Component({
   selector: 'app-level',
@@ -128,52 +128,6 @@ function getContext(canvas: HTMLCanvasElement) {
     throw new Error('2d context expected');
   }
   return context;
-}
-
-function createTilesResource(
-  tilesMapResource: HttpResourceRef<Blob | undefined>,
-  style: () => Style
-) {
-
-  const params = computed(() => {
-    const tilesMap = tilesMapResource.value();
-    return !tilesMap
-      ? undefined
-      : {
-          tilesMap,
-          style: style(),
-        };
-  });
-
-  return resource({
-    params,
-    loader: (loderParams) => {
-      const { tilesMap, style } = loderParams.params;
-      return extractTiles(tilesMap, style);
-    },
-  });
-}
-
-function createHeroResource(
-  heroMapResource: HttpResourceRef<Blob | undefined>,
-) {
-
-  const params = computed(() => {
-    const heroMap = heroMapResource.value();
-    return !heroMap
-      ? undefined
-      : {
-          heroMap,
-        };
-  });
-
-  return resource({
-    params,
-    loader: (loderParams) => {
-      const { heroMap } = loderParams.params;
-      return extractHeroTiles(heroMap);
-    },
-  });
 }
 
 function calcProgress(progress: HttpProgressEvent | undefined): string {

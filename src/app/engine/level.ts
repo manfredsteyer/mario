@@ -7,9 +7,10 @@ import {
   resetGameState,
   updateGameState,
 } from './game-state';
+import { HeroTileSet } from './hero';
 import { keyboard } from './keyboard';
 import { SIZE } from './palettes';
-import { BaseTileSet, DrawOptions, drawTile, HeroTileSet, TileCollections, TileSet } from './tiles';
+import { BaseTileSet, DrawOptions, drawTile, TileCollections, TileSet } from './tiles';
 
 const SCREEN_WIDTH = 340;
 

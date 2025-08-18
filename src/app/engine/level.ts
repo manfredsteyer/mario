@@ -3,15 +3,13 @@ import {
   Direction,
   GameState,
   getGameState,
-  initHeroState,
   Position,
   resetGameState,
-  setGameState,
   updateGameState,
 } from './game-state';
 import { keyboard } from './keyboard';
 import { SIZE } from './palettes';
-import { BaseTileSet, DrawOptions, drawTile, HeroTileSet, Tile, TileCollections, TileSet } from './tiles';
+import { BaseTileSet, DrawOptions, drawTile, HeroTileSet, TileCollections, TileSet } from './tiles';
 
 const SCREEN_WIDTH = 340;
 
@@ -145,7 +143,7 @@ function step(options: StepOptions): void {
   const delta = formerTimeStamp ? (timeStamp - formerTimeStamp) / speed : 0;
   // const newOffset = offset - delta * directionFactor;
 
-  moveHero(timeStamp, gameState, level, delta);
+  const movedVertically = moveHero(timeStamp, gameState, level, delta);
 
   gameState.hero.position.x = Math.max(0, gameState.hero.position.x)
 
@@ -154,8 +152,10 @@ function step(options: StepOptions): void {
 
   drawLevel({ level, offset, tiles, context, width, height });
 
+  const heroTile = getHeroTile(gameState, timeStamp, heroTiles, movedVertically);
+
   drawHero({
-    tile: heroTiles.stand,
+    tile: heroTile,
     position: { ...gameState.hero.position, x: renderX },
     context,
   })
@@ -166,7 +166,7 @@ function step(options: StepOptions): void {
       hero: gameState.hero,
       levelId: level.levelId,
       offset,
-      direction,
+      // direction,
     }));
   }
   else {
@@ -176,10 +176,8 @@ function step(options: StepOptions): void {
   requestAnimationFrame((newTimeStamp) => {
     step({
       ...options,
-      // offset: newOffset,
       formerTimeStamp: timeStamp,
       timeStamp: newTimeStamp,
-      // direction: newDirection,
     });
   });
 }
@@ -190,10 +188,27 @@ export type RenderOptions = {
   tiles: TileSet;
 };
 
-function moveHero(timeStamp: number, gameState: GameState, level: Level, delta: number) {
+function getHeroTile(gameState: GameState, timeStamp: number, heroTiles: HeroTileSet, movedVertically: boolean) {
+  let heroTileKey: keyof HeroTileSet = 'stand';
+
+  if (gameState.hero.runStart > 0 && !movedVertically) {
+    const runDelta = timeStamp - gameState.hero.runStart;
+    heroTileKey = 'run' + (Math.floor(runDelta / 100) % 3);
+  }
+
+  if (gameState.direction === 'left') {
+    heroTileKey = heroTileKey + 'Left';
+  }
+
+  const heroTile = heroTiles[heroTileKey as keyof HeroTileSet];
+  return heroTile;
+}
+
+function moveHero(timeStamp: number, gameState: GameState, level: Level, delta: number): boolean {
   let hitGround = false;
   let hitTop = false;
   const isJumping = keyboard.up && timeStamp - gameState.hero.jumpStart < 500;
+  const initY = gameState.hero.position.y;
 
   if (!isJumping) {
     gameState.hero.jumpStart = 0;
@@ -213,6 +228,16 @@ function moveHero(timeStamp: number, gameState: GameState, level: Level, delta: 
   else if (keyboard.right && !hitTop) {
     goRight(gameState, level, delta);
   }
+  
+  if (keyboard.left || keyboard.right) {
+    gameState.hero.runStart = gameState.hero.runStart || timeStamp;
+  }
+  else {
+    gameState.hero.runStart = 0;
+  }
+
+  return initY !== gameState.hero.position.y;
+
 }
 
 function goRight(gameState: GameState, level: Level, delta: number) {
@@ -220,6 +245,7 @@ function goRight(gameState: GameState, level: Level, delta: number) {
   const candX = gameState.hero.position.x + 1 * delta;
   const newX = Math.min(candX, maxX);
   gameState.hero.position.x = newX;
+  gameState.direction = 'right'
 }
 
 function goLeft(gameState: GameState, level: Level, delta: number) {
@@ -227,6 +253,7 @@ function goLeft(gameState: GameState, level: Level, delta: number) {
   const candX = gameState.hero.position.x - 1 * delta;
   const newX = Math.max(candX, minX);
   gameState.hero.position.x = newX;
+  gameState.direction = 'left';
 }
 
 function jump(gameState: GameState, level: Level, delta: number): boolean {

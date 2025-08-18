@@ -4,6 +4,7 @@ export type HeroState = {
   position: Position;
   acceleration: number;
   jumpStart: number;
+  runStart: number;
 };
 
 export type Position = {
@@ -20,6 +21,7 @@ export const initHeroState: HeroState = {
   position: initPosition,
   acceleration: 0,
   jumpStart: 0,
+  runStart: 0,
 };
 
 export type GameState = {

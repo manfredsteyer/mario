@@ -1,3 +1,4 @@
+import { flip } from '../shared/flip';
 import { addTransparency } from './color-utils';
 import { getPalettes, Palette, Palettes, SIZE, Style } from './palettes';
 
@@ -56,7 +57,14 @@ export type TileCollections = {
 export type TileSet = BaseTileSet & TileCollections;
 
 export type HeroTileSet = { 
-  stand: ImageBitmap
+  stand: ImageBitmap;
+  standLeft: ImageBitmap;
+  run0: ImageBitmap;
+  run0Left: ImageBitmap;
+  run1: ImageBitmap;
+  run1Left: ImageBitmap;
+  run2: ImageBitmap;
+  run2Left: ImageBitmap;
 };
 
 export type DrawOptions = {
@@ -254,6 +262,24 @@ async function getTile(
   return image;
 }
 
+
+async function getHeroTile(
+  bitmap: ImageBitmap,
+  p: Palette,
+  row: number,
+  col: number,
+) {
+  const image = await createImageBitmap(
+    bitmap,
+    p.x + row * (SIZE + 2),
+    p.y + col * (SIZE + 2),
+    SIZE,
+    SIZE,
+  );
+
+  return image;
+}
+
 export async function extractTiles(tilesMap: Blob, style: Style) {
   const bitmap = await createImageBitmap(tilesMap);
   const correctedBitmap = await addTransparency(bitmap, '#9494ff');
@@ -266,12 +292,26 @@ export async function extractTiles(tilesMap: Blob, style: Style) {
 
 async function loadHeroTiles(bitmap: ImageBitmap) {
 
-  const palette: Palette = {
+  const idlePalette: Palette = {
      x: 0, y: 8
   };
 
+  const runPalette: Palette = {
+     x: 20, y: 8
+  };
+
+
   const tilePromises = {
-    stand: getTile(bitmap, palette, 0, 0),
+    stand: getHeroTile(bitmap, idlePalette, 0, 0),
+
+    run1: getHeroTile(bitmap, runPalette, 0, 0),
+    run2: getHeroTile(bitmap, runPalette, 1, 0),
+    run0: getHeroTile(bitmap, runPalette, 2, 0),
+
+    standLeft: flip(getTile(bitmap, idlePalette, 0, 0)),
+    run1Left: flip(getHeroTile(bitmap, runPalette, 0, 0)),
+    run2Left: flip(getHeroTile(bitmap, runPalette, 1, 0)),
+    run0Left: flip(getHeroTile(bitmap, runPalette, 2, 0)),
   };
 
   const tiles = await Promise.all(Object.values(tilePromises)).then(

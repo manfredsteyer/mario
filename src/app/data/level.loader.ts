@@ -7,7 +7,6 @@ import { initLevelOverview, LevelOverview } from './level-info';
 @Injectable({ providedIn: 'root' })
 export class LevelLoader {
   getLevelOverviewResource(): HttpResourceRef<LevelOverview> {
-    // Lambda is now always expected!
     return httpResource<LevelOverview>(() => `/levels/overview.json`, {
       defaultValue: initLevelOverview,
     });
@@ -18,11 +17,11 @@ export class LevelLoader {
   ): HttpResourceRef<Level> {
     return httpResource<Level>(() => !levelKey() ? undefined : `/levels/${levelKey()}.json`, {
       defaultValue: initLevel,
-      parse: toLevel, // Zod
+      parse: toLevel, // zod
     });
   }
 
-  getLevelResource4(levelKey: () => string): HttpResourceRef<Level> {
+  getLevelResource2(levelKey: () => string): HttpResourceRef<Level> {
     return httpResource<Level>(
       () => ({
         url: `/levels/${levelKey()}.json`,

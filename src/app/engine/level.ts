@@ -48,7 +48,7 @@ export function animateLevel(options: AnimateOptions) {
   }
 
   stopAnimation();
-
+  
   abortController = new AbortController();
   const abortSignal = abortController.signal;
 
@@ -61,6 +61,10 @@ export function animateLevel(options: AnimateOptions) {
 
   const offset = getOffset(level);
   const direction = getDirection(level);
+
+  if (needReset(level)) {
+    resetGameState();
+  }
 
   step({
     canvas,
@@ -97,6 +101,11 @@ function getOffset(level: Level): number {
   const state = getGameState();
   const offset = level.levelId === state.levelId ? state.offset : 0;
   return offset;
+}
+
+function needReset(level: Level): boolean {
+  const state = getGameState();
+  return level.levelId !== state.levelId;
 }
 
 function getDirection(level: Level): Direction {
@@ -274,6 +283,7 @@ function calcMaxY(gameState: GameState, level: Level) {
 function isSolid(key: keyof BaseTileSet | keyof TileCollections): boolean {
   return key === 'floor' 
     || key === 'brick' 
+    || key === 'solid' 
     || key.startsWith('pipe') 
     || key === 'questionMark';
 }
@@ -307,7 +317,7 @@ function calcMaxX(gameState: GameState, level: Level): number {
   const below = level.items.filter((item) => {
     return (
       x <= (item.col) * SIZE &&
-      blockY > item.row &&
+      blockY >= item.row &&
       blockY <= item.row + (item.repeatRow || 1) + extraHeight(item.tileKey) &&
       isSolid(item.tileKey)
     );
@@ -330,7 +340,7 @@ function calcMinX(gameState: GameState, level: Level): number {
   const below = level.items.filter((item) => {
     return (
       x >= (item.col) * SIZE &&
-      blockY > item.row &&
+      blockY >= item.row &&
       blockY <= item.row + (item.repeatRow || 1) + extraHeight(item.tileKey) &&
       isSolid(item.tileKey)
     );

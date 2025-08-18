@@ -18,7 +18,7 @@ window.addEventListener('keydown', (event) => {
     case 'ArrowRight':
       keyboard.right = true;
       break;
-    case 'ArrowUp':
+    case 'KeyA':
       keyboard.up = true;
       break;
   }
@@ -32,7 +32,7 @@ window.addEventListener('keyup', (event) => {
     case 'ArrowRight':
       keyboard.right = false;
       break;
-    case 'ArrowUp':
+    case 'KeyA':
       keyboard.up = false;
       break;
   }

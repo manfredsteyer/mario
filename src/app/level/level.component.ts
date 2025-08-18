@@ -4,7 +4,6 @@ import {
   effect,
   ElementRef,
   inject,
-  linkedSignal,
   OnDestroy,
   resource,
   signal,
@@ -22,10 +21,11 @@ import { Style } from '../engine/palettes';
 import { extractHeroTiles, extractTiles } from '../engine/tiles';
 import { animateLevel, renderLevel, stopAnimation } from '../engine/level';
 import { HeroMapLoader } from '../data/hero-map-loader';
+import { BlurOnChangeDirective } from '../shared/blur-on-change.directive';
 
 @Component({
   selector: 'app-level',
-  imports: [FormsModule],
+  imports: [FormsModule, BlurOnChangeDirective],
   templateUrl: './level.component.html',
 })
 export class LevelComponent implements OnDestroy {

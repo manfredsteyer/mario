@@ -35,23 +35,19 @@ export class LevelComponent implements OnDestroy {
 
   canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
 
-  levelKey = signal('01');  // linkedSignal<string | undefined>(() => this.getFirstLevelKey());
+  levelKey = signal('01'); // linkedSignal<string | undefined>(() => this.getFirstLevelKey());
 
   style = signal<Style>('overworld');
   play = signal(false);
-  
+
   tilesMapResource = this.tilesMapLoader.getTilesMapResource();
   tilesResource = createTilesResource(this.tilesMapResource, this.style);
 
   heroMapResource = this.heroMapLoader.getHeroMapResource();
   heroResource = createHeroResource(this.heroMapResource);
 
-  levelResource = this.levelLoader.getLevelResource(this.levelKey);
   levelOverviewResource = this.levelLoader.getLevelOverviewResource();
-
-  tilesMapProgress = computed(() =>
-    calcProgress(this.tilesMapResource.progress())
-  );
+  levelResource = this.levelLoader.getLevelResource(this.levelKey);
 
   constructor() {
     effect(() => {
@@ -60,12 +56,6 @@ export class LevelComponent implements OnDestroy {
 
     effect(() => {
       this.render();
-    });
-
-    effect(() => {
-      console.log('status', this.levelOverviewResource.status());
-      console.log('statusCode', this.levelOverviewResource.statusCode());
-      console.log('headers', this.levelOverviewResource.headers()?.keys());
     });
   }
 
@@ -110,7 +100,7 @@ export class LevelComponent implements OnDestroy {
         canvas,
         level,
         tiles,
-        heroTiles
+        heroTiles,
       });
     } else {
       renderLevel({
@@ -143,3 +133,11 @@ function calcProgress(progress: HttpProgressEvent | undefined): string {
   const kb = Math.round(progress.loaded / 1024);
   return kb + ' KB';
 }
+
+/*
+    effect(() => {
+      console.log('status', this.levelOverviewResource.status());
+      console.log('statusCode', this.levelOverviewResource.statusCode());
+      console.log('headers', this.levelOverviewResource.headers()?.keys());
+    });
+*/

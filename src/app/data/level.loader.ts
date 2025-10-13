@@ -6,32 +6,30 @@ import { initLevelOverview, LevelOverview } from './level-info';
 
 @Injectable({ providedIn: 'root' })
 export class LevelLoader {
-  getLevelOverviewResource(): HttpResourceRef<LevelOverview> {
-    return httpResource<LevelOverview>(() => `/levels/overview.json`, {
-      defaultValue: initLevelOverview,
-    });
-  }
-
-  getLevelResource(
-    levelKey: () => string | undefined  
-  ): HttpResourceRef<Level> {
-    return httpResource<Level>(() => !levelKey() ? undefined : `/levels/${levelKey()}.json`, {
-      defaultValue: initLevel,
-      parse: toLevel, // zod
-    });
-  }
-
-  getLevelResource2(levelKey: () => string): HttpResourceRef<Level> {
+  
+  getLevelResource(levelKey: () => string | undefined): HttpResourceRef<Level> {
+    
     return httpResource<Level>(
-      () => ({
+      () => (!levelKey() ? undefined : `/levels/${levelKey()}.json`),
+      {
+        defaultValue: initLevel,
+        parse: raw => toLevel(raw), // zod
+      }
+    );
+    
+  }
+
+  getLevelResource2(levelKey: () => string | undefined): HttpResourceRef<Level> {
+    return httpResource<Level>(
+      () => !levelKey() ? undefined : ({
         url: `/levels/${levelKey()}.json`,
-        method: 'GET',
         headers: {
           accept: 'application/json',
         },
         params: {
-          levelId: levelKey(),
+          levelId: levelKey() ?? '',
         },
+        method: 'GET',
         body: null,
         reportProgress: false,
         transferCache: false,
@@ -39,6 +37,12 @@ export class LevelLoader {
       }),
       { defaultValue: initLevel }
     );
+  }
+
+  getLevelOverviewResource(): HttpResourceRef<LevelOverview> {
+    return httpResource<LevelOverview>(() => `/levels/overview.json`, {
+      defaultValue: initLevelOverview,
+    });
   }
 }
 

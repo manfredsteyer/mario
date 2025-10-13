@@ -35,7 +35,7 @@ export class LevelComponent implements OnDestroy {
 
   canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
 
-  levelKey = signal('01'); // linkedSignal<string | undefined>(() => this.getFirstLevelKey());
+  levelKey = signal('01'); 
 
   style = signal<Style>('overworld');
   play = signal(false);

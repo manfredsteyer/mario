@@ -13,10 +13,10 @@ export function resetLevelCoins(level: Level): void {
 }
 
 export function checkCoinsCollision(ctx: StepContext): void {
-  const top = ctx.gameState.hero.position.y;
-  const left = ctx.gameState.hero.position.x;
-  const right = ctx.gameState.hero.position.x + SIZE;
-  const bottom = ctx.gameState.hero.position.y + SIZE;
+  const top = ctx.hero.position.y;
+  const left = ctx.hero.position.x;
+  const right = ctx.hero.position.x + SIZE;
+  const bottom = ctx.hero.position.y + SIZE;
 
   const collidingCoins = ctx.level.items.filter((item) => {
     if (item.tileKey !== 'coin') {

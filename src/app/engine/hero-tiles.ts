@@ -1,6 +1,7 @@
 import { flip } from '../shared/flip';
 import { addTransparency } from './color-utils';
-import type { GameState } from './game-state';
+import type { Direction } from './game-state';
+import type { StepContext } from './step-context';
 import { Palette, SIZE } from './palettes';
 
 export type HeroTileSet = {
@@ -67,19 +68,20 @@ async function loadHeroTiles(bitmap: ImageBitmap) {
 }
 
 export function getHeroTile(
-  gameState: GameState,
+  ctx: StepContext,
   timeStamp: number,
   heroTiles: HeroTileSet,
-  movedVertically: boolean
+  movedVertically: boolean,
+  direction: Direction,
 ): ImageBitmap {
   let heroTileKey: keyof HeroTileSet = 'stand';
 
-  if (gameState.hero.runStart > 0 && !movedVertically) {
-    const runDelta = timeStamp - gameState.hero.runStart;
+  if (ctx.hero.runStart > 0 && !movedVertically) {
+    const runDelta = timeStamp - ctx.hero.runStart;
     heroTileKey = ('run' + (Math.floor(runDelta / 100) % 3)) as keyof HeroTileSet;
   }
 
-  if (gameState.direction === 'left') {
+  if (direction === 'left') {
     heroTileKey = (heroTileKey + 'Left') as keyof HeroTileSet;
   }
 

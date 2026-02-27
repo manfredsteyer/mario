@@ -66,6 +66,10 @@ export type DrawOptions = {
   pixelOffsetY?: number;
 };
 
+export type TileName = keyof TileSet | 'collected';
+
+export type Item = { tileKey: TileName } & DrawOptions;
+
 type NormalizedDrawTileOptions = {
   col: number;
   row: number;
@@ -196,17 +200,24 @@ async function createTiles(bitmap: ImageBitmap, palettes: Palettes) {
   return tiles;
 }
 
-export function drawTile(
-  context: CanvasRenderingContext2D,
-  tile: Tile,
-  offset: number,
-  options: DrawOptions,
-): void {
+export type DrawTileContext = {
+  context: CanvasRenderingContext2D;
+  tiles: TileSet;
+  scrollOffset: number;
+};
+
+export function drawTile(ctx: DrawTileContext, item: Item): void {
+  if (item.tileKey === 'collected') {
+    return
+  };
+
+  const { tileKey, ...options } = item;
   const normOptions: NormalizedDrawTileOptions = {
     ...defaultDrawTileOptions,
     ...options,
   };
 
+  const tile = ctx.tiles[tileKey];
   const normTile = normalizeTile(tile);
   const size = getTileSize(normTile);
 
@@ -218,9 +229,9 @@ export function drawTile(
           const row = options.row + rowOffset + rowRep * size.rows;
           const image = normTile[rowOffset][colOffset];
           if (image) {
-            context.drawImage(
+            ctx.context.drawImage(
               image,
-              SIZE * col + offset + normOptions.pixelOffsetX,
+              SIZE * col + ctx.scrollOffset + normOptions.pixelOffsetX,
               SIZE * row + normOptions.pixelOffsetY
             );
           }

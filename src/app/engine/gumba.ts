@@ -1,5 +1,5 @@
 import { GUMBA_SPEED, HERO_PADDING } from './constants';
-import type { GameState, GumbaState } from './game-state';
+import type { GumbaState } from './game-state';
 import type { Level } from './level';
 import { SIZE } from './palettes';
 import type { GumbaTileSet } from './gumba-tiles';
@@ -10,12 +10,7 @@ import { calcMaxX, calcMinX } from './walls';
 
 export type { GumbaStart };
 
-export type LevelForReset = {
-  levelId: number;
-  gumbas?: { col: number; row: number }[];
-};
-
-export function resetGumbas(level?: LevelForReset): GumbaState[] {
+export function resetGumbas(level?: Level): GumbaState[] {
   if (level?.gumbas?.length) {
     return level.gumbas.map(({ col, row }) => ({
       position: { x: col * SIZE, y: row * SIZE },
@@ -26,14 +21,8 @@ export function resetGumbas(level?: LevelForReset): GumbaState[] {
   return [];
 }
 
-export type MoveGumbasContext = {
-  gameState: GameState;
-  level: Level;
-  delta: number;
-};
-
-export function moveGumbas(ctx: MoveGumbasContext): void {
-  for (const gumba of ctx.gameState.gumbas) {
+export function moveGumbas(ctx: StepContext): void {
+  for (const gumba of ctx.gumbas) {
     if (!gumba.alive) {
       continue;
     }
@@ -78,12 +67,12 @@ function moveGumbaLeft(gumba: GumbaState, level: Level, delta: number) {
 export type HeroGumbaCollisionResult = 'none' | 'hero-dead' | 'gumba-stomped';
 
 export function checkHeroGumbaCollision(ctx: StepContext): void {
-  const heroLeft = ctx.gameState.hero.position.x + HERO_PADDING;
+  const heroLeft = ctx.hero.position.x + HERO_PADDING;
   const heroRight = heroLeft + SIZE - HERO_PADDING;
-  const heroTop = ctx.gameState.hero.position.y;
+  const heroTop = ctx.hero.position.y;
   const heroBottom = heroTop + SIZE;
 
-  for (const gumba of ctx.gameState.gumbas) {
+  for (const gumba of ctx.gumbas) {
     if (!gumba.alive) {
       continue;
     }
@@ -103,7 +92,7 @@ export function checkHeroGumbaCollision(ctx: StepContext): void {
       continue;
     }
 
-    const isStomp = ctx.gameState.isFalling;
+    const isStomp = ctx.isFalling;
 
     if (isStomp) {
       gumba.alive = false;
@@ -116,11 +105,11 @@ export function checkHeroGumbaCollision(ctx: StepContext): void {
 }
 
 export function drawGumbas(ctx: StepContext): void {
-  if (!ctx.gumbaTiles || !ctx.gameState.gumbas) {
+  if (!ctx.gumbas) {
     return;
   }
 
-  for (const gumba of ctx.gameState.gumbas) {
+  for (const gumba of ctx.gumbas) {
     if (!gumba.alive) {
       continue;
     }

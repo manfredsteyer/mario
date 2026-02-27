@@ -16,8 +16,8 @@ import { HttpProgressEvent } from '@angular/common/http';
 //
 //  In this example, we treat the game "engine" as a black box
 //
-import { Style } from '../engine/palettes';
 import { playLevel, renderLevel, stopAnimation } from '../engine/level';
+import { Style } from '../engine/palettes';
 import { HeroMapLoader } from '../data/hero-map-loader';
 import { EnemiesMapLoader } from '../data/enemies-map-loader';
 import { BlurOnChangeDirective } from '../shared/blur-on-change.directive';
@@ -38,7 +38,7 @@ export class LevelComponent implements OnDestroy {
 
   canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
 
-  levelKey = signal('01'); 
+  levelKey = signal('01');
 
   style = signal<Style>('overworld');
   play = signal(false);
@@ -98,7 +98,7 @@ export class LevelComponent implements OnDestroy {
     const heroTiles = this.heroResource.value();
     const gumbaTiles = this.enemiesResource.value();
 
-    if (!tiles || !heroTiles || !canvas) {
+    if (!tiles || !heroTiles || !gumbaTiles || !canvas) {
       return;
     }
 
@@ -108,7 +108,7 @@ export class LevelComponent implements OnDestroy {
         level,
         tiles,
         heroTiles,
-        gumbaTiles: gumbaTiles ?? undefined,
+        gumbaTiles,
       });
     } else {
       renderLevel({

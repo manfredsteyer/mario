@@ -1,15 +1,29 @@
-import type {
-  Direction,
-  HeroState,
-  GumbaState,
-  RisingCoin,
-} from './game-state';
+import type { ObjectState } from './walls';
 import type { HeroTileSet } from './hero-tiles';
 import type { GumbaTileSet } from './gumba-tiles';
 import type { Level } from './types';
 import type { TileSet } from './tiles';
 
-export type StepOptions = {
+export type Direction = 'right' | 'left';
+
+export type RisingCoin = {
+  col: number;
+  row: number;
+  startTime: number;
+};
+
+export type HeroState = ObjectState & {
+  acceleration: number;
+  jumpStart: number;
+  runStart: number;
+};
+
+export type GumbaState = ObjectState & {
+  direction: Direction;
+  alive: boolean;
+};
+
+export type GameOptions = {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
   level: Level;
@@ -29,7 +43,7 @@ export type StepOptions = {
   isFalling: boolean;
 };
 
-export type StepContext = StepOptions & {
+export type GameContext = GameOptions & {
   levelId: number;
   maxOffset: number;
   width: number;
@@ -42,7 +56,7 @@ export type StepContext = StepOptions & {
   scrollOffset: number;
 };
 
-export function createInitialStepOptions() {
+export function createInitialGameOptions() {
   return {
     speed: 10,
     timeStamp: 0,

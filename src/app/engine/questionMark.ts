@@ -1,10 +1,10 @@
-import type { StepContext } from './step-context';
+import type { GameContext } from './game-context';
 import { SIZE } from './palettes';
 
 const RISE_DURATION_MS = 500;
 const RISE_DISTANCE = SIZE * 3;
 
-export function drawRisingCoins(ctx: StepContext): void {
+export function drawRisingCoins(ctx: GameContext): void {
   const coinTile = ctx.tiles.coin as ImageBitmap;
   const stillRising: typeof ctx.risingCoins = [];
   for (const rc of ctx.risingCoins) {

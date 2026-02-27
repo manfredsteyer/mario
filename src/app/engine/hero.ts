@@ -1,9 +1,8 @@
 import { HERO_PADDING, VELOCITY_Y } from './constants';
-import type { Position } from './game-state';
-import { getHeroTile, type HeroTileSet } from './hero-tiles';
+import { getHeroTile } from './hero-tiles';
 import { keyboard } from './keyboard';
 import { SIZE } from './palettes';
-import type { StepContext } from './step-context';
+import type { GameContext } from './game-context';
 import {
   calcMaxX,
   calcMaxY,
@@ -14,7 +13,7 @@ import {
   toRight,
 } from './walls';
 
-export function drawHero(ctx: StepContext): void {
+export function drawHero(ctx: GameContext): void {
   const tile = getHeroTile(
     ctx,
     ctx.timeStamp,
@@ -26,7 +25,7 @@ export function drawHero(ctx: StepContext): void {
   ctx.context.drawImage(tile, ctx.renderX, y);
 }
 
-export function moveHero(ctx: StepContext): void {
+export function moveHero(ctx: GameContext): void {
   let hitGround = false;
   let hitTop = false;
   const isJumping = keyboard.up && ctx.timeStamp - ctx.hero.jumpStart < 500;
@@ -54,7 +53,7 @@ export function moveHero(ctx: StepContext): void {
   ctx.movedVertically = initY !== ctx.hero.position.y;
 }
 
-export function goRight(ctx: StepContext): void {
+export function goRight(ctx: GameContext): void {
   const hero = ctx.hero;
   const maxX = calcMaxX(hero, ctx.level);
   const candX = hero.position.x + 1 * ctx.delta;
@@ -62,7 +61,7 @@ export function goRight(ctx: StepContext): void {
   ctx.direction = 'right';
 }
 
-export function goLeft(ctx: StepContext): void {
+export function goLeft(ctx: GameContext): void {
   const hero = ctx.hero;
   const minX = calcMinX(hero, ctx.level);
   const candX = hero.position.x - 1 * ctx.delta;
@@ -70,7 +69,7 @@ export function goLeft(ctx: StepContext): void {
   ctx.direction = 'left';
 }
 
-function jump(ctx: StepContext, delta: number, timeStamp: number): boolean {
+function jump(ctx: GameContext, delta: number, timeStamp: number): boolean {
   const minY = calcMinY(ctx.hero, ctx.level);
   const candY = ctx.hero.position.y - 2 * delta;
   const newY = Math.max(candY, minY);
@@ -85,7 +84,7 @@ function jump(ctx: StepContext, delta: number, timeStamp: number): boolean {
   return false;
 }
 
-function handleQuestionBlockHit(ctx: StepContext, timeStamp: number): void {
+function handleQuestionBlockHit(ctx: GameContext, timeStamp: number): void {
   const y = ctx.hero.position.y;
   const leftX = ctx.hero.position.x + SIZE - HERO_PADDING;
   const rightX = ctx.hero.position.x + HERO_PADDING;
@@ -116,7 +115,7 @@ function handleQuestionBlockHit(ctx: StepContext, timeStamp: number): void {
   });
 }
 
-function applyGravity(ctx: StepContext): boolean {
+function applyGravity(ctx: GameContext): boolean {
   const maxY = calcMaxY(ctx.hero, ctx.level);
   const y = ctx.hero.position.y;
   const candY = y + VELOCITY_Y * ctx.delta;

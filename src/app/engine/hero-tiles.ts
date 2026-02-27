@@ -1,7 +1,7 @@
 import { flip } from '../shared/flip';
 import { addTransparency } from './color-utils';
-import type { Direction } from './game-state';
-import type { StepContext } from './step-context';
+import type { Direction } from './game-context';
+import type { GameContext } from './game-context';
 import { Palette, SIZE } from './palettes';
 
 export type HeroTileSet = {
@@ -68,7 +68,7 @@ async function loadHeroTiles(bitmap: ImageBitmap) {
 }
 
 export function getHeroTile(
-  ctx: StepContext,
+  ctx: GameContext,
   timeStamp: number,
   heroTiles: HeroTileSet,
   movedVertically: boolean,

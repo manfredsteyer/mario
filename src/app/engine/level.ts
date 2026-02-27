@@ -1,6 +1,6 @@
 import { SCALE } from './constants';
 import { checkCoinsCollision, resetLevelCoins } from './coins';
-import type { GumbaState, HeroState, RisingCoin } from './game-state';
+import type { GumbaState, HeroState, RisingCoin } from './game-context';
 import { drawHero, moveHero } from './hero';
 import { HeroTileSet } from './hero-tiles';
 import type { GumbaTileSet } from './gumba-tiles';
@@ -8,12 +8,13 @@ import { drawGumbas, checkHeroGumbaCollision, moveGumbas, resetGumbas } from './
 import { drawRisingCoins } from './questionMark';
 import { SIZE } from './palettes';
 import {
-  createInitialStepOptions,
-  type StepContext,
-  type StepOptions,
-} from './step-context';
+  createInitialGameOptions,
+  type GameContext,
+  type GameOptions,
+} from './game-context';
 import { drawTile, type TileSet } from './tiles';
-import type { Item, Level, TileName } from './types';
+import type { Item, TileName } from './tiles';
+import type { Level } from './types';
 
 export type { Item, Level, TileName };
 
@@ -50,7 +51,7 @@ export function renderLevel(options: RenderOptions): void {
     width,
     height,
     timeStamp: 0,
-  } as unknown as StepContext);
+  } as unknown as GameContext);
 }
 
 export type AnimateOptions = {
@@ -75,35 +76,37 @@ export function playLevel(options: AnimateOptions) {
   abortController = new AbortController();
   const abortSignal = abortController.signal;
 
-  const stepOptions: StepOptions = {
-    ...createInitialStepOptions(),
+  const gameOptions: GameOptions = {
+    ...createInitialGameOptions(),
     ...options,
     canvas,
     abortSignal,
     context,
     direction: 'right',
   };
-  stepOptions.gumbas = resetGumbas(level);
+  gameOptions.gumbas = resetGumbas(level);
 
-  step(stepOptions);
+  runGameLoop(gameOptions);
 }
 
 export function stopAnimation(): void {
   abortController?.abort();
 }
 
-function step(input: StepOptions): void {
-  if (input.abortSignal.aborted) {
+function runGameLoop(gameOptions: GameOptions): void {
+  if (gameOptions.abortSignal.aborted) {
     return;
   }
 
-  const ctx: StepContext = {
-    ...createStepContext(input),
-    levelId: input.level.levelId,
-    maxOffset: getMaxOffset(input.level),
-    width: input.canvas.width,
-    height: input.canvas.height,
-    delta: input.formerTimeStamp ? (input.timeStamp - input.formerTimeStamp) / input.speed : 0,
+  const ctx: GameContext = {
+    ...createGameContext(gameOptions),
+    levelId: gameOptions.level.levelId,
+    maxOffset: getMaxOffset(gameOptions.level),
+    width: gameOptions.canvas.width,
+    height: gameOptions.canvas.height,
+    delta: gameOptions.formerTimeStamp
+      ? (gameOptions.timeStamp - gameOptions.formerTimeStamp) / gameOptions.speed
+      : 0,
     beaten: false,
     fellOff: false,
     movedVertically: false,
@@ -126,10 +129,10 @@ function step(input: StepOptions): void {
   }
 
   requestAnimationFrame((newTimeStamp) => {
-    step({
-      ...input,
+    runGameLoop({
+      ...gameOptions,
       ...ctx,
-      formerTimeStamp: input.timeStamp,
+      formerTimeStamp: gameOptions.timeStamp,
       timeStamp: newTimeStamp,
     });
   });
@@ -158,15 +161,15 @@ function getInitialState(): {
   };
 }
 
-function createStepContext(input: StepOptions): StepContext {
+function createGameContext(gameOptions: GameOptions): GameContext {
   return {
-    ...input,
-    levelId: input.level.levelId,
-    maxOffset: getMaxOffset(input.level),
-    width: input.canvas.width,
-    height: input.canvas.height,
-    delta: input.formerTimeStamp
-      ? (input.timeStamp - input.formerTimeStamp) / input.speed
+    ...gameOptions,
+    levelId: gameOptions.level.levelId,
+    maxOffset: getMaxOffset(gameOptions.level),
+    width: gameOptions.canvas.width,
+    height: gameOptions.canvas.height,
+    delta: gameOptions.formerTimeStamp
+      ? (gameOptions.timeStamp - gameOptions.formerTimeStamp) / gameOptions.speed
       : 0,
     beaten: false,
     fellOff: false,
@@ -188,21 +191,21 @@ function getOffset(_level: Level): number {
   return 0;
 }
 
-function scrollLevel(ctx: StepContext): void {
+function scrollLevel(ctx: GameContext): void {
   ctx.renderX = Math.min(ctx.hero.position.x, ctx.width / SCALE / 2 - SIZE);
   ctx.scrollOffset = -Math.max(0, ctx.hero.position.x - ctx.renderX);
 }
 
-function checkFellOff(ctx: StepContext): void {
+function checkFellOff(ctx: GameContext): void {
   const bottom = ctx.height / SCALE;
   ctx.fellOff = ctx.hero.position.y > bottom;
 }
 
-function didHeroDie(ctx: StepContext): boolean {
+function didHeroDie(ctx: GameContext): boolean {
   return ctx.fellOff || ctx.beaten;
 }
 
-function resetLevelOnDeath(ctx: StepContext): void {
+function resetLevelOnDeath(ctx: GameContext): void {
   resetLevelCoins(ctx.level);
   const state = getInitialState();
   state.gumbas = resetGumbas(ctx.level);
@@ -214,7 +217,7 @@ function resetLevelOnDeath(ctx: StepContext): void {
   ctx.isFalling = state.isFalling;
 }
 
-function drawLevel(ctx: StepContext): void {
+function drawLevel(ctx: GameContext): void {
   const { level, context, width, height } = ctx;
   context.fillStyle = level.backgroundColor;
   context.fillRect(0, 0, width, height);

@@ -1,7 +1,16 @@
 import { HERO_PADDING } from './constants';
-import type { ObjectState } from './game-state';
-import type { Item, Level, TileName } from './level';
 import { SIZE } from './palettes';
+import type { Item, TileName } from './tiles';
+import type { Level } from './types';
+
+export type Position = {
+  x: number;
+  y: number;
+};
+
+export type ObjectState = {
+  position: Position;
+};
 
 export function getBlockWidth(tileKey: TileName): number {
   if (tileKey === 'pipeTop') {

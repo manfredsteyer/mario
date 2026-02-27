@@ -1,6 +1,4 @@
-import type { Item, TileSet } from './tiles';
-
-export type { Item, TileName } from './tiles';
+import type { Item } from './tiles';
 
 export type GumbaStart = { col: number; row: number };
 

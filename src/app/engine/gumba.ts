@@ -4,7 +4,27 @@ import type { Level } from './level';
 import { SIZE } from './palettes';
 import type { GumbaTileSet } from './gumba-tiles';
 import { getGumbaTile } from './gumba-tiles';
+import type { StepContext } from './step-context';
+import type { GumbaStart } from './types';
 import { calcMaxX, calcMinX } from './walls';
+
+export type { GumbaStart };
+
+export type LevelForReset = {
+  levelId: number;
+  gumbas?: { col: number; row: number }[];
+};
+
+export function resetGumbas(level?: LevelForReset): GumbaState[] {
+  if (level?.gumbas?.length) {
+    return level.gumbas.map(({ col, row }) => ({
+      position: { x: col * SIZE, y: row * SIZE },
+      direction: 'left' as const,
+      alive: true,
+    }));
+  }
+  return [];
+}
 
 export type MoveGumbasContext = {
   gameState: GameState;
@@ -57,14 +77,7 @@ function moveGumbaLeft(gumba: GumbaState, level: Level, delta: number) {
 
 export type HeroGumbaCollisionResult = 'none' | 'hero-dead' | 'gumba-stomped';
 
-export type CheckHeroGumbaCollisionContext = {
-  gameState: GameState;
-  beaten: boolean;
-};
-
-export function checkHeroGumbaCollision(
-  ctx: CheckHeroGumbaCollisionContext,
-): void {
+export function checkHeroGumbaCollision(ctx: StepContext): void {
   const heroLeft = ctx.gameState.hero.position.x + HERO_PADDING;
   const heroRight = heroLeft + SIZE - HERO_PADDING;
   const heroTop = ctx.gameState.hero.position.y;
@@ -102,15 +115,7 @@ export function checkHeroGumbaCollision(
   }
 }
 
-export type DrawGumbasContext = {
-  context: CanvasRenderingContext2D;
-  gameState: GameState;
-  gumbaTiles?: GumbaTileSet;
-  timeStamp: number;
-  scrollOffset: number;
-};
-
-export function drawGumbas(ctx: DrawGumbasContext): void {
+export function drawGumbas(ctx: StepContext): void {
   if (!ctx.gumbaTiles || !ctx.gameState.gumbas) {
     return;
   }

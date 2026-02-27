@@ -1,6 +1,6 @@
 import { COIN_PADDING } from './constants';
-import type { GameState } from './game-state';
 import type { Level } from './level';
+import type { StepContext } from './step-context';
 import { SIZE } from './palettes';
 import { toBottom, toLeft, toRight, toTop } from './walls';
 
@@ -12,12 +12,7 @@ export function resetLevelCoins(level: Level): void {
   }
 }
 
-export type CheckCoinsCollisionContext = {
-  level: Level;
-  gameState: GameState;
-};
-
-export function checkCoinsCollision(ctx: CheckCoinsCollisionContext): void {
+export function checkCoinsCollision(ctx: StepContext): void {
   const top = ctx.gameState.hero.position.y;
   const left = ctx.gameState.hero.position.x;
   const right = ctx.gameState.hero.position.x + SIZE;

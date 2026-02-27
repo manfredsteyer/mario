@@ -2,7 +2,6 @@ import { SCALE } from './constants';
 import { checkCoinsCollision, resetLevelCoins } from './coins';
 import {
   Direction,
-  GameState,
   getGameState,
   resetGameState,
   updateGameState,
@@ -13,22 +12,48 @@ import type { GumbaTileSet } from './gumba-tiles';
 import { drawGumbas, checkHeroGumbaCollision, moveGumbas } from './gumba';
 import { drawRisingCoins } from './questionMark';
 import { SIZE } from './palettes';
-import { DrawOptions, drawTile, TileSet } from './tiles';
+import type { StepContext, StepOptions } from './step-context';
+import { drawTile, TileSet } from './tiles';
+import type { Item, Level, TileName } from './types';
+
+export type { Item, Level, TileName };
 
 const SCREEN_WIDTH = 340;
 
-export type GumbaStart = { col: number; row: number };
+let abortController: AbortController | undefined;
 
-export type Level = {
-  levelId: number;
-  backgroundColor: string;
-  items: Item[];
-  gumbas?: GumbaStart[];
+export type RenderOptions = {
+  canvas: HTMLCanvasElement;
+  level: Level;
+  tiles: TileSet;
 };
 
-export type TileName = keyof TileSet | 'collected' | 'empty';
+export function renderLevel(options: RenderOptions): void {
+  const { canvas, level, tiles } = options;
 
-export type Item = { tileKey: TileName } & DrawOptions;
+  const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
+
+  if (!context) {
+    throw new Error('canvas 2d expected!');
+  }
+
+  const width = canvas.width;
+  const height = canvas.height;
+  const offset = getOffset(level);
+
+  stopAnimation();
+  const gameState = getGameState();
+  drawLevel({
+    level,
+    scrollOffset: offset,
+    tiles,
+    context,
+    width,
+    height,
+    timeStamp: 0,
+    gameState,
+  } as StepContext);
+}
 
 export type AnimateOptions = {
   canvas: HTMLCanvasElement;
@@ -37,12 +62,6 @@ export type AnimateOptions = {
   heroTiles: HeroTileSet;
   gumbaTiles?: GumbaTileSet;
 };
-
-let abortController: AbortController | undefined;
-
-export function stopAnimation(): void {
-  abortController?.abort();
-}
 
 export function playLevel(options: AnimateOptions) {
   const { canvas, level, tiles, heroTiles } = options;
@@ -89,49 +108,8 @@ export function playLevel(options: AnimateOptions) {
   });
 }
 
-type StepOptions = {
-  canvas: HTMLCanvasElement;
-  context: CanvasRenderingContext2D;
-  level: Level;
-  tiles: TileSet;
-  heroTiles: HeroTileSet;
-  gumbaTiles?: GumbaTileSet;
-  offset: number;
-  speed: number;
-  timeStamp: number;
-  formerTimeStamp: number;
-  abortSignal: AbortSignal;
-  maxOffset: number;
-  direction: Direction;
-};
-
-export type StepContext = StepOptions & {
-  gameState: GameState;
-  width: number;
-  height: number;
-  delta: number;
-  beaten: boolean;
-  fellOff: boolean;
-  movedVertically: boolean;
-  renderX: number;
-  scrollOffset: number;
-};
-
-function getOffset(level: Level): number {
-  const state = getGameState();
-  const offset = level.levelId === state.levelId ? state.offset : 0;
-  return offset;
-}
-
-function needReset(level: Level): boolean {
-  const state = getGameState();
-  return level.levelId !== state.levelId;
-}
-
-function getDirection(level: Level): Direction {
-  const state = getGameState();
-  const offset = level.levelId === state.levelId ? state.direction : 'right';
-  return offset;
+export function stopAnimation(): void {
+  abortController?.abort();
 }
 
 function step(options: StepOptions): void {
@@ -173,8 +151,7 @@ function step(options: StepOptions): void {
       isFalling: ctx.gameState.isFalling,
     }));
   } else {
-    resetLevelCoins(ctx.level);
-    resetGameState(ctx.level);
+    resetLevelOnDeath(ctx);
   }
 
   requestAnimationFrame((newTimeStamp) => {
@@ -186,11 +163,22 @@ function step(options: StepOptions): void {
   });
 }
 
-export type RenderOptions = {
-  canvas: HTMLCanvasElement;
-  level: Level;
-  tiles: TileSet;
-};
+function getOffset(level: Level): number {
+  const state = getGameState();
+  const offset = level.levelId === state.levelId ? state.offset : 0;
+  return offset;
+}
+
+function needReset(level: Level): boolean {
+  const state = getGameState();
+  return level.levelId !== state.levelId;
+}
+
+function getDirection(level: Level): Direction {
+  const state = getGameState();
+  const offset = level.levelId === state.levelId ? state.direction : 'right';
+  return offset;
+}
 
 function scrollLevel(ctx: StepContext): void {
   ctx.renderX = Math.min(ctx.gameState.hero.position.x, ctx.width / SCALE / 2 - SIZE);
@@ -206,39 +194,12 @@ function didHeroDie(ctx: StepContext): boolean {
   return ctx.fellOff || ctx.beaten;
 }
 
-export function renderLevel(options: RenderOptions): void {
-  const { canvas, level, tiles } = options;
-
-  const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
-
-  if (!context) {
-    throw new Error('canvas 2d expected!');
-  }
-
-  const width = canvas.width;
-  const height = canvas.height;
-  const offset = getOffset(level);
-
-  stopAnimation();
-  const gameState = getGameState();
-  drawLevel({
-    level,
-    scrollOffset: offset,
-    tiles,
-    context,
-    width,
-    height,
-    timeStamp: 0,
-    gameState,
-  });
+function resetLevelOnDeath(ctx: StepContext): void {
+  resetLevelCoins(ctx.level);
+  resetGameState(ctx.level);
 }
 
-type DrawLevelContext = Pick<
-  StepContext,
-  'level' | 'scrollOffset' | 'tiles' | 'context' | 'width' | 'height' | 'timeStamp' | 'gameState'
->;
-
-function drawLevel(ctx: DrawLevelContext): void {
+function drawLevel(ctx: StepContext): void {
   const { level, scrollOffset, tiles, context, width, height, timeStamp, gameState } = ctx;
   context.fillStyle = level.backgroundColor;
   context.fillRect(0, 0, width, height);
@@ -251,5 +212,3 @@ function drawLevel(ctx: DrawLevelContext): void {
     drawTile(context, tile, scrollOffset, item);
   }
 }
-
-

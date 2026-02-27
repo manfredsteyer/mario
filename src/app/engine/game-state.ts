@@ -1,3 +1,5 @@
+import { resetGumbas } from './gumba';
+
 export type Direction = 'right' | 'left';
 
 export type ObjectState = {
@@ -11,8 +13,10 @@ export type HeroState = ObjectState & {
   runStart: number;
 };
 
-import { SIZE } from './palettes';
-
+export type GumbaState = ObjectState & {
+  direction: Direction;
+  alive: boolean;
+};
 export type Position = {
   x: number;
   y: number;
@@ -28,11 +32,6 @@ export const initHeroState: HeroState = {
   acceleration: 0,
   jumpStart: 0,
   runStart: 0,
-};
-
-export type GumbaState = ObjectState & {
-  direction: Direction;
-  alive: boolean;
 };
 
 export type RisingCoin = {
@@ -99,13 +98,7 @@ export type LevelForReset = {
 
 export function resetGameState(level?: LevelForReset): void {
   _state = getInitState();
-  if (level?.gumbas?.length) {
-    _state.gumbas = level.gumbas.map(({ col, row }) => ({
-      position: { x: col * SIZE, y: row * SIZE },
-      direction: 'left' as const,
-      alive: true,
-    }));
-  }
+  _state.gumbas = resetGumbas(level);
   _state.risingCoins = [];
   _state.hitQuestionBlocks = new Set();
 }

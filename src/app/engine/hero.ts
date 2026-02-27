@@ -4,6 +4,7 @@ import { getHeroTile, type HeroTileSet } from './hero-tiles';
 import { keyboard } from './keyboard';
 import type { Level } from './level';
 import { SIZE } from './palettes';
+import type { StepContext } from './step-context';
 import {
   calcMaxX,
   calcMaxY,
@@ -14,30 +15,13 @@ import {
   toRight,
 } from './walls';
 
-export type DrawHeroContext = {
-  gameState: GameState;
-  timeStamp: number;
-  heroTiles: HeroTileSet;
-  movedVertically: boolean;
-  renderX: number;
-  context: CanvasRenderingContext2D;
-};
-
-export function drawHero(ctx: DrawHeroContext): void {
+export function drawHero(ctx: StepContext): void {
   const tile = getHeroTile(ctx.gameState, ctx.timeStamp, ctx.heroTiles, ctx.movedVertically);
   const { y } = ctx.gameState.hero.position;
   ctx.context.drawImage(tile, ctx.renderX, y);
 }
 
-export type MoveHeroContext = {
-  timeStamp: number;
-  gameState: GameState;
-  level: Level;
-  delta: number;
-  movedVertically: boolean;
-};
-
-export function moveHero(ctx: MoveHeroContext): void {
+export function moveHero(ctx: StepContext): void {
   let hitGround = false;
   let hitTop = false;
   const isJumping = keyboard.up && ctx.timeStamp - ctx.gameState.hero.jumpStart < 500;

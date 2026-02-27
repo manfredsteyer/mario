@@ -6,16 +6,18 @@ import type { GumbaTileSet } from './gumba-tiles';
 import { getGumbaTile } from './gumba-tiles';
 import { calcMaxX, calcMinX } from './walls';
 
-export function moveGumbas(
-  gameState: GameState,
-  level: Level,
-  delta: number,
-): void {
-  for (const gumba of gameState.gumbas) {
+export type MoveGumbasContext = {
+  gameState: GameState;
+  level: Level;
+  delta: number;
+};
+
+export function moveGumbas(ctx: MoveGumbasContext): void {
+  for (const gumba of ctx.gameState.gumbas) {
     if (!gumba.alive) {
       continue;
     }
-    moveGumba(gumba, level, delta);
+    moveGumba(gumba, ctx.level, ctx.delta);
   }
 }
 
@@ -55,15 +57,20 @@ function moveGumbaLeft(gumba: GumbaState, level: Level, delta: number) {
 
 export type HeroGumbaCollisionResult = 'none' | 'hero-dead' | 'gumba-stomped';
 
+export type CheckHeroGumbaCollisionContext = {
+  gameState: GameState;
+  beaten: boolean;
+};
+
 export function checkHeroGumbaCollision(
-  gameState: GameState,
-): HeroGumbaCollisionResult {
-  const heroLeft = gameState.hero.position.x + HERO_PADDING;
+  ctx: CheckHeroGumbaCollisionContext,
+): void {
+  const heroLeft = ctx.gameState.hero.position.x + HERO_PADDING;
   const heroRight = heroLeft + SIZE - HERO_PADDING;
-  const heroTop = gameState.hero.position.y;
+  const heroTop = ctx.gameState.hero.position.y;
   const heroBottom = heroTop + SIZE;
 
-  for (const gumba of gameState.gumbas) {
+  for (const gumba of ctx.gameState.gumbas) {
     if (!gumba.alive) {
       continue;
     }
@@ -83,37 +90,38 @@ export function checkHeroGumbaCollision(
       continue;
     }
 
-    const isStomp = gameState.isFalling;
+    const isStomp = ctx.gameState.isFalling;
 
     if (isStomp) {
       gumba.alive = false;
-      return 'gumba-stomped';
+      return;
     }
 
-    return 'hero-dead';
+    ctx.beaten = true;
+    return;
   }
-  return 'none';
 }
 
-export function drawGumbas(
-  context: CanvasRenderingContext2D,
-  gameState: GameState,
-  gumbaTiles: GumbaTileSet,
-  timeStamp: number,
-  offset: number,
-): void {
+export type DrawGumbasContext = {
+  context: CanvasRenderingContext2D;
+  gameState: GameState;
+  gumbaTiles?: GumbaTileSet;
+  timeStamp: number;
+  scrollOffset: number;
+};
 
-  if (!gameState.gumbas) {
+export function drawGumbas(ctx: DrawGumbasContext): void {
+  if (!ctx.gumbaTiles || !ctx.gameState.gumbas) {
     return;
   }
 
-  for (const gumba of gameState.gumbas) {
+  for (const gumba of ctx.gameState.gumbas) {
     if (!gumba.alive) {
       continue;
     }
-    const tile = getGumbaTile(timeStamp, gumbaTiles);
-    const x = gumba.position.x + offset;
+    const tile = getGumbaTile(ctx.timeStamp, ctx.gumbaTiles);
+    const x = gumba.position.x + ctx.scrollOffset;
     const y = gumba.position.y;
-    context.drawImage(tile, x, y);
+    ctx.context.drawImage(tile, x, y);
   }
 }

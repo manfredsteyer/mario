@@ -105,6 +105,18 @@ type StepOptions = {
   direction: Direction;
 };
 
+export type StepContext = StepOptions & {
+  gameState: GameState;
+  width: number;
+  height: number;
+  delta: number;
+  beaten: boolean;
+  fellOff: boolean;
+  movedVertically: boolean;
+  renderX: number;
+  scrollOffset: number;
+};
+
 function getOffset(level: Level): number {
   const state = getGameState();
   const offset = level.levelId === state.levelId ? state.offset : 0;
@@ -123,86 +135,52 @@ function getDirection(level: Level): Direction {
 }
 
 function step(options: StepOptions): void {
-  const {
-    canvas,
-    context,
-    level,
-    tiles,
-    heroTiles,
-    gumbaTiles,
-    speed,
-    timeStamp,
-    formerTimeStamp,
-  } = options;
-
   if (options.abortSignal.aborted) {
     return;
   }
 
-  const gameState = getGameState();
-  let beaten = false;
-  const width = canvas.width;
-  const height = canvas.height;
-  const delta = formerTimeStamp ? (timeStamp - formerTimeStamp) / speed : 0;
+  const ctx: StepContext = {
+    ...options,
+    gameState: getGameState(),
+    width: options.canvas.width,
+    height: options.canvas.height,
+    delta: options.formerTimeStamp
+      ? (options.timeStamp - options.formerTimeStamp) / options.speed
+      : 0,
+    beaten: false,
+    fellOff: false,
+    movedVertically: false,
+    renderX: 0,
+    scrollOffset: 0,
+  };
 
-  const movedVertically = moveHero(timeStamp, gameState, level, delta);
+  moveHero(ctx);
+  moveGumbas(ctx);
+  scrollLevel(ctx);
+  drawLevel(ctx);
+  drawHero(ctx);
+  drawGumbas(ctx);
+  checkCoinsCollision(ctx);
+  checkHeroGumbaCollision(ctx);
+  checkFellOff(ctx);
 
-  if (gumbaTiles) {
-    moveGumbas(gameState, level, delta);
-  }
-
-  const { renderX, offset } = scrollLevel(width, gameState.hero.position.x);
-
-  drawLevel({
-    level,
-    offset,
-    tiles,
-    context,
-    width,
-    height,
-    timeStamp,
-    gameState,
-  });
-
-  drawHero({
-    gameState,
-    timeStamp,
-    heroTiles,
-    movedVertically,
-    position: { ...gameState.hero.position, x: renderX },
-    context,
-  });
-
-  if (gumbaTiles) {
-    drawGumbas(context, gameState, gumbaTiles, timeStamp, offset);
-  }
-
-  checkCoinsCollision(level, gameState);
-
-  if (gumbaTiles) {
-    const collision = checkHeroGumbaCollision(gameState);
-    if (collision === 'hero-dead') beaten = true;
-  }
-
-  const didFellOff = fellOff(height, gameState);
-
-  if (!didFellOff && !beaten) {
+  if (!didHeroDie(ctx)) {
     updateGameState((state) => ({
       ...state,
-      hero: gameState.hero,
-      levelId: level.levelId,
-      offset,
-      isFalling: gameState.isFalling,
+      hero: ctx.gameState.hero,
+      levelId: ctx.level.levelId,
+      offset: ctx.scrollOffset,
+      isFalling: ctx.gameState.isFalling,
     }));
   } else {
-    resetLevelCoins(level);
-    resetGameState(level);
+    resetLevelCoins(ctx.level);
+    resetGameState(ctx.level);
   }
 
   requestAnimationFrame((newTimeStamp) => {
     step({
       ...options,
-      formerTimeStamp: timeStamp,
+      formerTimeStamp: options.timeStamp,
       timeStamp: newTimeStamp,
     });
   });
@@ -214,15 +192,18 @@ export type RenderOptions = {
   tiles: TileSet;
 };
 
-function scrollLevel(width: number, heroX: number): { renderX: number; offset: number } {
-  const renderX = Math.min(heroX, width / SCALE / 2 - SIZE);
-  const offset = -Math.max(0, heroX - renderX);
-  return { renderX, offset };
+function scrollLevel(ctx: StepContext): void {
+  ctx.renderX = Math.min(ctx.gameState.hero.position.x, ctx.width / SCALE / 2 - SIZE);
+  ctx.scrollOffset = -Math.max(0, ctx.gameState.hero.position.x - ctx.renderX);
 }
 
-function fellOff(height: number, gameState: GameState): boolean {
-  const bottom = height / SCALE;
-  return gameState.hero.position.y > bottom;
+function checkFellOff(ctx: StepContext): void {
+  const bottom = ctx.height / SCALE;
+  ctx.fellOff = ctx.gameState.hero.position.y > bottom;
+}
+
+function didHeroDie(ctx: StepContext): boolean {
+  return ctx.fellOff || ctx.beaten;
 }
 
 export function renderLevel(options: RenderOptions): void {
@@ -242,7 +223,7 @@ export function renderLevel(options: RenderOptions): void {
   const gameState = getGameState();
   drawLevel({
     level,
-    offset,
+    scrollOffset: offset,
     tiles,
     context,
     width,
@@ -252,29 +233,22 @@ export function renderLevel(options: RenderOptions): void {
   });
 }
 
-type DrawLevelOptions = {
-  level: Level;
-  offset: number;
-  tiles: TileSet;
-  context: CanvasRenderingContext2D;
-  width: number;
-  height: number;
-  timeStamp: number;
-  gameState: GameState;
-};
+type DrawLevelContext = Pick<
+  StepContext,
+  'level' | 'scrollOffset' | 'tiles' | 'context' | 'width' | 'height' | 'timeStamp' | 'gameState'
+>;
 
-function drawLevel(options: DrawLevelOptions) {
-  const { level, offset, tiles, context, width, height, timeStamp, gameState } =
-    options;
+function drawLevel(ctx: DrawLevelContext): void {
+  const { level, scrollOffset, tiles, context, width, height, timeStamp, gameState } = ctx;
   context.fillStyle = level.backgroundColor;
   context.fillRect(0, 0, width, height);
 
-  drawRisingCoins(context, tiles, offset, timeStamp, gameState);
+  drawRisingCoins(context, tiles, scrollOffset, timeStamp, gameState);
 
   for (const item of level.items) {
     if (item.tileKey === 'collected') continue;
     const tile = tiles[item.tileKey as keyof TileSet];
-    drawTile(context, tile, offset, item);
+    drawTile(context, tile, scrollOffset, item);
   }
 }
 

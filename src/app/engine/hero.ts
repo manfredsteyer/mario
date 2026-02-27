@@ -14,54 +14,55 @@ import {
   toRight,
 } from './walls';
 
-export type DrawHeroOptions = {
+export type DrawHeroContext = {
   gameState: GameState;
   timeStamp: number;
   heroTiles: HeroTileSet;
   movedVertically: boolean;
-  position: Position;
+  renderX: number;
   context: CanvasRenderingContext2D;
 };
 
-export function drawHero(options: DrawHeroOptions): void {
-  const { gameState, timeStamp, heroTiles, movedVertically, position, context } =
-    options;
-  const tile = getHeroTile(gameState, timeStamp, heroTiles, movedVertically);
-  const { x, y } = position;
-  context.drawImage(tile, x, y);
+export function drawHero(ctx: DrawHeroContext): void {
+  const tile = getHeroTile(ctx.gameState, ctx.timeStamp, ctx.heroTiles, ctx.movedVertically);
+  const { y } = ctx.gameState.hero.position;
+  ctx.context.drawImage(tile, ctx.renderX, y);
 }
 
-export function moveHero(
-  timeStamp: number,
-  gameState: GameState,
-  level: Level,
-  delta: number
-): boolean {
+export type MoveHeroContext = {
+  timeStamp: number;
+  gameState: GameState;
+  level: Level;
+  delta: number;
+  movedVertically: boolean;
+};
+
+export function moveHero(ctx: MoveHeroContext): void {
   let hitGround = false;
   let hitTop = false;
-  const isJumping = keyboard.up && timeStamp - gameState.hero.jumpStart < 500;
-  const initY = gameState.hero.position.y;
+  const isJumping = keyboard.up && ctx.timeStamp - ctx.gameState.hero.jumpStart < 500;
+  const initY = ctx.gameState.hero.position.y;
 
   if (!isJumping) {
-    gameState.hero.jumpStart = 0;
-    hitGround = applyGravity(gameState, level, delta);
+    ctx.gameState.hero.jumpStart = 0;
+    hitGround = applyGravity(ctx.gameState, ctx.level, ctx.delta);
   } else {
-    hitTop = jump(gameState, level, delta, timeStamp);
+    hitTop = jump(ctx.gameState, ctx.level, ctx.delta, ctx.timeStamp);
   }
 
   if (keyboard.up && hitGround) {
-    gameState.hero.jumpStart = timeStamp;
+    ctx.gameState.hero.jumpStart = ctx.timeStamp;
   }
 
-  if (keyboard.left && !hitTop) goLeft(gameState, level, delta);
-  else if (keyboard.right && !hitTop) goRight(gameState, level, delta);
+  if (keyboard.left && !hitTop) goLeft(ctx.gameState, ctx.level, ctx.delta);
+  else if (keyboard.right && !hitTop) goRight(ctx.gameState, ctx.level, ctx.delta);
 
-  gameState.hero.runStart =
-    (keyboard.left || keyboard.right) ? gameState.hero.runStart || timeStamp : 0;
+  ctx.gameState.hero.runStart =
+    (keyboard.left || keyboard.right) ? ctx.gameState.hero.runStart || ctx.timeStamp : 0;
 
-  gameState.hero.position.x = Math.max(0, gameState.hero.position.x);
-  gameState.isFalling = gameState.hero.position.y > initY;
-  return initY !== gameState.hero.position.y;
+  ctx.gameState.hero.position.x = Math.max(0, ctx.gameState.hero.position.x);
+  ctx.gameState.isFalling = ctx.gameState.hero.position.y > initY;
+  ctx.movedVertically = initY !== ctx.gameState.hero.position.y;
 }
 
 export function goRight(gameState: GameState, level: Level, delta: number): void {

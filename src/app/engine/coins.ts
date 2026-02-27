@@ -12,13 +12,18 @@ export function resetLevelCoins(level: Level): void {
   }
 }
 
-export function checkCoinsCollision(level: Level, gameState: GameState): void {
-  const top = gameState.hero.position.y;
-  const left = gameState.hero.position.x;
-  const right = gameState.hero.position.x + SIZE;
-  const bottom = gameState.hero.position.y + SIZE;
+export type CheckCoinsCollisionContext = {
+  level: Level;
+  gameState: GameState;
+};
 
-  const collidingCoins = level.items.filter((item) => {
+export function checkCoinsCollision(ctx: CheckCoinsCollisionContext): void {
+  const top = ctx.gameState.hero.position.y;
+  const left = ctx.gameState.hero.position.x;
+  const right = ctx.gameState.hero.position.x + SIZE;
+  const bottom = ctx.gameState.hero.position.y + SIZE;
+
+  const collidingCoins = ctx.level.items.filter((item) => {
     if (item.tileKey !== 'coin') {
       return false;
     }
@@ -32,3 +37,4 @@ export function checkCoinsCollision(level: Level, gameState: GameState): void {
 
   collidingCoins.forEach((item) => (item.tileKey = 'collected'));
 }
+

@@ -466,7 +466,9 @@ function toLeft(item: Item, offset = 0): number {
 }
 
 function toRight(item: Item, offset = 0): number {
-  return (item.col + (item.repeatCol ?? 1)) * SIZE - offset;
+  const repeat = item.repeatCol ?? 1;
+  const blockWidth = getBlockWidth(item.tileKey);
+  return (item.col + (repeat * blockWidth)) * SIZE - offset;
 }
 
 function toTop(item: Item, offset = 0): number {
@@ -474,7 +476,9 @@ function toTop(item: Item, offset = 0): number {
 }
 
 function toBottom(item: Item, offset = 0): number {
-  return (item.row + (item.repeatRow ?? 1)) * SIZE - offset;
+  const repeat = item.repeatRow ?? 1;
+  const blockHeight = getBlockHeight(item.tileKey);
+  return (item.row + (repeat * blockHeight)) * SIZE - offset;
 }
 
 function checkCoinsCollision(level: Level, gameState: GameState): void {
@@ -527,6 +531,7 @@ function calcDirection(
   return currentDirection;
 }
 
+
 function extraLength(tileKey: TileName): number {
   if (tileKey === 'pipeTop') {
     return 1; // pipes are one tile wider
@@ -539,6 +544,20 @@ function extraHeight(tileKey: TileName): number {
     return 2; // pipes are one tile higher
   }
   return 0;
+}
+
+function getBlockWidth(tileKey: TileName): number {
+  if (tileKey === 'pipeTop') {
+    return 2; 
+  }
+  return 1;
+}
+
+function getBlockHeight(tileKey: TileName): number {
+  if (tileKey === 'pipeTop') {
+    return 3; 
+  }
+  return 1;
 }
 
 

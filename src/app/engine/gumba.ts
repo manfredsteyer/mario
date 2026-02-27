@@ -102,8 +102,15 @@ export function drawGumbas(
   timeStamp: number,
   offset: number,
 ): void {
+
+  if (!gameState.gumbas) {
+    return;
+  }
+
   for (const gumba of gameState.gumbas) {
-    if (!gumba.alive) continue;
+    if (!gumba.alive) {
+      continue;
+    }
     const tile = getGumbaTile(timeStamp, gumbaTiles);
     const x = gumba.position.x + offset;
     const y = gumba.position.y;

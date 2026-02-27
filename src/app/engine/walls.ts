@@ -43,7 +43,8 @@ function isSolid(key: TileName): boolean {
     key === 'brick' ||
     key === 'solid' ||
     key.startsWith('pipe') ||
-    key === 'questionMark'
+    key === 'questionMark' ||
+    key === 'empty'
   );
 }
 

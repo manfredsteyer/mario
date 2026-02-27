@@ -19,6 +19,7 @@ export type BaseTileSet = {
   water: ImageBitmap;
   floor: ImageBitmap;
   solid: ImageBitmap;
+  empty: ImageBitmap;
   brick: ImageBitmap;
   stump: ImageBitmap;
   questionMark: ImageBitmap;
@@ -61,6 +62,8 @@ export type DrawOptions = {
   row: number;
   repeatCol?: number;
   repeatRow?: number;
+  pixelOffsetX?: number;
+  pixelOffsetY?: number;
 };
 
 type NormalizedDrawTileOptions = {
@@ -68,6 +71,8 @@ type NormalizedDrawTileOptions = {
   row: number;
   repeatCol: number;
   repeatRow: number;
+  pixelOffsetX: number;
+  pixelOffsetY: number;
 };
 
 export const defaultDrawTileOptions: NormalizedDrawTileOptions = {
@@ -75,6 +80,8 @@ export const defaultDrawTileOptions: NormalizedDrawTileOptions = {
   row: 0,
   repeatCol: 1,
   repeatRow: 1,
+  pixelOffsetX: 0,
+  pixelOffsetY: 0,
 };
 
 export type TileSize = {
@@ -142,6 +149,8 @@ async function createTiles(bitmap: ImageBitmap, palettes: Palettes) {
     brick: getTile(bitmap, palettes.p1, 2, 0),
     solid: getTile(bitmap, palettes.p1, 0, 1),
     stump: getTile(bitmap, palettes.p1, 1, 3),
+    empty: getTile(bitmap, palettes.p1, 3, 0),
+
 
     // Interactive tiles
     questionMark: getTile(bitmap, palettes.p3, 0, 0),
@@ -209,7 +218,11 @@ export function drawTile(
           const row = options.row + rowOffset + rowRep * size.rows;
           const image = normTile[rowOffset][colOffset];
           if (image) {
-            context.drawImage(image, SIZE * col + offset, SIZE * row);
+            context.drawImage(
+              image,
+              SIZE * col + offset + normOptions.pixelOffsetX,
+              SIZE * row + normOptions.pixelOffsetY
+            );
           }
         }
       }

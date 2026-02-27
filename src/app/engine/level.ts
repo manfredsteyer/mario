@@ -8,9 +8,10 @@ import {
   updateGameState,
 } from './game-state';
 import { drawHero, moveHero } from './hero';
-import { getHeroTile, HeroTileSet } from './hero-tiles';
+import { HeroTileSet } from './hero-tiles';
 import type { GumbaTileSet } from './gumba-tiles';
 import { drawGumbas, checkHeroGumbaCollision, moveGumbas } from './gumba';
+import { drawRisingCoins } from './questionMark';
 import { SIZE } from './palettes';
 import { DrawOptions, drawTile, TileSet } from './tiles';
 
@@ -25,7 +26,7 @@ export type Level = {
   gumbas?: GumbaStart[];
 };
 
-export type TileName = keyof TileSet | 'collected';
+export type TileName = keyof TileSet | 'collected' | 'empty';
 
 export type Item = { tileKey: TileName } & DrawOptions;
 
@@ -139,61 +140,53 @@ function step(options: StepOptions): void {
   }
 
   const gameState = getGameState();
-
+  let beaten = false;
   const width = canvas.width;
   const height = canvas.height;
-
   const delta = formerTimeStamp ? (timeStamp - formerTimeStamp) / speed : 0;
 
-  const previousHeroY = gameState.hero.position.y;
   const movedVertically = moveHero(timeStamp, gameState, level, delta);
-  const isFalling = gameState.hero.position.y > previousHeroY;
-  gameState.isFalling = isFalling;
 
-  checkCoinsCollision(level, gameState);
-
-  if (gumbaTiles?.length) {
+  if (gumbaTiles) {
     moveGumbas(gameState, level, delta);
-    const collision = checkHeroGumbaCollision(gameState);
-    if (collision === 'hero-dead') {
-      resetLevelCoins(level);
-      resetGameState(level);
-      requestAnimationFrame((newTimeStamp) => {
-        step({
-          ...options,
-          formerTimeStamp: timeStamp,
-          timeStamp: newTimeStamp,
-        });
-      });
-      return;
-    }
   }
 
-  gameState.hero.position.x = Math.max(0, gameState.hero.position.x);
+  const { renderX, offset } = scrollLevel(width, gameState.hero.position.x);
 
-  const renderX = Math.min(gameState.hero.position.x, width / SCALE / 2 - SIZE);
-  const offset = -Math.max(0, gameState.hero.position.x - renderX);
+  drawLevel({
+    level,
+    offset,
+    tiles,
+    context,
+    width,
+    height,
+    timeStamp,
+    gameState,
+  });
 
-  drawLevel({ level, offset, tiles, context, width, height });
-
-  const heroTile = getHeroTile(
+  drawHero({
     gameState,
     timeStamp,
     heroTiles,
     movedVertically,
-  );
-
-  drawHero({
-    tile: heroTile,
     position: { ...gameState.hero.position, x: renderX },
     context,
   });
 
-  if (gumbaTiles?.length) {
+  if (gumbaTiles) {
     drawGumbas(context, gameState, gumbaTiles, timeStamp, offset);
   }
 
-  if (!lostLife(height, gameState)) {
+  checkCoinsCollision(level, gameState);
+
+  if (gumbaTiles) {
+    const collision = checkHeroGumbaCollision(gameState);
+    if (collision === 'hero-dead') beaten = true;
+  }
+
+  const didFellOff = fellOff(height, gameState);
+
+  if (!didFellOff && !beaten) {
     updateGameState((state) => ({
       ...state,
       hero: gameState.hero,
@@ -221,7 +214,13 @@ export type RenderOptions = {
   tiles: TileSet;
 };
 
-function lostLife(height: number, gameState: GameState): boolean {
+function scrollLevel(width: number, heroX: number): { renderX: number; offset: number } {
+  const renderX = Math.min(heroX, width / SCALE / 2 - SIZE);
+  const offset = -Math.max(0, heroX - renderX);
+  return { renderX, offset };
+}
+
+function fellOff(height: number, gameState: GameState): boolean {
   const bottom = height / SCALE;
   return gameState.hero.position.y > bottom;
 }
@@ -240,7 +239,17 @@ export function renderLevel(options: RenderOptions): void {
   const offset = getOffset(level);
 
   stopAnimation();
-  drawLevel({ level, offset, tiles, context, width, height });
+  const gameState = getGameState();
+  drawLevel({
+    level,
+    offset,
+    tiles,
+    context,
+    width,
+    height,
+    timeStamp: 0,
+    gameState,
+  });
 }
 
 type DrawLevelOptions = {
@@ -250,12 +259,17 @@ type DrawLevelOptions = {
   context: CanvasRenderingContext2D;
   width: number;
   height: number;
+  timeStamp: number;
+  gameState: GameState;
 };
 
 function drawLevel(options: DrawLevelOptions) {
-  const { level, offset, tiles, context, width, height } = options;
+  const { level, offset, tiles, context, width, height, timeStamp, gameState } =
+    options;
   context.fillStyle = level.backgroundColor;
   context.fillRect(0, 0, width, height);
+
+  drawRisingCoins(context, tiles, offset, timeStamp, gameState);
 
   for (const item of level.items) {
     if (item.tileKey === 'collected') continue;

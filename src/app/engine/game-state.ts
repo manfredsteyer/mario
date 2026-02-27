@@ -35,11 +35,19 @@ export type GumbaState = ObjectState & {
   alive: boolean;
 };
 
+export type RisingCoin = {
+  col: number;
+  row: number;
+  startTime: number;
+};
+
 export type GameState = {
   offset: number;
   levelId: number;
   hero: HeroState;
   gumbas: GumbaState[];
+  risingCoins: RisingCoin[];
+  hitQuestionBlocks: Set<string>;
   animation: boolean;
   direction: Direction;
   isFalling: boolean;
@@ -50,6 +58,8 @@ export const initGameState: GameState = {
   levelId: 0,
   hero: initHeroState,
   gumbas: [],
+  risingCoins: [],
+  hitQuestionBlocks: new Set(),
   animation: false,
   direction: 'right',
   isFalling: false,
@@ -96,4 +106,6 @@ export function resetGameState(level?: LevelForReset): void {
       alive: true,
     }));
   }
+  _state.risingCoins = [];
+  _state.hitQuestionBlocks = new Set();
 }

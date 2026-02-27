@@ -1,7 +1,6 @@
 import {
   SCALE,
-  TOLERANCE_LEFT,
-  TOLERANCE_RIGHT,
+  HERO_PATTING,
   VELOCITY_Y,
 } from './constants';
 import {
@@ -328,13 +327,14 @@ function calcMaxY(gameState: GameState, level: Level) {
 
 function getBottomSolids(gameState: GameState, level: Level) {
   const y = gameState.hero.position.y;
-  const x = gameState.hero.position.x;
+  const leftX = gameState.hero.position.x + SIZE - HERO_PATTING;
+  const rightX = gameState.hero.position.x + HERO_PATTING;
 
   const bottom = level.items.filter((item) => {
     return (
       toTop(item) > y &&
-      toLeft(item, -TOLERANCE_LEFT) < x &&
-      toRight(item, TOLERANCE_RIGHT) > x &&
+      toLeft(item) < leftX &&
+      toRight(item) > rightX &&
       isSolid(item.tileKey)
     );
   });
@@ -371,15 +371,15 @@ function calcMinY(gameState: GameState, level: Level): number {
 }
 
 function getAboveSolids(gameState: GameState, level: Level) {
-  const blockY = gameState.hero.position.y / SIZE;
-  const x = gameState.hero.position.x;
+  const y = gameState.hero.position.y;
+  const leftX = gameState.hero.position.x + SIZE - HERO_PATTING;
+  const rightX = gameState.hero.position.x + HERO_PATTING;
 
   const above = level.items.filter((item) => {
     return (
-      item.row + 1 <= blockY &&
-      item.col * SIZE < x + TOLERANCE_LEFT &&
-      (item.col + (item.repeatCol || 1) + extraLength(item.tileKey)) * SIZE >
-        x + TOLERANCE_RIGHT &&
+      toBottom(item) <= y &&
+      toLeft(item) < leftX &&
+      toRight(item) > rightX &&
       isSolid(item.tileKey)
     );
   });
@@ -391,22 +391,22 @@ function calcMaxX(gameState: GameState, level: Level): number {
 
   let maxX = Infinity;
   if (right.length > 0) {
-    const minCol = min(right, (b) => b.col);
-    maxX = minCol * SIZE - SIZE + TOLERANCE_RIGHT;
+    const minCol = min(right, (b) => toLeft(b, HERO_PATTING));
+    maxX = minCol - SIZE;
   }
 
   return maxX;
 }
 
 function getRightSolids(gameState: GameState, level: Level) {
-  const blockY = gameState.hero.position.y / SIZE;
+  const y = gameState.hero.position.y;
   const x = gameState.hero.position.x;
 
   const right = level.items.filter((item) => {
     return (
-      x <= item.col * SIZE &&
-      blockY >= item.row &&
-      blockY <= item.row + (item.repeatRow || 1) + extraHeight(item.tileKey) &&
+      toLeft(item) >= x &&
+      toTop(item) <= y &&
+      toBottom(item) >= y &&
       isSolid(item.tileKey)
     );
   });
@@ -414,30 +414,27 @@ function getRightSolids(gameState: GameState, level: Level) {
 }
 
 function calcMinX(gameState: GameState, level: Level): number {
-  const below = getLeftSolids(gameState, level);
-
+  const left = getLeftSolids(gameState, level);
   let minX = -Infinity;
-  if (below.length > 0) {
-    const minCol = max(below, (b) => b.col + extraLength(b.tileKey));
-    minX = (minCol + 1) * SIZE - TOLERANCE_RIGHT;
+  if (left.length > 0) {
+    minX = max(left, (b) => toRight(b) - HERO_PATTING);
   }
-
   return minX;
 }
 
 function getLeftSolids(gameState: GameState, level: Level) {
-  const blockY = gameState.hero.position.y / SIZE;
-  const x = gameState.hero.position.x;
+  const y = gameState.hero.position.y;
+  const x = gameState.hero.position.x + HERO_PATTING;
 
-  const below = level.items.filter((item) => {
+  const left = level.items.filter((item) => {
     return (
-      x >= item.col * SIZE &&
-      blockY >= item.row &&
-      blockY <= item.row + (item.repeatRow || 1) + extraHeight(item.tileKey) &&
+      toRight(item) <= x &&
+      toTop(item) <= y &&
+      toBottom(item) >= y &&
       isSolid(item.tileKey)
     );
   });
-  return below;
+  return left;
 }
 
 export function renderLevel(options: RenderOptions): void {

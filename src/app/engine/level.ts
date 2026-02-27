@@ -1,8 +1,4 @@
-import {
-  SCALE,
-  HERO_PATTING,
-  VELOCITY_Y,
-} from './constants';
+import { SCALE, HERO_PADDING, VELOCITY_Y, COIN_PADDING } from './constants';
 import {
   Direction,
   GameState,
@@ -15,10 +11,8 @@ import { HeroTileSet } from './hero';
 import { keyboard } from './keyboard';
 import { SIZE } from './palettes';
 import {
-  BaseTileSet,
   DrawOptions,
   drawTile,
-  TileCollections,
   TileSet,
 } from './tiles';
 
@@ -130,17 +124,10 @@ function step(options: StepOptions): void {
     level,
     tiles,
     heroTiles,
-    //offset,
     speed,
     timeStamp,
     formerTimeStamp,
-    maxOffset,
-    direction,
   } = options;
-
-  // const newDirection = calcDirection(offset, maxOffset, direction);
-
-  // const directionFactor = direction === 'right' ? 1 : -1;
 
   if (options.abortSignal.aborted) {
     return;
@@ -152,7 +139,6 @@ function step(options: StepOptions): void {
   const height = canvas.height;
 
   const delta = formerTimeStamp ? (timeStamp - formerTimeStamp) / speed : 0;
-  // const newOffset = offset - delta * directionFactor;
 
   const movedVertically = moveHero(timeStamp, gameState, level, delta);
 
@@ -184,7 +170,6 @@ function step(options: StepOptions): void {
       hero: gameState.hero,
       levelId: level.levelId,
       offset,
-      // direction,
     }));
   } else {
     resetLevelCoins(level);
@@ -267,7 +252,7 @@ function moveHero(
 function goRight(gameState: GameState, level: Level, delta: number) {
   const maxX = calcMaxX(gameState, level);
   const candX = gameState.hero.position.x + 1 * delta;
-  const newX = Math.min(candX, maxX);
+  const newX = Math.min(candX, maxX + HERO_PADDING);
   gameState.hero.position.x = newX;
   gameState.direction = 'right';
 }
@@ -275,7 +260,7 @@ function goRight(gameState: GameState, level: Level, delta: number) {
 function goLeft(gameState: GameState, level: Level, delta: number) {
   const minX = calcMinX(gameState, level);
   const candX = gameState.hero.position.x - 1 * delta;
-  const newX = Math.max(candX, minX);
+  const newX = Math.max(candX, minX - HERO_PADDING);
   gameState.hero.position.x = newX;
   gameState.direction = 'left';
 }
@@ -306,11 +291,12 @@ function applyGravity(
 ): boolean {
   const maxY = calcMaxY(gameState, level);
 
-  const candY = gameState.hero.position.y + VELOCITY_Y * delta;
+  const y = gameState.hero.position.y;
+  const candY = y + VELOCITY_Y * delta;
   const newY = Math.min(maxY, candY);
-  const hitGround = newY === gameState.hero.position.y;
   gameState.hero.position.y = newY;
 
+  const hitGround = newY === y;
   return hitGround;
 }
 
@@ -327,8 +313,8 @@ function calcMaxY(gameState: GameState, level: Level) {
 
 function getBottomSolids(gameState: GameState, level: Level) {
   const y = gameState.hero.position.y;
-  const leftX = gameState.hero.position.x + SIZE - HERO_PATTING;
-  const rightX = gameState.hero.position.x + HERO_PATTING;
+  const leftX = gameState.hero.position.x + SIZE - HERO_PADDING;
+  const rightX = gameState.hero.position.x + HERO_PADDING;
 
   const bottom = level.items.filter((item) => {
     return (
@@ -372,8 +358,8 @@ function calcMinY(gameState: GameState, level: Level): number {
 
 function getAboveSolids(gameState: GameState, level: Level) {
   const y = gameState.hero.position.y;
-  const leftX = gameState.hero.position.x + SIZE - HERO_PATTING;
-  const rightX = gameState.hero.position.x + HERO_PATTING;
+  const leftX = gameState.hero.position.x + SIZE - HERO_PADDING;
+  const rightX = gameState.hero.position.x + HERO_PADDING;
 
   const above = level.items.filter((item) => {
     return (
@@ -391,7 +377,7 @@ function calcMaxX(gameState: GameState, level: Level): number {
 
   let maxX = Infinity;
   if (right.length > 0) {
-    const minCol = min(right, (b) => toLeft(b, HERO_PATTING));
+    const minCol = min(right, (b) => toLeft(b));
     maxX = minCol - SIZE;
   }
 
@@ -417,18 +403,18 @@ function calcMinX(gameState: GameState, level: Level): number {
   const left = getLeftSolids(gameState, level);
   let minX = -Infinity;
   if (left.length > 0) {
-    minX = max(left, (b) => toRight(b) - HERO_PATTING);
+    minX = max(left, (b) => toRight(b));
   }
   return minX;
 }
 
 function getLeftSolids(gameState: GameState, level: Level) {
   const y = gameState.hero.position.y;
-  const x = gameState.hero.position.x + HERO_PATTING;
+  const x = gameState.hero.position.x;
 
   const left = level.items.filter((item) => {
     return (
-      toRight(item) <= x &&
+      toRight(item) <= x + HERO_PADDING &&
       toTop(item) <= y &&
       toBottom(item) >= y &&
       isSolid(item.tileKey)
@@ -483,42 +469,41 @@ function resetLevelCoins(level: Level): void {
   }
 }
 
-function toLeft(item: Item, offset = 0): number {
-  return item.col * SIZE + offset;
+function toLeft(item: Item): number {
+  return item.col * SIZE;
 }
 
-function toRight(item: Item, offset = 0): number {
+function toRight(item: Item): number {
   const repeat = item.repeatCol ?? 1;
   const blockWidth = getBlockWidth(item.tileKey);
-  return (item.col + repeat * blockWidth) * SIZE - offset;
+  return (item.col + repeat * blockWidth) * SIZE;
 }
 
-function toTop(item: Item, offset = 0): number {
-  return item.row * SIZE + offset;
+function toTop(item: Item): number {
+  return item.row * SIZE;
 }
 
-function toBottom(item: Item, offset = 0): number {
+function toBottom(item: Item): number {
   const repeat = item.repeatRow ?? 1;
   const blockHeight = getBlockHeight(item.tileKey);
-  return (item.row + repeat * blockHeight) * SIZE - offset;
+  return (item.row + repeat * blockHeight) * SIZE;
 }
 
 function checkCoinsCollision(level: Level, gameState: GameState): void {
-  const heroLeft = gameState.hero.position.x;
-  const heroRight = heroLeft + SIZE;
-  const heroTop = gameState.hero.position.y;
-  const heroBottom = heroTop + SIZE;
-
-  const offset = SIZE / 3;
+  const top = gameState.hero.position.y;
+  const left = gameState.hero.position.x;
+  const right = gameState.hero.position.x + SIZE;
+  const bottom = gameState.hero.position.y + SIZE;
 
   const collidingCoins = level.items.filter((item) => {
-    if (item.tileKey !== 'coin') return false;
-
+    if (item.tileKey !== 'coin') { 
+      return false;
+    }
     return (
-      heroRight > toLeft(item, offset) &&
-      heroLeft < toRight(item, offset) &&
-      heroBottom > toTop(item, offset) &&
-      heroTop < toBottom(item, offset)
+      right > toLeft(item) + COIN_PADDING &&
+      left < toRight(item) - COIN_PADDING &&
+      bottom > toTop(item) + COIN_PADDING &&
+      top < toBottom(item) - COIN_PADDING
     );
   });
 
@@ -535,36 +520,6 @@ function drawHero(options: DrawHeroOptions): void {
   const { tile, position, context } = options;
   const { x, y } = options.position;
   context.drawImage(tile, x, y);
-}
-
-function calcDirection(
-  offset: number,
-  maxOffset: number,
-  currentDirection: Direction,
-): Direction {
-  if (offset < -maxOffset) {
-    return 'left';
-  }
-
-  if (offset >= 0) {
-    return 'right';
-  }
-
-  return currentDirection;
-}
-
-function extraLength(tileKey: TileName): number {
-  if (tileKey === 'pipeTop') {
-    return 1; // pipes are one tile wider
-  }
-  return 0;
-}
-
-function extraHeight(tileKey: TileName): number {
-  if (tileKey === 'pipeTop') {
-    return 2; // pipes are one tile higher
-  }
-  return 0;
 }
 
 function getBlockWidth(tileKey: TileName): number {

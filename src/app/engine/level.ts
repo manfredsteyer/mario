@@ -10,11 +10,17 @@ import {
 import { HeroTileSet } from './hero';
 import { keyboard } from './keyboard';
 import { SIZE } from './palettes';
+import { DrawOptions, drawTile, TileSet } from './tiles';
 import {
-  DrawOptions,
-  drawTile,
-  TileSet,
-} from './tiles';
+  calcMaxX,
+  calcMaxY,
+  calcMinX,
+  calcMinY,
+  toBottom,
+  toLeft,
+  toRight,
+  toTop,
+} from './walls';
 
 const SCREEN_WIDTH = 340;
 
@@ -300,129 +306,6 @@ function applyGravity(
   return hitGround;
 }
 
-function calcMaxY(gameState: GameState, level: Level) {
-  const bottom = getBottomSolids(gameState, level);
-
-  let maxY = Infinity;
-  if (bottom.length > 0) {
-    const minRow = min(bottom, (item) => item.row);
-    maxY = minRow * SIZE - SIZE;
-  }
-  return maxY;
-}
-
-function getBottomSolids(gameState: GameState, level: Level) {
-  const y = gameState.hero.position.y;
-  const leftX = gameState.hero.position.x + SIZE - HERO_PADDING;
-  const rightX = gameState.hero.position.x + HERO_PADDING;
-
-  const bottom = level.items.filter((item) => {
-    return (
-      toTop(item) > y &&
-      toLeft(item) < leftX &&
-      toRight(item) > rightX &&
-      isSolid(item.tileKey)
-    );
-  });
-  return bottom;
-}
-
-function min(right: Item[], c: (b: Item) => number) {
-  return Math.min(...right.map(c));
-}
-
-function max(right: Item[], c: (b: Item) => number) {
-  return Math.max(...right.map(c));
-}
-
-function isSolid(key: TileName): boolean {
-  return (
-    key === 'floor' ||
-    key === 'brick' ||
-    key === 'solid' ||
-    key.startsWith('pipe') ||
-    key === 'questionMark'
-  );
-}
-
-function calcMinY(gameState: GameState, level: Level): number {
-  const above = getAboveSolids(gameState, level);
-
-  let minY = -Infinity;
-  if (above.length > 0) {
-    const minRow = max(above, (b) => b.row);
-    minY = minRow * SIZE + SIZE;
-  }
-  return minY;
-}
-
-function getAboveSolids(gameState: GameState, level: Level) {
-  const y = gameState.hero.position.y;
-  const leftX = gameState.hero.position.x + SIZE - HERO_PADDING;
-  const rightX = gameState.hero.position.x + HERO_PADDING;
-
-  const above = level.items.filter((item) => {
-    return (
-      toBottom(item) <= y &&
-      toLeft(item) < leftX &&
-      toRight(item) > rightX &&
-      isSolid(item.tileKey)
-    );
-  });
-  return above;
-}
-
-function calcMaxX(gameState: GameState, level: Level): number {
-  const right = getRightSolids(gameState, level);
-
-  let maxX = Infinity;
-  if (right.length > 0) {
-    const minCol = min(right, (b) => toLeft(b));
-    maxX = minCol - SIZE;
-  }
-
-  return maxX;
-}
-
-function getRightSolids(gameState: GameState, level: Level) {
-  const y = gameState.hero.position.y;
-  const x = gameState.hero.position.x;
-
-  const right = level.items.filter((item) => {
-    return (
-      toLeft(item) >= x &&
-      toTop(item) <= y &&
-      toBottom(item) >= y &&
-      isSolid(item.tileKey)
-    );
-  });
-  return right;
-}
-
-function calcMinX(gameState: GameState, level: Level): number {
-  const left = getLeftSolids(gameState, level);
-  let minX = -Infinity;
-  if (left.length > 0) {
-    minX = max(left, (b) => toRight(b));
-  }
-  return minX;
-}
-
-function getLeftSolids(gameState: GameState, level: Level) {
-  const y = gameState.hero.position.y;
-  const x = gameState.hero.position.x;
-
-  const left = level.items.filter((item) => {
-    return (
-      toRight(item) <= x + HERO_PADDING &&
-      toTop(item) <= y &&
-      toBottom(item) >= y &&
-      isSolid(item.tileKey)
-    );
-  });
-  return left;
-}
-
 export function renderLevel(options: RenderOptions): void {
   const { canvas, level, tiles } = options;
 
@@ -469,26 +352,6 @@ function resetLevelCoins(level: Level): void {
   }
 }
 
-function toLeft(item: Item): number {
-  return item.col * SIZE;
-}
-
-function toRight(item: Item): number {
-  const repeat = item.repeatCol ?? 1;
-  const blockWidth = getBlockWidth(item.tileKey);
-  return (item.col + repeat * blockWidth) * SIZE;
-}
-
-function toTop(item: Item): number {
-  return item.row * SIZE;
-}
-
-function toBottom(item: Item): number {
-  const repeat = item.repeatRow ?? 1;
-  const blockHeight = getBlockHeight(item.tileKey);
-  return (item.row + repeat * blockHeight) * SIZE;
-}
-
 function checkCoinsCollision(level: Level, gameState: GameState): void {
   const top = gameState.hero.position.y;
   const left = gameState.hero.position.x;
@@ -522,16 +385,3 @@ function drawHero(options: DrawHeroOptions): void {
   context.drawImage(tile, x, y);
 }
 
-function getBlockWidth(tileKey: TileName): number {
-  if (tileKey === 'pipeTop') {
-    return 2;
-  }
-  return 1;
-}
-
-function getBlockHeight(tileKey: TileName): number {
-  if (tileKey === 'pipeTop') {
-    return 3;
-  }
-  return 1;
-}

@@ -1,0 +1,156 @@
+import { HERO_PADDING } from './constants';
+import type { GameState } from './game-state';
+import type { Item, Level, TileName } from './level';
+import { SIZE } from './palettes';
+
+export function getBlockWidth(tileKey: TileName): number {
+  if (tileKey === 'pipeTop') {
+    return 2;
+  }
+  return 1;
+}
+
+export function getBlockHeight(tileKey: TileName): number {
+  if (tileKey === 'pipeTop') {
+    return 3;
+  }
+  return 1;
+}
+
+export function toLeft(item: Item): number {
+  return item.col * SIZE;
+}
+
+export function toRight(item: Item): number {
+  const repeat = item.repeatCol ?? 1;
+  const blockWidth = getBlockWidth(item.tileKey);
+  return (item.col + repeat * blockWidth) * SIZE;
+}
+
+export function toTop(item: Item): number {
+  return item.row * SIZE;
+}
+
+export function toBottom(item: Item): number {
+  const repeat = item.repeatRow ?? 1;
+  const blockHeight = getBlockHeight(item.tileKey);
+  return (item.row + repeat * blockHeight) * SIZE;
+}
+
+function isSolid(key: TileName): boolean {
+  return (
+    key === 'floor' ||
+    key === 'brick' ||
+    key === 'solid' ||
+    key.startsWith('pipe') ||
+    key === 'questionMark'
+  );
+}
+
+function min(items: Item[], pick: (b: Item) => number): number {
+  return Math.min(...items.map(pick));
+}
+
+function max(items: Item[], pick: (b: Item) => number): number {
+  return Math.max(...items.map(pick));
+}
+
+export function getBottomSolids(gameState: GameState, level: Level): Item[] {
+  const y = gameState.hero.position.y;
+  const leftX = gameState.hero.position.x + SIZE - HERO_PADDING;
+  const rightX = gameState.hero.position.x + HERO_PADDING;
+
+  return level.items.filter((item) => {
+    return (
+      toTop(item) > y &&
+      toLeft(item) < leftX &&
+      toRight(item) > rightX &&
+      isSolid(item.tileKey)
+    );
+  });
+}
+
+export function getAboveSolids(gameState: GameState, level: Level): Item[] {
+  const y = gameState.hero.position.y;
+  const leftX = gameState.hero.position.x + SIZE - HERO_PADDING;
+  const rightX = gameState.hero.position.x + HERO_PADDING;
+
+  return level.items.filter((item) => {
+    return (
+      toBottom(item) <= y &&
+      toLeft(item) < leftX &&
+      toRight(item) > rightX &&
+      isSolid(item.tileKey)
+    );
+  });
+}
+
+export function getRightSolids(gameState: GameState, level: Level): Item[] {
+  const y = gameState.hero.position.y;
+  const x = gameState.hero.position.x;
+
+  return level.items.filter((item) => {
+    return (
+      toLeft(item) >= x &&
+      toTop(item) <= y &&
+      toBottom(item) >= y &&
+      isSolid(item.tileKey)
+    );
+  });
+}
+
+export function getLeftSolids(gameState: GameState, level: Level): Item[] {
+  const y = gameState.hero.position.y;
+  const x = gameState.hero.position.x;
+
+  return level.items.filter((item) => {
+    return (
+      toRight(item) <= x + HERO_PADDING &&
+      toTop(item) <= y &&
+      toBottom(item) >= y &&
+      isSolid(item.tileKey)
+    );
+  });
+}
+
+export function calcMaxY(gameState: GameState, level: Level): number {
+  const bottom = getBottomSolids(gameState, level);
+
+  let maxY = Infinity;
+  if (bottom.length > 0) {
+    const minRow = min(bottom, (item) => item.row);
+    maxY = minRow * SIZE - SIZE;
+  }
+  return maxY;
+}
+
+export function calcMinY(gameState: GameState, level: Level): number {
+  const above = getAboveSolids(gameState, level);
+
+  let minY = -Infinity;
+  if (above.length > 0) {
+    const minRow = max(above, (b) => b.row);
+    minY = minRow * SIZE + SIZE;
+  }
+  return minY;
+}
+
+export function calcMaxX(gameState: GameState, level: Level): number {
+  const right = getRightSolids(gameState, level);
+
+  let maxX = Infinity;
+  if (right.length > 0) {
+    const minCol = min(right, (b) => toLeft(b));
+    maxX = minCol - SIZE;
+  }
+  return maxX;
+}
+
+export function calcMinX(gameState: GameState, level: Level): number {
+  const left = getLeftSolids(gameState, level);
+  let minX = -Infinity;
+  if (left.length > 0) {
+    minX = max(left, (b) => toRight(b));
+  }
+  return minX;
+}

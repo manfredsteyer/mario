@@ -19,9 +19,11 @@ import { HttpProgressEvent } from '@angular/common/http';
 import { Style } from '../engine/palettes';
 import { playLevel, renderLevel, stopAnimation } from '../engine/level';
 import { HeroMapLoader } from '../data/hero-map-loader';
+import { EnemiesMapLoader } from '../data/enemies-map-loader';
 import { BlurOnChangeDirective } from '../shared/blur-on-change.directive';
 import { createTilesResource } from '../data/tile-resources';
 import { createHeroResource } from '../data/hero-resource';
+import { createEnemiesResource } from '../data/enemies-resource';
 
 @Component({
   selector: 'app-level',
@@ -32,6 +34,7 @@ export class LevelComponent implements OnDestroy {
   private tilesMapLoader = inject(TilesMapLoader);
   private levelLoader = inject(LevelLoader);
   private heroMapLoader = inject(HeroMapLoader);
+  private enemiesMapLoader = inject(EnemiesMapLoader);
 
   canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
 
@@ -45,6 +48,9 @@ export class LevelComponent implements OnDestroy {
 
   heroMapResource = this.heroMapLoader.getHeroMapResource();
   heroResource = createHeroResource(this.heroMapResource);
+
+  enemiesMapResource = this.enemiesMapLoader.getEnemiesMapResource();
+  enemiesResource = createEnemiesResource(this.enemiesMapResource);
 
   levelOverviewResource = this.levelLoader.getLevelOverviewResource();
   levelResource = this.levelLoader.getLevelResource(this.levelKey);
@@ -90,6 +96,7 @@ export class LevelComponent implements OnDestroy {
     const canvas = this.canvas()?.nativeElement;
     const play = this.play();
     const heroTiles = this.heroResource.value();
+    const gumbaTiles = this.enemiesResource.value();
 
     if (!tiles || !heroTiles || !canvas) {
       return;
@@ -101,6 +108,7 @@ export class LevelComponent implements OnDestroy {
         level,
         tiles,
         heroTiles,
+        gumbaTiles: gumbaTiles ?? undefined,
       });
     } else {
       renderLevel({

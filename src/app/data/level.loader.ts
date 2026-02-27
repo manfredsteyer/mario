@@ -74,5 +74,9 @@ function toLevel(raw: unknown): Level {
     throw new Error('Level has an invalid structure!');
   }
 
-  return raw as Level;
+  const obj = raw as Record<string, unknown>;
+  const gumbas = Array.isArray(obj['gumbas'])
+    ? (obj['gumbas'] as { col: number; row: number }[])
+    : undefined;
+  return { ...obj, gumbas } as Level;
 }

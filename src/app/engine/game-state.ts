@@ -7,6 +7,8 @@ export type HeroState = {
   runStart: number;
 };
 
+import { SIZE } from './palettes';
+
 export type Position = {
   x: number;
   y: number;
@@ -24,10 +26,17 @@ export const initHeroState: HeroState = {
   runStart: 0,
 };
 
+export type GumbaState = {
+  position: Position;
+  direction: Direction;
+  alive: boolean;
+};
+
 export type GameState = {
   offset: number;
   levelId: number;
   hero: HeroState;
+  gumbas: GumbaState[];
   animation: boolean;
   direction: Direction;
 };
@@ -36,6 +45,7 @@ export const initGameState: GameState = {
   offset: 0,
   levelId: 0,
   hero: initHeroState,
+  gumbas: [],
   animation: false,
   direction: 'right',
 };
@@ -67,6 +77,18 @@ export function updateGameState(updater: Updater): void {
   setGameState(newState);
 }
 
-export function resetGameState(): void {
+export type LevelForReset = {
+  levelId: number;
+  gumbas?: { col: number; row: number }[];
+};
+
+export function resetGameState(level?: LevelForReset): void {
   _state = getInitState();
+  if (level?.gumbas?.length) {
+    _state.gumbas = level.gumbas.map(({ col, row }) => ({
+      position: { x: col * SIZE, y: row * SIZE },
+      direction: 'left' as const,
+      alive: true,
+    }));
+  }
 }

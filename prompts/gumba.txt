@@ -1,0 +1,18 @@
+Du findest nun ein File public/enemies.png. 
+Lade zur Laufzeit die beiden Tiles links oben, die einen Feind namens Gumba darstellen.
+Die beiden Teils sollen sich abwechseln, wenn der Gumba läuft.
+
+Orientiere dich dabei am Hero.
+
+Für alle Gumbas soll ein Array mit Startkoordinaten festgelegt werden können.
+
+Der Gumba soll nach links laufen, bis er auf ein hinternis stößt und dann die richtung wechseln und nach recht laufen.
+Stößt er erneut auf ein hindernis, soll er wieder die Richtung wechseln und nach links laufen und so weiter.
+
+Wenn der Hero mit dem Gumba kollidiert gibt es zwei Möglichkeiten:
+- Hero fällt von oben auf den Gumba: Gumba verschwindet
+- Hero läuft von links oder rechts in den Gumba: Hero is tod und das lebel beginnt von vorne (rufe dazu resetGameState auf).
+
+
+
+

@@ -434,32 +434,42 @@ function resetLevelCoins(level: Level): void {
   }
 }
 
+function toLeft(item: Item, offset = 0): number {
+  return item.col * SIZE + offset;
+}
+
+function toRight(item: Item, offset = 0): number {
+  return (item.col + (item.repeatCol ?? 1)) * SIZE - offset;
+}
+
+function toTop(item: Item, offset = 0): number {
+  return item.row * SIZE + offset;
+}
+
+function toBottom(item: Item, offset = 0): number {
+  return (item.row + (item.repeatRow ?? 1)) * SIZE - offset;
+}
+
 function checkCoinsCollision(level: Level, gameState: GameState): void {
   const heroLeft = gameState.hero.position.x;
   const heroRight = heroLeft + SIZE;
   const heroTop = gameState.hero.position.y;
   const heroBottom = heroTop + SIZE;
 
-  const OFFSET = SIZE / 3;
-  
-  for (const item of level.items) {
-    if (item.tileKey !== 'coin') continue;
+  const offset = SIZE / 3;
 
-    const coinLeft = item.col * SIZE + OFFSET;
-    const coinRight = (item.col + (item.repeatCol ?? 1)) * SIZE - OFFSET;
-    const coinTop = item.row * SIZE + OFFSET;
-    const coinBottom = (item.row + (item.repeatRow ?? 1)) * SIZE - OFFSET;
+  const collidingCoins = level.items.filter((item) => {
+    if (item.tileKey !== 'coin') return false;
 
-    const overlaps =
-      heroRight > coinLeft &&
-      heroLeft < coinRight &&
-      heroBottom > coinTop &&
-      heroTop < coinBottom;
+    return (
+      heroRight > toLeft(item, offset) &&
+      heroLeft < toRight(item, offset) &&
+      heroBottom > toTop(item, offset) &&
+      heroTop < toBottom(item, offset)
+    );
+  });
 
-    if (overlaps) {
-      item.tileKey = 'collected';
-    }
-  }
+  collidingCoins.forEach((item) => (item.tileKey = 'collected'));
 }
 
 type DrawHeroOptions = {

@@ -145,7 +145,10 @@ function step(options: StepOptions): void {
 
   const delta = formerTimeStamp ? (timeStamp - formerTimeStamp) / speed : 0;
 
+  const previousHeroY = gameState.hero.position.y;
   const movedVertically = moveHero(timeStamp, gameState, level, delta);
+  const isFalling = gameState.hero.position.y > previousHeroY;
+  gameState.isFalling = isFalling;
 
   checkCoinsCollision(level, gameState);
 
@@ -196,6 +199,7 @@ function step(options: StepOptions): void {
       hero: gameState.hero,
       levelId: level.levelId,
       offset,
+      isFalling: gameState.isFalling,
     }));
   } else {
     resetLevelCoins(level);

@@ -1,5 +1,5 @@
 import { HERO_PADDING } from './constants';
-import type { GameState } from './game-state';
+import type { ObjectState } from './game-state';
 import type { Item, Level, TileName } from './level';
 import { SIZE } from './palettes';
 
@@ -55,10 +55,10 @@ function max(items: Item[], pick: (b: Item) => number): number {
   return Math.max(...items.map(pick));
 }
 
-export function getBottomSolids(gameState: GameState, level: Level): Item[] {
-  const y = gameState.hero.position.y;
-  const leftX = gameState.hero.position.x + SIZE - HERO_PADDING;
-  const rightX = gameState.hero.position.x + HERO_PADDING;
+export function getBottomSolids(entity: ObjectState, level: Level): Item[] {
+  const y = entity.position.y;
+  const leftX = entity.position.x + SIZE - HERO_PADDING;
+  const rightX = entity.position.x + HERO_PADDING;
 
   return level.items.filter((item) => {
     return (
@@ -70,10 +70,10 @@ export function getBottomSolids(gameState: GameState, level: Level): Item[] {
   });
 }
 
-export function getAboveSolids(gameState: GameState, level: Level): Item[] {
-  const y = gameState.hero.position.y;
-  const leftX = gameState.hero.position.x + SIZE - HERO_PADDING;
-  const rightX = gameState.hero.position.x + HERO_PADDING;
+export function getAboveSolids(entity: ObjectState, level: Level): Item[] {
+  const y = entity.position.y;
+  const leftX = entity.position.x + SIZE - HERO_PADDING;
+  const rightX = entity.position.x + HERO_PADDING;
 
   return level.items.filter((item) => {
     return (
@@ -85,9 +85,9 @@ export function getAboveSolids(gameState: GameState, level: Level): Item[] {
   });
 }
 
-export function getRightSolids(gameState: GameState, level: Level): Item[] {
-  const y = gameState.hero.position.y;
-  const x = gameState.hero.position.x;
+export function getRightSolids(entity: ObjectState, level: Level): Item[] {
+  const y = entity.position.y;
+  const x = entity.position.x;
 
   return level.items.filter((item) => {
     return (
@@ -99,9 +99,9 @@ export function getRightSolids(gameState: GameState, level: Level): Item[] {
   });
 }
 
-export function getLeftSolids(gameState: GameState, level: Level): Item[] {
-  const y = gameState.hero.position.y;
-  const x = gameState.hero.position.x;
+export function getLeftSolids(entity: ObjectState, level: Level): Item[] {
+  const y = entity.position.y;
+  const x = entity.position.x;
 
   return level.items.filter((item) => {
     return (
@@ -113,8 +113,8 @@ export function getLeftSolids(gameState: GameState, level: Level): Item[] {
   });
 }
 
-export function calcMaxY(gameState: GameState, level: Level): number {
-  const bottom = getBottomSolids(gameState, level);
+export function calcMaxY(entity: ObjectState, level: Level): number {
+  const bottom = getBottomSolids(entity, level);
 
   let maxY = Infinity;
   if (bottom.length > 0) {
@@ -124,8 +124,8 @@ export function calcMaxY(gameState: GameState, level: Level): number {
   return maxY;
 }
 
-export function calcMinY(gameState: GameState, level: Level): number {
-  const above = getAboveSolids(gameState, level);
+export function calcMinY(entity: ObjectState, level: Level): number {
+  const above = getAboveSolids(entity, level);
 
   let minY = -Infinity;
   if (above.length > 0) {
@@ -135,8 +135,8 @@ export function calcMinY(gameState: GameState, level: Level): number {
   return minY;
 }
 
-export function calcMaxX(gameState: GameState, level: Level): number {
-  const right = getRightSolids(gameState, level);
+export function calcMaxX(entity: ObjectState, level: Level): number {
+  const right = getRightSolids(entity, level);
 
   let maxX = Infinity;
   if (right.length > 0) {
@@ -146,8 +146,8 @@ export function calcMaxX(gameState: GameState, level: Level): number {
   return maxX;
 }
 
-export function calcMinX(gameState: GameState, level: Level): number {
-  const left = getLeftSolids(gameState, level);
+export function calcMinX(entity: ObjectState, level: Level): number {
+  const left = getLeftSolids(entity, level);
   let minX = -Infinity;
   if (left.length > 0) {
     minX = max(left, (b) => toRight(b));

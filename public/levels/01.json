@@ -197,7 +197,7 @@
     { "tileKey": "coin", "col": 37, "row": 3 }
   ],
   "gumbas": [
-    { "col": 8, "row": 12 },
+    { "col": 14, "row": 12 },
     { "col": 18, "row": 12 },
     { "col": 28, "row": 12 }
   ]

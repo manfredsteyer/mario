@@ -54,21 +54,23 @@ export function moveHero(
 }
 
 export function goRight(gameState: GameState, level: Level, delta: number): void {
-  const maxX = calcMaxX(gameState, level);
-  const candX = gameState.hero.position.x + 1 * delta;
-  gameState.hero.position.x = Math.min(candX, maxX + HERO_PADDING);
+  const hero = gameState.hero;
+  const maxX = calcMaxX(hero, level);
+  const candX = hero.position.x + 1 * delta;
+  hero.position.x = Math.min(candX, maxX + HERO_PADDING);
   gameState.direction = 'right';
 }
 
 export function goLeft(gameState: GameState, level: Level, delta: number): void {
-  const minX = calcMinX(gameState, level);
-  const candX = gameState.hero.position.x - 1 * delta;
-  gameState.hero.position.x = Math.max(candX, minX - HERO_PADDING);
+  const hero = gameState.hero;
+  const minX = calcMinX(hero, level);
+  const candX = hero.position.x - 1 * delta;
+  hero.position.x = Math.max(candX, minX - HERO_PADDING);
   gameState.direction = 'left';
 }
 
 function jump(gameState: GameState, level: Level, delta: number): boolean {
-  const minY = calcMinY(gameState, level);
+  const minY = calcMinY(gameState.hero, level);
   const candY = gameState.hero.position.y - 2 * delta;
   const newY = Math.max(candY, minY);
 
@@ -86,7 +88,7 @@ function applyGravity(
   level: Level,
   delta: number
 ): boolean {
-  const maxY = calcMaxY(gameState, level);
+  const maxY = calcMaxY(gameState.hero, level);
   const y = gameState.hero.position.y;
   const candY = y + VELOCITY_Y * delta;
   const newY = Math.min(maxY, candY);

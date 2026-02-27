@@ -1,4 +1,4 @@
-import { GUMBA_SPEED } from './constants';
+import { GUMBA_SPEED, HERO_PADDING } from './constants';
 import type { GameState, GumbaState } from './game-state';
 import type { Level } from './level';
 import { SIZE } from './palettes';
@@ -9,50 +9,64 @@ import { calcMaxX, calcMinX } from './walls';
 export function moveGumbas(
   gameState: GameState,
   level: Level,
-  delta: number
+  delta: number,
 ): void {
   for (const gumba of gameState.gumbas) {
-    if (!gumba.alive) continue;
-
-    const fakeState: GameState = {
-      ...gameState,
-      hero: { ...gameState.hero, position: { ...gumba.position } },
-    };
-    const minX = calcMinX(fakeState, level);
-    const maxX = calcMaxX(fakeState, level);
-
-    if (gumba.direction === 'left') {
-      const newX = gumba.position.x - GUMBA_SPEED * delta;
-      if (newX <= minX) {
-        gumba.position.x = minX;
-        gumba.direction = 'right';
-      } else {
-        gumba.position.x = newX;
-      }
-    } else {
-      const newX = gumba.position.x + GUMBA_SPEED * delta;
-      if (newX >= maxX) {
-        gumba.position.x = maxX;
-        gumba.direction = 'left';
-      } else {
-        gumba.position.x = newX;
-      }
+    if (!gumba.alive) {
+      continue;
     }
+    moveGumba(gumba, level, delta);
+  }
+}
+
+function moveGumba(gumba: GumbaState, level: Level, delta: number) {
+  if (gumba.direction === 'left') {
+    moveGumbaLeft(gumba, level, delta);
+  } else {
+    moveGumbaRight(gumba, level, delta);
+  }
+}
+
+function moveGumbaRight(gumba: GumbaState, level: Level, delta: number) {
+  
+  const maxX = calcMaxX(gumba, level);
+  const newX = gumba.position.x + GUMBA_SPEED * delta;
+  
+  if (newX >= maxX) {
+    gumba.position.x = maxX;
+    gumba.direction = 'left';
+  } else {
+    gumba.position.x = newX;
+  }
+}
+
+function moveGumbaLeft(gumba: GumbaState, level: Level, delta: number) {
+  
+  const minX = calcMinX(gumba, level);
+  const newX = gumba.position.x - GUMBA_SPEED * delta;
+
+  if (newX <= minX) {
+    gumba.position.x = minX;
+    gumba.direction = 'right';
+  } else {
+    gumba.position.x = newX;
   }
 }
 
 export type HeroGumbaCollisionResult = 'none' | 'hero-dead' | 'gumba-stomped';
 
 export function checkHeroGumbaCollision(
-  gameState: GameState
+  gameState: GameState,
 ): HeroGumbaCollisionResult {
-  const heroLeft = gameState.hero.position.x;
-  const heroRight = heroLeft + SIZE;
+  const heroLeft = gameState.hero.position.x + HERO_PADDING;
+  const heroRight = heroLeft + SIZE - HERO_PADDING;
   const heroTop = gameState.hero.position.y;
   const heroBottom = heroTop + SIZE;
 
   for (const gumba of gameState.gumbas) {
-    if (!gumba.alive) continue;
+    if (!gumba.alive) {
+      continue;
+    }
 
     const gumbaLeft = gumba.position.x;
     const gumbaRight = gumbaLeft + SIZE;
@@ -65,13 +79,11 @@ export function checkHeroGumbaCollision(
       heroBottom > gumbaTop &&
       heroTop < gumbaBottom;
 
-    if (!overlaps) continue;
+    if (!overlaps) {
+      continue;
+    }
 
-    // Stomp nur, wenn der Hero von oben auf den Gumba fällt: Füße in der oberen Kante des Gumbas
-    const stompMargin = SIZE / 3;
-    const isStomp =
-      heroBottom <= gumbaTop + stompMargin &&
-      heroTop < gumbaBottom - stompMargin;
+    const isStomp = gameState.isFalling;
 
     if (isStomp) {
       gumba.alive = false;
@@ -88,7 +100,7 @@ export function drawGumbas(
   gameState: GameState,
   gumbaTiles: GumbaTileSet,
   timeStamp: number,
-  offset: number
+  offset: number,
 ): void {
   for (const gumba of gameState.gumbas) {
     if (!gumba.alive) continue;

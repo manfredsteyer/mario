@@ -1,6 +1,10 @@
 export type Direction = 'right' | 'left';
 
-export type HeroState = {
+export type ObjectState = {
+  position: Position;
+};
+
+export type HeroState = ObjectState & {
   position: Position;
   acceleration: number;
   jumpStart: number;
@@ -26,8 +30,7 @@ export const initHeroState: HeroState = {
   runStart: 0,
 };
 
-export type GumbaState = {
-  position: Position;
+export type GumbaState = ObjectState & {
   direction: Direction;
   alive: boolean;
 };
@@ -39,6 +42,7 @@ export type GameState = {
   gumbas: GumbaState[];
   animation: boolean;
   direction: Direction;
+  isFalling: boolean;
 };
 
 export const initGameState: GameState = {
@@ -48,6 +52,7 @@ export const initGameState: GameState = {
   gumbas: [],
   animation: false,
   direction: 'right',
+  isFalling: false,
 };
 
 let _state = getInitState();
@@ -57,7 +62,7 @@ function getInitState(): GameState {
     ...initGameState,
     hero: {
       ...initHeroState,
-      position: { ...initPosition }
+      position: { ...initPosition },
     },
   };
 }

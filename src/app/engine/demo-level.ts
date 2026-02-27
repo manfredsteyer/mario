@@ -35,5 +35,10 @@ export const demoLevel: Level = {
       row: 4,
       repeatRow: 1,
     },
+    { tileKey: 'coin', col: 2, row: 6 },
+    { tileKey: 'coin', col: 4, row: 6 },
+    { tileKey: 'coin', col: 5, row: 5 },
+    { tileKey: 'coin', col: 8, row: 6 },
+    { tileKey: 'coin', col: 10, row: 6 },
   ],
 };

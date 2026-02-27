@@ -42,7 +42,7 @@ export const initGameState: GameState = {
 
 let _state = getInitState();
 
-function getInitState() {
+function getInitState(): GameState {
   return {
     ...initGameState,
     hero: {

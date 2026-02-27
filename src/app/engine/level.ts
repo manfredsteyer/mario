@@ -20,7 +20,7 @@ export type Level = {
   items: Item[];
 };
 
-export type TileName = keyof TileSet;
+export type TileName = keyof TileSet | 'collected';
 
 export type Item = { tileKey: TileName } & DrawOptions;
 
@@ -146,6 +146,8 @@ function step(options: StepOptions): void {
 
   const movedVertically = moveHero(timeStamp, gameState, level, delta);
 
+  checkCoinsCollision(level, gameState);
+
   gameState.hero.position.x = Math.max(0, gameState.hero.position.x)
 
   const renderX = Math.min(gameState.hero.position.x, width / SCALE / 2 - SIZE);
@@ -171,6 +173,7 @@ function step(options: StepOptions): void {
     }));
   }
   else {
+    resetLevelCoins(level);
     resetGameState();
   }
 
@@ -308,11 +311,12 @@ function calcMaxY(gameState: GameState, level: Level) {
   return maxY;
 }
 
-function isSolid(key: keyof BaseTileSet | keyof TileCollections): boolean {
-  return key === 'floor' 
-    || key === 'brick' 
-    || key === 'solid' 
-    || key.startsWith('pipe') 
+function isSolid(key: TileName): boolean {
+  // if (key === 'collected') return false;
+  return key === 'floor'
+    || key === 'brick'
+    || key === 'solid'
+    || key.startsWith('pipe')
     || key === 'questionMark';
 }
 
@@ -416,8 +420,45 @@ function drawLevel(options: DrawLevelOptions) {
   context.fillRect(0, 0, width, height);
 
   for (const item of level.items) {
-    const tile = tiles[item.tileKey];
+    if (item.tileKey === 'collected') continue;
+    const tile = tiles[item.tileKey as keyof TileSet];
     drawTile(context, tile, offset, item);
+  }
+}
+
+function resetLevelCoins(level: Level): void {
+  for (const item of level.items) {
+    if (item.tileKey === 'collected') {
+      item.tileKey = 'coin';
+    }
+  }
+}
+
+function checkCoinsCollision(level: Level, gameState: GameState): void {
+  const heroLeft = gameState.hero.position.x;
+  const heroRight = heroLeft + SIZE;
+  const heroTop = gameState.hero.position.y;
+  const heroBottom = heroTop + SIZE;
+
+  const OFFSET = SIZE / 3;
+  
+  for (const item of level.items) {
+    if (item.tileKey !== 'coin') continue;
+
+    const coinLeft = item.col * SIZE + OFFSET;
+    const coinRight = (item.col + (item.repeatCol ?? 1)) * SIZE - OFFSET;
+    const coinTop = item.row * SIZE + OFFSET;
+    const coinBottom = (item.row + (item.repeatRow ?? 1)) * SIZE - OFFSET;
+
+    const overlaps =
+      heroRight > coinLeft &&
+      heroLeft < coinRight &&
+      heroBottom > coinTop &&
+      heroTop < coinBottom;
+
+    if (overlaps) {
+      item.tileKey = 'collected';
+    }
   }
 }
 
@@ -449,14 +490,14 @@ function calcDirection(
   return currentDirection;
 }
 
-function extraLength(tileKey: string): number {
+function extraLength(tileKey: TileName): number {
   if (tileKey === 'pipeTop') {
     return 1; // pipes are one tile wider
   }
   return 0;
 }
 
-function extraHeight(tileKey: string): number {
+function extraHeight(tileKey: TileName): number {
   if (tileKey === 'pipeTop') {
     return 2; // pipes are one tile higher
   }

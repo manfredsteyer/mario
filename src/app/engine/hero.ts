@@ -1,73 +1,95 @@
-import { flip } from '../shared/flip';
-import { addTransparency } from './color-utils';
-import { Palette, SIZE } from './palettes';
+import { HERO_PADDING, VELOCITY_Y } from './constants';
+import type { GameState, Position } from './game-state';
+import { keyboard } from './keyboard';
+import type { Level } from './level';
+import { calcMaxX, calcMaxY, calcMinX, calcMinY } from './walls';
 
-export type HeroTileSet = {
-  stand: ImageBitmap;
-  standLeft: ImageBitmap;
-  run0: ImageBitmap;
-  run0Left: ImageBitmap;
-  run1: ImageBitmap;
-  run1Left: ImageBitmap;
-  run2: ImageBitmap;
-  run2Left: ImageBitmap;
+export type DrawHeroOptions = {
+  tile: ImageBitmap;
+  position: Position;
+  context: CanvasRenderingContext2D;
 };
 
-async function getHeroTile(
-  bitmap: ImageBitmap,
-  p: Palette,
-  row: number,
-  col: number
-) {
-  const image = await createImageBitmap(
-    bitmap,
-    p.x + row * (SIZE + 2),
-    p.y + col * (SIZE + 2),
-    SIZE,
-    SIZE
-  );
-
-  return image;
+export function drawHero(options: DrawHeroOptions): void {
+  const { tile, position, context } = options;
+  const { x, y } = position;
+  context.drawImage(tile, x, y);
 }
 
-async function loadHeroTiles(bitmap: ImageBitmap) {
-  const idlePalette: Palette = {
-    x: 0,
-    y: 8,
-  };
+export function moveHero(
+  timeStamp: number,
+  gameState: GameState,
+  level: Level,
+  delta: number
+): boolean {
+  let hitGround = false;
+  let hitTop = false;
+  const isJumping = keyboard.up && timeStamp - gameState.hero.jumpStart < 500;
+  const initY = gameState.hero.position.y;
 
-  const runPalette: Palette = {
-    x: 20,
-    y: 8,
-  };
+  if (!isJumping) {
+    gameState.hero.jumpStart = 0;
+    hitGround = applyGravity(gameState, level, delta);
+  } else {
+    hitTop = jump(gameState, level, delta);
+  }
 
-  const tilePromises = {
-    stand: getHeroTile(bitmap, idlePalette, 0, 0),
+  if (keyboard.up && hitGround) {
+    gameState.hero.jumpStart = timeStamp;
+  }
 
-    run1: getHeroTile(bitmap, runPalette, 0, 0),
-    run2: getHeroTile(bitmap, runPalette, 1, 0),
-    run0: getHeroTile(bitmap, runPalette, 2, 0),
+  if (keyboard.left && !hitTop) {
+    goLeft(gameState, level, delta);
+  } else if (keyboard.right && !hitTop) {
+    goRight(gameState, level, delta);
+  }
 
-    standLeft: flip(getHeroTile(bitmap, idlePalette, 0, 0)),
-    run1Left: flip(getHeroTile(bitmap, runPalette, 0, 0)),
-    run2Left: flip(getHeroTile(bitmap, runPalette, 1, 0)),
-    run0Left: flip(getHeroTile(bitmap, runPalette, 2, 0)),
-  };
+  if (keyboard.left || keyboard.right) {
+    gameState.hero.runStart = gameState.hero.runStart || timeStamp;
+  } else {
+    gameState.hero.runStart = 0;
+  }
 
-  const tiles = await Promise.all(Object.values(tilePromises)).then(
-    (resolvedTiles) => {
-      const tileNames = Object.keys(tilePromises);
-      return Object.fromEntries(
-        tileNames.map((name, index) => [name, resolvedTiles[index]])
-      ) as HeroTileSet;
-    }
-  );
-  return tiles;
+  return initY !== gameState.hero.position.y;
 }
 
-export async function extractHeroTiles(tilesMap: Blob) {
-  const bitmap = await createImageBitmap(tilesMap);
-  const correctedBitmap = await addTransparency(bitmap, '#9290ff');
-  const tiles = await loadHeroTiles(correctedBitmap);
-  return tiles;
+export function goRight(gameState: GameState, level: Level, delta: number): void {
+  const maxX = calcMaxX(gameState, level);
+  const candX = gameState.hero.position.x + 1 * delta;
+  gameState.hero.position.x = Math.min(candX, maxX + HERO_PADDING);
+  gameState.direction = 'right';
+}
+
+export function goLeft(gameState: GameState, level: Level, delta: number): void {
+  const minX = calcMinX(gameState, level);
+  const candX = gameState.hero.position.x - 1 * delta;
+  gameState.hero.position.x = Math.max(candX, minX - HERO_PADDING);
+  gameState.direction = 'left';
+}
+
+function jump(gameState: GameState, level: Level, delta: number): boolean {
+  const minY = calcMinY(gameState, level);
+  const candY = gameState.hero.position.y - 2 * delta;
+  const newY = Math.max(candY, minY);
+
+  gameState.hero.position.y = newY;
+
+  if (newY === minY) {
+    gameState.hero.jumpStart = 0;
+    return true;
+  }
+  return false;
+}
+
+function applyGravity(
+  gameState: GameState,
+  level: Level,
+  delta: number
+): boolean {
+  const maxY = calcMaxY(gameState, level);
+  const y = gameState.hero.position.y;
+  const candY = y + VELOCITY_Y * delta;
+  const newY = Math.min(maxY, candY);
+  gameState.hero.position.y = newY;
+  return newY === y;
 }

@@ -1,6 +1,6 @@
 import { HttpResourceRef } from "@angular/common/http";
 import { computed, resource } from "@angular/core";
-import { extractHeroTiles } from "../engine/hero";
+import { extractHeroTiles } from "../engine/hero-tiles";
 
 export function createHeroResource(
   heroMapResource: HttpResourceRef<Blob | undefined>,

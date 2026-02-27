@@ -1,18 +1,16 @@
-import { SCALE, HERO_PADDING, VELOCITY_Y } from './constants';
+import { SCALE } from './constants';
 import { checkCoinsCollision, resetLevelCoins } from './coins';
 import {
   Direction,
   GameState,
   getGameState,
-  Position,
   resetGameState,
   updateGameState,
 } from './game-state';
-import { HeroTileSet } from './hero';
-import { keyboard } from './keyboard';
+import { drawHero, moveHero } from './hero';
+import { getHeroTile, HeroTileSet } from './hero-tiles';
 import { SIZE } from './palettes';
 import { DrawOptions, drawTile, TileSet } from './tiles';
-import { calcMaxX, calcMaxY, calcMinX, calcMinY } from './walls';
 
 const SCREEN_WIDTH = 340;
 
@@ -189,113 +187,9 @@ export type RenderOptions = {
   tiles: TileSet;
 };
 
-function getHeroTile(
-  gameState: GameState,
-  timeStamp: number,
-  heroTiles: HeroTileSet,
-  movedVertically: boolean,
-) {
-  let heroTileKey: keyof HeroTileSet = 'stand';
-
-  if (gameState.hero.runStart > 0 && !movedVertically) {
-    const runDelta = timeStamp - gameState.hero.runStart;
-    heroTileKey = 'run' + (Math.floor(runDelta / 100) % 3);
-  }
-
-  if (gameState.direction === 'left') {
-    heroTileKey = heroTileKey + 'Left';
-  }
-
-  const heroTile = heroTiles[heroTileKey as keyof HeroTileSet];
-  return heroTile;
-}
-
-function moveHero(
-  timeStamp: number,
-  gameState: GameState,
-  level: Level,
-  delta: number,
-): boolean {
-  let hitGround = false;
-  let hitTop = false;
-  const isJumping = keyboard.up && timeStamp - gameState.hero.jumpStart < 500;
-  const initY = gameState.hero.position.y;
-
-  if (!isJumping) {
-    gameState.hero.jumpStart = 0;
-    hitGround = applyGravity(gameState, level, delta);
-  } else {
-    hitTop = jump(gameState, level, delta);
-  }
-
-  if (keyboard.up && hitGround) {
-    gameState.hero.jumpStart = timeStamp;
-  }
-
-  if (keyboard.left && !hitTop) {
-    goLeft(gameState, level, delta);
-  } else if (keyboard.right && !hitTop) {
-    goRight(gameState, level, delta);
-  }
-
-  if (keyboard.left || keyboard.right) {
-    gameState.hero.runStart = gameState.hero.runStart || timeStamp;
-  } else {
-    gameState.hero.runStart = 0;
-  }
-
-  return initY !== gameState.hero.position.y;
-}
-
-function goRight(gameState: GameState, level: Level, delta: number) {
-  const maxX = calcMaxX(gameState, level);
-  const candX = gameState.hero.position.x + 1 * delta;
-  const newX = Math.min(candX, maxX + HERO_PADDING);
-  gameState.hero.position.x = newX;
-  gameState.direction = 'right';
-}
-
-function goLeft(gameState: GameState, level: Level, delta: number) {
-  const minX = calcMinX(gameState, level);
-  const candX = gameState.hero.position.x - 1 * delta;
-  const newX = Math.max(candX, minX - HERO_PADDING);
-  gameState.hero.position.x = newX;
-  gameState.direction = 'left';
-}
-
-function jump(gameState: GameState, level: Level, delta: number): boolean {
-  const minY = calcMinY(gameState, level);
-  const candY = gameState.hero.position.y - 2 * delta;
-  const newY = Math.max(candY, minY);
-
-  gameState.hero.position.y = newY;
-
-  if (newY === minY) {
-    gameState.hero.jumpStart = 0;
-    return true;
-  }
-  return false;
-}
-
 function lostLife(height: number, gameState: GameState): boolean {
   const bottom = height / SCALE;
   return gameState.hero.position.y > bottom;
-}
-
-function applyGravity(
-  gameState: GameState,
-  level: Level,
-  delta: number,
-): boolean {
-  const maxY = calcMaxY(gameState, level);
-
-  const y = gameState.hero.position.y;
-  const candY = y + VELOCITY_Y * delta;
-  const newY = Math.min(maxY, candY);
-  gameState.hero.position.y = newY;
-
-  const hitGround = newY === y;
-  return hitGround;
 }
 
 export function renderLevel(options: RenderOptions): void {
@@ -336,15 +230,4 @@ function drawLevel(options: DrawLevelOptions) {
   }
 }
 
-type DrawHeroOptions = {
-  tile: ImageBitmap;
-  position: Position;
-  context: CanvasRenderingContext2D;
-};
-
-function drawHero(options: DrawHeroOptions): void {
-  const { tile, position, context } = options;
-  const { x, y } = options.position;
-  context.drawImage(tile, x, y);
-}
 

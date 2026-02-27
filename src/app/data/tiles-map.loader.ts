@@ -9,7 +9,7 @@ export class TilesMapLoader {
     return httpResource.blob(() => ({
       url: config.tiles,
       reportProgress: true,
-    }))
+    }));
   
   }
 }

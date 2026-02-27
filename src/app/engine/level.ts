@@ -291,10 +291,22 @@ function applyGravity(gameState: GameState, level: Level, delta: number): boolea
 }
 
 function calcMaxY(gameState: GameState, level: Level) {
+  const bottom = getBottomSolids(gameState, level);
+
+  let maxY = Infinity;
+  if (bottom.length > 0) {
+    const minRow = min(bottom, item => item.row);
+    maxY = minRow * SIZE - SIZE;
+  }
+  return maxY;
+}
+
+
+function getBottomSolids(gameState: GameState, level: Level) {
   const blockY = gameState.hero.position.y / SIZE;
   const x = gameState.hero.position.x;
 
-  const below = level.items.filter((item) => {
+  const bottom = level.items.filter((item) => {
     return (
       item.row > blockY &&
       ((item.col) * SIZE) < x + TOLERANCE_LEFT &&
@@ -302,13 +314,16 @@ function calcMaxY(gameState: GameState, level: Level) {
       isSolid(item.tileKey)
     );
   });
+  return bottom;
+}
 
-  let maxY = Infinity;
-  if (below.length > 0) {
-    const minRow = Math.min(...below.map(b => b.row));
-    maxY = minRow * SIZE - SIZE;
-  }
-  return maxY;
+function min(right: Item[], c: (b: Item) => number) {
+  return Math.min(...right.map(c));
+}
+
+
+function max(right: Item[], c: (b: Item) => number) {
+  return Math.max(...right.map(c));
 }
 
 function isSolid(key: TileName): boolean {
@@ -321,32 +336,48 @@ function isSolid(key: TileName): boolean {
 }
 
 function calcMinY(gameState: GameState, level: Level): number {
+  const above = getAboveSolids(gameState, level);
+
+  let minY = -Infinity;
+  if (above.length > 0) {
+    const minRow = max(above, b => b.row);
+    minY = minRow * SIZE + SIZE;
+  }
+  return minY;
+}
+
+function getAboveSolids(gameState: GameState, level: Level) {
   const blockY = gameState.hero.position.y / SIZE;
   const x = gameState.hero.position.x;
 
-  const below = level.items.filter((item) => {
+  const above = level.items.filter((item) => {
     return (
-      item.row + 1 <= blockY  &&
+      item.row + 1 <= blockY &&
       ((item.col) * SIZE) < x + TOLERANCE_LEFT &&
       ((item.col + (item.repeatCol || 1) + extraLength(item.tileKey)) * SIZE) > x + TOLERANCE_RIGHT &&
       isSolid(item.tileKey)
     );
   });
-
-  let minY = -Infinity;
-  if (below.length > 0) {
-    const minRow = Math.max(...below.map(b => b.row));
-    minY = minRow * SIZE + SIZE;
-  }
-
-  return minY;
+  return above;
 }
 
 function calcMaxX(gameState: GameState, level: Level): number {
+  const right = getRightSolids(gameState, level);
+
+  let maxX = Infinity;
+  if (right.length > 0) {
+    const minCol = min(right, b => b.col);
+    maxX = minCol * SIZE - SIZE+ TOLERANCE_RIGHT;
+  }
+
+  return maxX;
+}
+
+function getRightSolids(gameState: GameState, level: Level) {
   const blockY = gameState.hero.position.y / SIZE;
   const x = gameState.hero.position.x;
 
-  const below = level.items.filter((item) => {
+  const right = level.items.filter((item) => {
     return (
       x <= (item.col) * SIZE &&
       blockY >= item.row &&
@@ -354,18 +385,22 @@ function calcMaxX(gameState: GameState, level: Level): number {
       isSolid(item.tileKey)
     );
   });
-
-  let maxX = Infinity;
-  if (below.length > 0) {
-    console.log('below', below);
-    const minCol = Math.min(...below.map(b => b.col));
-    maxX = minCol * SIZE - SIZE+ TOLERANCE_RIGHT;
-  }
-
-  return maxX;
+  return right;
 }
 
 function calcMinX(gameState: GameState, level: Level): number {
+  const below = getLeftSolids(gameState, level);
+
+  let minX = -Infinity;
+  if (below.length > 0) {
+    const minCol = max(below, b => b.col + extraLength(b.tileKey));
+    minX = (minCol + 1) * SIZE - TOLERANCE_RIGHT;
+  }
+
+  return minX;
+}
+
+function getLeftSolids(gameState: GameState, level: Level) {
   const blockY = gameState.hero.position.y / SIZE;
   const x = gameState.hero.position.x;
 
@@ -377,15 +412,7 @@ function calcMinX(gameState: GameState, level: Level): number {
       isSolid(item.tileKey)
     );
   });
-
-  let minX = -Infinity;
-  if (below.length > 0) {
-    console.log('below', below);
-    const minCol = Math.max(...below.map(b => b.col + extraLength(b.tileKey)));
-    minX = (minCol + 1) * SIZE - TOLERANCE_RIGHT;
-  }
-
-  return minX;
+  return below;
 }
 
 export function renderLevel(options: RenderOptions): void {

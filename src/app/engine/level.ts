@@ -129,6 +129,8 @@ function runGameLoop(gameOptions: GameOptions): void {
   drawHero(ctx);
   drawGumbas(ctx);
 
+  drawGrid(ctx);
+
   if (didHeroDie(ctx)) {
     resetLevelOnDeath(ctx);
   }
@@ -225,13 +227,38 @@ function resetLevelOnDeath(ctx: GameContext): void {
   ctx.isFalling = state.isFalling;
 }
 
+export function drawGrid(ctx: GameContext): void {
+  const { context, width, height, scrollOffset } = ctx;
+  const firstCol = Math.floor(-scrollOffset / SIZE);
+  const lastCol = Math.ceil((width - scrollOffset) / SIZE);
+  const lastRow = Math.ceil(height / SIZE);
+
+  context.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+  context.lineWidth = 1;
+
+  for (let col = firstCol; col <= lastCol; col++) {
+    const x = col * SIZE + scrollOffset;
+    context.beginPath();
+    context.moveTo(x, 0);
+    context.lineTo(x, height);
+    context.stroke();
+  }
+  for (let row = 0; row <= lastRow; row++) {
+    const y = row * SIZE;
+    context.beginPath();
+    context.moveTo(0, y);
+    context.lineTo(width, y);
+    context.stroke();
+  }
+}
+
 function drawLevel(ctx: GameContext): void {
   const { level, context, width, height } = ctx;
   context.fillStyle = level.backgroundColor;
   context.fillRect(0, 0, width, height);
 
   drawRisingCoins(ctx);
-  
+
   for (const item of level.items) {
     drawTile(ctx, item);
   }

@@ -1,7 +1,7 @@
 import { SCALE } from './constants';
 import { checkCoinsCollision, resetLevelCoins } from './coins';
 import type { GumbaState, HeroState, RisingCoin } from './game-context';
-import { drawHero, moveHero } from './hero';
+import { checkHitQuestionMark, drawHero, moveHero } from './hero';
 import { HeroTileSet } from './hero-tiles';
 import type { GumbaTileSet } from './gumba-tiles';
 import { drawGumbas, checkHeroGumbaCollision, moveGumbas, resetGumbas } from './gumba';
@@ -83,6 +83,7 @@ export function playLevel(options: AnimateOptions) {
     abortSignal,
     context,
     direction: 'right',
+    initialLevelItems: level.items.map((item) => ({ ...item })),
   };
   gameOptions.gumbas = resetGumbas(level);
 
@@ -114,17 +115,19 @@ function runGameLoop(gameOptions: GameOptions): void {
     scrollOffset: 0,
   };
 
-  console.log('delta', ctx.delta);
 
   moveHero(ctx);
   moveGumbas(ctx);
   scrollLevel(ctx);
-  drawLevel(ctx);
-  drawHero(ctx);
-  drawGumbas(ctx);
+
   checkCoinsCollision(ctx);
   checkHeroGumbaCollision(ctx);
   checkFellOff(ctx);
+  checkHitQuestionMark(ctx);
+  
+  drawLevel(ctx);
+  drawHero(ctx);
+  drawGumbas(ctx);
 
   if (didHeroDie(ctx)) {
     resetLevelOnDeath(ctx);
@@ -208,6 +211,11 @@ function didHeroDie(ctx: GameContext): boolean {
 
 function resetLevelOnDeath(ctx: GameContext): void {
   resetLevelCoins(ctx.level);
+  ctx.level.items.splice(
+    0,
+    ctx.level.items.length,
+    ...ctx.initialLevelItems.map((item) => ({ ...item }))
+  );
   const state = getInitialState();
   state.gumbas = resetGumbas(ctx.level);
   ctx.hero = state.hero;
@@ -223,7 +231,7 @@ function drawLevel(ctx: GameContext): void {
   context.fillRect(0, 0, width, height);
 
   drawRisingCoins(ctx);
-
+  
   for (const item of level.items) {
     drawTile(ctx, item);
   }

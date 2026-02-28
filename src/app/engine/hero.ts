@@ -71,19 +71,23 @@ function jump(ctx: GameContext, delta: number, timeStamp: number): boolean {
   ctx.hero.position.y = newY;
 
   if (newY === minY) {
-    handleQuestionBlockHit(ctx, timeStamp);
+    ctx.hitTop = true;
+    ctx.hitTopTimeStamp = timeStamp;
     ctx.hero.jumpStart = 0;
     return true;
   }
   return false;
 }
 
-function handleQuestionBlockHit(ctx: GameContext, timeStamp: number): void {
+export function checkHitQuestionMark(ctx: GameContext): void {
+  if (!ctx.hitTop) return;
+  const timeStamp = ctx.hitTopTimeStamp ?? ctx.timeStamp;
+
   const y = ctx.hero.position.y;
   const leftX = ctx.hero.position.x + SIZE - HERO_PADDING;
   const rightX = ctx.hero.position.x + HERO_PADDING;
 
-  const block = ctx.level.items.find((item: Item) => {
+  const blockIndex = ctx.level.items.findIndex((item: Item) => {
     return (
       item.tileKey === 'questionMark' &&
       toBottom(item) === y &&
@@ -92,16 +96,49 @@ function handleQuestionBlockHit(ctx: GameContext, timeStamp: number): void {
     );
   });
 
+  const block = blockIndex === -1 ? null : ctx.level.items[blockIndex];
   if (!block) {
+    ctx.hitTop = false;
+    ctx.hitTopTimeStamp = undefined;
     return;
   }
 
-  block.tileKey = 'empty';
-  ctx.risingCoins.push({
-    col: block.col,
-    row: block.row,
-    startTime: timeStamp,
-  });
+  const repeatCol = block.repeatCol ?? 1;
+  const centerX = (leftX + rightX) / 2;
+  const hitColIndex = Math.min(
+    Math.max(0, Math.floor((centerX - toLeft(block)) / SIZE)),
+    repeatCol - 1
+  );
+
+  const hitCol = block.col + hitColIndex;
+  const hitRow = block.row;
+
+  if (repeatCol === 1) {
+    block.tileKey = 'empty';
+    ctx.risingCoins.push({ col: hitCol, row: hitRow, startTime: timeStamp });
+  } else {
+    block.col = hitCol;
+    block.repeatCol = 1;
+    block.tileKey = 'empty';
+
+    const otherItems: Item[] = [];
+    const baseCol = block.col - hitColIndex;
+    for (let i = 0; i < repeatCol; i++) {
+      if (i === hitColIndex) continue;
+      otherItems.push({
+        ...block,
+        col: baseCol + i,
+        row: block.row,
+        repeatCol: 1,
+        tileKey: 'questionMark',
+      });
+    }
+    ctx.level.items.splice(blockIndex, 1, block, ...otherItems);
+    ctx.risingCoins.push({ col: hitCol, row: hitRow, startTime: timeStamp });
+  }
+
+  ctx.hitTop = false;
+  ctx.hitTopTimeStamp = undefined;
 }
 
 function applyGravity(ctx: GameContext): boolean {

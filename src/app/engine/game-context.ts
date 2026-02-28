@@ -27,6 +27,7 @@ export type GameOptions = {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
   level: Level;
+  initialLevelItems: Level['items'];
   tiles: TileSet;
   heroTiles: HeroTileSet;
   gumbaTiles: GumbaTileSet;
@@ -40,6 +41,8 @@ export type GameOptions = {
   risingCoins: RisingCoin[];
   animation: boolean;
   isFalling: boolean;
+  hitTop: boolean;
+  hitTopTimeStamp?: number;
 };
 
 export type GameContext = GameOptions & {
@@ -71,5 +74,6 @@ export function createInitialGameOptions() {
     risingCoins: [] as RisingCoin[],
     animation: false,
     isFalling: false,
+    hitTop: false,
   };
 }

@@ -20,9 +20,7 @@ export function toLeft(item: Item): number {
 }
 
 export function toRight(item: Item): number {
-  const repeat = item.repeatCol ?? 1;
-  const blockWidth = getBlockWidth(item.tileKey);
-  return (item.col + repeat * blockWidth) * SIZE;
+  return (item.col + 1) * SIZE;
 }
 
 export function toTop(item: Item): number {
@@ -30,7 +28,5 @@ export function toTop(item: Item): number {
 }
 
 export function toBottom(item: Item): number {
-  const repeat = item.repeatRow ?? 1;
-  const blockHeight = getBlockHeight(item.tileKey);
-  return (item.row + repeat * blockHeight) * SIZE;
+  return (item.row + 1) * SIZE;
 }

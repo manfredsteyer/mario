@@ -1,4 +1,13 @@
-import type { GridCell, Item } from './tiles';
+import type { Item } from './tiles';
+
+export type Position = {
+  x: number;
+  y: number;
+};
+
+export type ObjectState = {
+  position: Position;
+};
 
 export type GumbaStart = { col: number; row: number };
 
@@ -7,7 +16,7 @@ export type Level = {
   backgroundColor: string;
   items: Item[];
   gumbas: GumbaStart[];
-  levelGrid: GridCell[][];
+  levelGrid: Item[][];
   rowCount: number;
   colCount: number;
 };

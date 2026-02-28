@@ -13,8 +13,16 @@ import {
   type GameContext,
   type GameOptions,
 } from './game-context';
-import { drawTile, type TileSet } from './tiles';
-import { NULL_ITEM } from './tiles';
+import {
+  defaultDrawTileOptions,
+  drawTile,
+  getKeyCollections,
+  getTileCell,
+  getTileSize,
+  normalizeTile,
+  type KeyTileCollections,
+  type TileSet,
+} from './tiles';
 import type { Item, TileName } from './tiles';
 import type { Level } from './types';
 
@@ -75,10 +83,11 @@ export function playLevel(options: AnimateOptions) {
 
   stopAnimation();
 
+
   abortController = new AbortController();
   const abortSignal = abortController.signal;
 
-  level.levelGrid = buildLevelGrid(level);
+  level.levelGrid = buildLevelGrid(level, options.tiles);
   level.rowCount = level.levelGrid.length;
   level.colCount = level.levelGrid[0]?.length ?? 0;
   const gameOptions: GameOptions = {
@@ -92,6 +101,9 @@ export function playLevel(options: AnimateOptions) {
   };
   gameOptions.gumbas = resetGumbas(level);
 
+  // For debugging
+  (window as any).game = gameOptions;
+  
   runGameLoop(gameOptions);
 }
 
@@ -130,7 +142,7 @@ function runGameLoop(gameOptions: GameOptions): void {
   checkFellOff(ctx);
   checkHitQuestionMark(ctx);
   
-  drawLevel(ctx);
+  drawLevelOptimized(ctx);
   drawHero(ctx);
   drawGumbas(ctx);
 
@@ -189,32 +201,84 @@ function createGameContext(gameOptions: GameOptions): GameContext {
   };
 }
 
-function buildLevelGrid(level: Level): Level['levelGrid'] {
-  const { items } = level;
-  if (items.length === 0) {
-    return [];
+function to2DKeys(
+  keys: (string | null)[] | (string | null)[][]
+): (string | null)[][] {
+  if (!keys.length) return [];
+  return Array.isArray(keys[0])
+    ? (keys as (string | null)[][])
+    : [keys as (string | null)[]];
+}
+
+function getPlacementSize(
+  item: Item,
+  keyCollections: KeyTileCollections
+): { cols: number; rows: number } {
+  const keyTemplate = keyCollections[item.tileKey as keyof KeyTileCollections];
+  const repeatCol = item.repeatCol ?? 1;
+  const repeatRow = item.repeatRow ?? 1;
+  if (keyTemplate) {
+    const shape = to2DKeys(keyTemplate);
+    const keyRows = shape.length;
+    const keyCols = shape[0]?.length ?? 0;
+    return {
+      cols: repeatCol * keyCols,
+      rows: repeatRow * keyRows,
+    };
   }
-  const maxCol = Math.max(
-    ...items.map(
-      (i) => i.col + (i.repeatCol ?? 1) * getBlockWidth(i.tileKey)
-    )
+  return {
+    cols: repeatCol * getBlockWidth(item.tileKey),
+    rows: repeatRow * getBlockHeight(item.tileKey),
+  };
+}
+
+function buildLevelGrid(level: Level, tiles: TileSet): Item[][] {
+  const { items } = level;
+
+
+  const rows = Math.max(...items.map((item) => item.row + (item.repeatRow ?? 1))) + 1;
+  const cols = Math.max(...items.map((item) => item.col + (item.repeatCol ?? 1))) + 1;
+
+  const grid: Item[][] = Array.from({ length: rows }, (_, row) =>
+    Array.from({ length: cols }, (_, col) => ({
+      tileKey: 'air' as TileName,
+      tile: tiles.air,
+      col,
+      row,
+    }))
   );
-  const maxRow = Math.max(
-    ...items.map(
-      (i) => i.row + (i.repeatRow ?? 1) * getBlockHeight(i.tileKey)
-    )
-  );
-  const grid: Level['levelGrid'] = Array.from({ length: maxRow }, () =>
-    Array.from({ length: maxCol }, () => NULL_ITEM)
-  );
+
   for (const item of items) {
-    const cols = (item.repeatCol ?? 1) * getBlockWidth(item.tileKey);
-    const rows = (item.repeatRow ?? 1) * getBlockHeight(item.tileKey);
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        grid[item.row + r][item.col + c] = item;
+ 
+    const tile = tiles[item.tileKey];
+    const normTile = normalizeTile(tile);
+    const size = getTileSize(normTile);
+
+    const repeatCol = item.repeatCol ?? 1;
+    const repeatRow = item.repeatRow ?? 1;
+    
+    for (let colRep = 0; colRep < repeatCol; colRep++) {
+      for (let rowRep = 0; rowRep < repeatRow; rowRep++) {
+        for (let colOffset = 0; colOffset < size.cols; colOffset++) {
+          for (let rowOffset = 0; rowOffset < size.rows; rowOffset++) {
+            const col = item.col + colOffset + colRep * size.cols;
+            const row = item.row + rowOffset + rowRep * size.rows;
+            const image = normTile[rowOffset][colOffset];
+            if (grid[row]?.[col]?.tileKey === 'air') {
+              grid[row][col] = {
+                tileKey: item.tileKey,
+                tile: image,
+                col,
+                row,
+                repeatCol: 1,
+                repeatRow: 1,
+              };
+            }
+          }
+        }
       }
     }
+
   }
   return grid;
 }
@@ -253,6 +317,9 @@ function resetLevelOnDeath(ctx: GameContext): void {
     ctx.level.items.length,
     ...ctx.initialLevelItems.map((item) => ({ ...item }))
   );
+  ctx.level.levelGrid = buildLevelGrid(ctx.level, ctx.tiles);
+  ctx.level.rowCount = ctx.level.levelGrid.length;
+  ctx.level.colCount = ctx.level.levelGrid[0]?.length ?? 0;
   const state = getInitialState();
   state.gumbas = resetGumbas(ctx.level);
   ctx.hero = state.hero;
@@ -298,3 +365,37 @@ function drawLevel(ctx: GameContext): void {
     drawTile(ctx, item);
   }
 }
+
+function drawLevelOptimized(ctx: GameContext): void {
+  const { level, context, width, height, scrollOffset } = ctx;
+  const { levelGrid, rowCount, colCount } = level;
+
+  context.fillStyle = level.backgroundColor;
+  context.fillRect(0, 0, width, height);
+
+  drawRisingCoins(ctx);
+
+  const firstCol = Math.max(0, Math.floor(-scrollOffset / SIZE) - 1);
+  const lastCol = Math.min(
+    colCount - 1,
+    Math.ceil((width - scrollOffset) / SIZE) + 1
+  );
+  const lastRow = Math.min(
+    rowCount - 1,
+    Math.ceil(height / SIZE) - 1
+  );
+
+  if (rowCount === 0 || colCount === 0 || firstCol > lastCol) {
+    return;
+  }
+
+  for (let row = 0; row <= lastRow; row++) {
+    for (let col = firstCol; col <= lastCol; col++) {
+      const cell = levelGrid[row]?.[col];
+      if (cell) {
+        drawTile(ctx, cell);
+      }
+    }
+  }
+}
+

@@ -30,6 +30,19 @@ export function checkCoinsCollision(ctx: GameContext): void {
     );
   });
 
-  collidingCoins.forEach((item) => (item.tileKey = 'collected'));
+  for (const item of collidingCoins) {
+    item.tileKey = 'collected';
+    const { levelGrid } = ctx.level;
+    const r = item.row;
+    const c = item.col;
+    if (levelGrid[r]?.[c] !== undefined) {
+      levelGrid[r][c] = {
+        tileKey: 'collected',
+        tile: ctx.tiles.collected,
+        col: c,
+        row: r,
+      };
+    }
+  }
 }
 

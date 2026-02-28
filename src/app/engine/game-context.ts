@@ -1,4 +1,4 @@
-import type { ObjectState } from './walls';
+import type { ObjectState } from './types';
 import type { HeroTileSet } from './hero-tiles';
 import type { GumbaTileSet } from './gumba-tiles';
 import type { Level } from './types';

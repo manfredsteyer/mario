@@ -5,7 +5,7 @@ import { SIZE } from './palettes';
 import { toBottom, toLeft, toRight } from './coordinates';
 import type { GameContext } from './game-context';
 import type { Item } from './tiles';
-import { calcMaxX, calcMaxY, calcMinX, calcMinY } from './walls';
+import { calcMaxX, calcMaxY, calcMinX, calcMinY } from './walls-optimized';
 
 export function drawHero(ctx: GameContext): void {
   const tile = getHeroTile(
@@ -66,6 +66,8 @@ export function goLeft(ctx: GameContext): void {
 function jump(ctx: GameContext, delta: number, timeStamp: number): boolean {
   const minY = calcMinY(ctx.hero, ctx.level);
   const candY = ctx.hero.position.y - 2 * delta;
+
+  console.log('minY', minY, 'candY', candY);
   const newY = Math.max(candY, minY);
 
   ctx.hero.position.y = newY;
@@ -104,14 +106,16 @@ export function checkHitQuestionMark(ctx: GameContext): void {
   }
 
   const repeatCol = block.repeatCol ?? 1;
+  const baseRow = block.row;
+  const baseCol = block.col;
   const centerX = (leftX + rightX) / 2;
   const hitColIndex = Math.min(
     Math.max(0, Math.floor((centerX - toLeft(block)) / SIZE)),
     repeatCol - 1
   );
 
-  const hitCol = block.col + hitColIndex;
-  const hitRow = block.row;
+  const hitCol = baseCol + hitColIndex;
+  const hitRow = baseRow;
 
   if (repeatCol === 1) {
     block.tileKey = 'empty';
@@ -122,19 +126,31 @@ export function checkHitQuestionMark(ctx: GameContext): void {
     block.tileKey = 'empty';
 
     const otherItems: Item[] = [];
-    const baseCol = block.col - hitColIndex;
     for (let i = 0; i < repeatCol; i++) {
       if (i === hitColIndex) continue;
       otherItems.push({
         ...block,
         col: baseCol + i,
-        row: block.row,
+        row: baseRow,
         repeatCol: 1,
         tileKey: 'questionMark',
       });
     }
     ctx.level.items.splice(blockIndex, 1, block, ...otherItems);
     ctx.risingCoins.push({ col: hitCol, row: hitRow, startTime: timeStamp });
+  }
+
+  // Update levelGrid so the entire block shows the new tiles
+  const { levelGrid } = ctx.level;
+  for (let c = 0; c < repeatCol; c++) {
+    const col = baseCol + c;
+    const isEmpty = c === hitColIndex;
+    levelGrid[baseRow][col] = {
+      tileKey: isEmpty ? 'empty' : 'questionMark',
+      tile: isEmpty ? ctx.tiles.empty : ctx.tiles.questionMark,
+      col,
+      row: baseRow,
+    };
   }
 
   ctx.hitTop = false;

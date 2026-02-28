@@ -78,5 +78,11 @@ function toLevel(raw: unknown): Level {
   const gumbas = Array.isArray(obj['gumbas'])
     ? (obj['gumbas'] as { col: number; row: number }[])
     : [];
-  return { ...obj, gumbas, levelGrid: [], rowCount: 0, colCount: 0 } as Level;
+  return {
+    ...obj,
+    gumbas,
+    levelGrid: [],
+    rowCount: 0,
+    colCount: 0,
+  } as unknown as Level;
 }

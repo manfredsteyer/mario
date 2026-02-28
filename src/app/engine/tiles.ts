@@ -70,6 +70,15 @@ export type TileName = keyof TileSet | 'collected';
 
 export type Item = { tileKey: TileName } & DrawOptions;
 
+export const NULL_ITEM = { _nullItem: true } as const;
+export type NullItem = typeof NULL_ITEM;
+
+export type GridCell = Item | NullItem;
+
+export function isNullItem(cell: GridCell): cell is NullItem {
+  return cell === NULL_ITEM;
+}
+
 type NormalizedDrawTileOptions = {
   col: number;
   row: number;

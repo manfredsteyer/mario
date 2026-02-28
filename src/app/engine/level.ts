@@ -1,3 +1,4 @@
+import { getBlockHeight, getBlockWidth } from './coordinates';
 import { SCALE } from './constants';
 import { checkCoinsCollision, resetLevelCoins } from './coins';
 import type { GumbaState, HeroState, RisingCoin } from './game-context';
@@ -13,6 +14,7 @@ import {
   type GameOptions,
 } from './game-context';
 import { drawTile, type TileSet } from './tiles';
+import { NULL_ITEM } from './tiles';
 import type { Item, TileName } from './tiles';
 import type { Level } from './types';
 
@@ -76,6 +78,9 @@ export function playLevel(options: AnimateOptions) {
   abortController = new AbortController();
   const abortSignal = abortController.signal;
 
+  level.levelGrid = buildLevelGrid(level);
+  level.rowCount = level.levelGrid.length;
+  level.colCount = level.levelGrid[0]?.length ?? 0;
   const gameOptions: GameOptions = {
     ...createInitialGameOptions(),
     ...options,
@@ -182,6 +187,36 @@ function createGameContext(gameOptions: GameOptions): GameContext {
     renderX: 0,
     scrollOffset: 0,
   };
+}
+
+function buildLevelGrid(level: Level): Level['levelGrid'] {
+  const { items } = level;
+  if (items.length === 0) {
+    return [];
+  }
+  const maxCol = Math.max(
+    ...items.map(
+      (i) => i.col + (i.repeatCol ?? 1) * getBlockWidth(i.tileKey)
+    )
+  );
+  const maxRow = Math.max(
+    ...items.map(
+      (i) => i.row + (i.repeatRow ?? 1) * getBlockHeight(i.tileKey)
+    )
+  );
+  const grid: Level['levelGrid'] = Array.from({ length: maxRow }, () =>
+    Array.from({ length: maxCol }, () => NULL_ITEM)
+  );
+  for (const item of items) {
+    const cols = (item.repeatCol ?? 1) * getBlockWidth(item.tileKey);
+    const rows = (item.repeatRow ?? 1) * getBlockHeight(item.tileKey);
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        grid[item.row + r][item.col + c] = item;
+      }
+    }
+  }
+  return grid;
 }
 
 function getMaxOffset(level: Level): number {

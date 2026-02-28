@@ -1,7 +1,7 @@
 import { toBottom, toLeft, toRight, toTop } from './coordinates';
 import { HERO_PADDING } from './constants';
 import { SIZE } from './palettes';
-import type { Item, TileName } from './tiles';
+import { isNullItem, NULL_ITEM, type Item, type TileName } from './tiles';
 import type { Level } from './types';
 
 export type Position = {
@@ -37,6 +37,47 @@ export function getBottomSolids(entity: ObjectState, level: Level): Item[] {
       isSolid(item.tileKey)
     );
   });
+}
+
+export function getBottomSolidsOptimized(
+  entity: ObjectState,
+  level: Level
+): Item {
+  const { levelGrid, rowCount, colCount } = level;
+
+  const nullItem: Item = { 
+    tileKey: 'empty',
+    col: 0,
+    row: Infinity
+  };
+
+  if (rowCount === 0 || colCount === 0) return nullItem;
+
+  const y = entity.position.y;
+  const x = entity.position.x;
+
+  const firstRow = Math.floor(y / SIZE) + 1;
+  const minCol = Math.max(0, Math.floor(x / SIZE));
+  const maxColIndex = Math.min(colCount - 1, Math.ceil(x / SIZE));
+
+  const boxLeft = x + HERO_PADDING;
+  const boxRight = x + SIZE - HERO_PADDING;
+
+  for (let row = firstRow; row < rowCount; row++) {
+    for (let col = minCol; col <= maxColIndex; col++) {
+      const cell = levelGrid[row]?.[col];
+      if (
+        cell &&
+        !isNullItem(cell) &&
+        isSolid(cell.tileKey) &&
+        toLeft(cell) < boxRight &&
+        toRight(cell) > boxLeft
+      ) {
+        return cell;
+      }
+    }
+  }
+  return nullItem;
 }
 
 export function getAboveSolids(entity: ObjectState, level: Level): Item[] {
@@ -83,7 +124,8 @@ export function getLeftSolids(entity: ObjectState, level: Level): Item[] {
 }
 
 export function calcMaxY(entity: ObjectState, level: Level): number {
-  const bottom = getBottomSolids(entity, level);
+  // const bottom = getBottomSolids(entity, level);
+  const bottom = [getBottomSolidsOptimized(entity, level)];
 
   let maxY = Infinity;
   if (bottom.length > 0) {
@@ -92,6 +134,8 @@ export function calcMaxY(entity: ObjectState, level: Level): number {
   }
   return maxY;
 }
+
+
 
 export function calcMinY(entity: ObjectState, level: Level): number {
   const above = getAboveSolids(entity, level);

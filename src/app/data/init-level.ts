@@ -5,4 +5,7 @@ export const initLevel: Level = {
   backgroundColor: '#FFFFFF',
   items: [],
   gumbas: [],
+  levelGrid: [],
+  rowCount: 0,
+  colCount: 0,
 };

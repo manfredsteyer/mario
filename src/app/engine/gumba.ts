@@ -4,10 +4,7 @@ import type { Level } from './level';
 import { SIZE } from './palettes';
 import { getGumbaTile } from './gumba-tiles';
 import type { GameContext } from './game-context';
-import type { GumbaStart } from './types';
 import { calcMaxX, calcMinX } from './walls';
-
-export type { GumbaStart };
 
 export function resetGumbas(level?: Level): GumbaState[] {
   if (level?.gumbas?.length) {

@@ -2,16 +2,10 @@ import { HERO_PADDING, VELOCITY_Y } from './constants';
 import { getHeroTile } from './hero-tiles';
 import { keyboard } from './keyboard';
 import { SIZE } from './palettes';
+import { toBottom, toLeft, toRight } from './coordinates';
 import type { GameContext } from './game-context';
-import {
-  calcMaxX,
-  calcMaxY,
-  calcMinX,
-  calcMinY,
-  toBottom,
-  toLeft,
-  toRight,
-} from './walls';
+import type { Item } from './tiles';
+import { calcMaxX, calcMaxY, calcMinX, calcMinY } from './walls';
 
 export function drawHero(ctx: GameContext): void {
   const tile = getHeroTile(
@@ -89,7 +83,7 @@ function handleQuestionBlockHit(ctx: GameContext, timeStamp: number): void {
   const leftX = ctx.hero.position.x + SIZE - HERO_PADDING;
   const rightX = ctx.hero.position.x + HERO_PADDING;
 
-  const block = ctx.level.items.find((item) => {
+  const block = ctx.level.items.find((item: Item) => {
     return (
       item.tileKey === 'questionMark' &&
       toBottom(item) === y &&
@@ -102,11 +96,6 @@ function handleQuestionBlockHit(ctx: GameContext, timeStamp: number): void {
     return;
   }
 
-  const blockKey = `${block.col},${block.row}`;
-  if (ctx.hitQuestionBlocks.has(blockKey)) {
-    return;
-  }
-  ctx.hitQuestionBlocks.add(blockKey);
   block.tileKey = 'empty';
   ctx.risingCoins.push({
     col: block.col,

@@ -2,7 +2,7 @@ import { COIN_PADDING } from './constants';
 import type { Level } from './level';
 import type { GameContext } from './game-context';
 import { SIZE } from './palettes';
-import { toBottom, toLeft, toRight, toTop } from './walls';
+import { toBottom, toLeft, toRight, toTop } from './coordinates';
 
 export function resetLevelCoins(level: Level): void {
   for (const item of level.items) {

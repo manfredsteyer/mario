@@ -38,7 +38,6 @@ export type GameOptions = {
   hero: HeroState;
   gumbas: GumbaState[];
   risingCoins: RisingCoin[];
-  hitQuestionBlocks: Set<string>;
   animation: boolean;
   isFalling: boolean;
 };
@@ -70,7 +69,6 @@ export function createInitialGameOptions() {
     },
     gumbas: [] as GumbaState[],
     risingCoins: [] as RisingCoin[],
-    hitQuestionBlocks: new Set<string>(),
     animation: false,
     isFalling: false,
   };

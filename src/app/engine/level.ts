@@ -63,7 +63,7 @@ export type AnimateOptions = {
 };
 
 export function playLevel(options: AnimateOptions) {
-  const { canvas, level, tiles, heroTiles, gumbaTiles } = options;
+  const { canvas, level } = options;
 
   const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
 
@@ -114,6 +114,8 @@ function runGameLoop(gameOptions: GameOptions): void {
     scrollOffset: 0,
   };
 
+  console.log('delta', ctx.delta);
+
   moveHero(ctx);
   moveGumbas(ctx);
   scrollLevel(ctx);
@@ -142,7 +144,6 @@ function getInitialState(): {
   hero: HeroState;
   gumbas: GumbaState[];
   risingCoins: RisingCoin[];
-  hitQuestionBlocks: Set<string>;
   animation: boolean;
   isFalling: boolean;
 } {
@@ -155,7 +156,6 @@ function getInitialState(): {
     },
     gumbas: [] as GumbaState[],
     risingCoins: [] as RisingCoin[],
-    hitQuestionBlocks: new Set<string>(),
     animation: false,
     isFalling: false,
   };
@@ -192,8 +192,9 @@ function getOffset(_level: Level): number {
 }
 
 function scrollLevel(ctx: GameContext): void {
-  ctx.renderX = Math.min(ctx.hero.position.x, ctx.width / SCALE / 2 - SIZE);
-  ctx.scrollOffset = -Math.max(0, ctx.hero.position.x - ctx.renderX);
+  const center = ctx.width / SCALE / 2;
+  ctx.renderX = Math.min(ctx.hero.position.x, center - SIZE);
+  ctx.scrollOffset = -1 * (ctx.hero.position.x - ctx.renderX);
 }
 
 function checkFellOff(ctx: GameContext): void {
@@ -212,7 +213,6 @@ function resetLevelOnDeath(ctx: GameContext): void {
   ctx.hero = state.hero;
   ctx.gumbas = state.gumbas;
   ctx.risingCoins = state.risingCoins;
-  ctx.hitQuestionBlocks = state.hitQuestionBlocks;
   ctx.animation = state.animation;
   ctx.isFalling = state.isFalling;
 }

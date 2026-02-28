@@ -1,3 +1,4 @@
+import { toBottom, toLeft, toRight, toTop } from './coordinates';
 import { HERO_PADDING } from './constants';
 import { SIZE } from './palettes';
 import type { Item, TileName } from './tiles';
@@ -12,40 +13,6 @@ export type ObjectState = {
   position: Position;
 };
 
-export function getBlockWidth(tileKey: TileName): number {
-  if (tileKey === 'pipeTop') {
-    return 2;
-  }
-  return 1;
-}
-
-export function getBlockHeight(tileKey: TileName): number {
-  if (tileKey === 'pipeTop') {
-    return 3;
-  }
-  return 1;
-}
-
-export function toLeft(item: Item): number {
-  return item.col * SIZE;
-}
-
-export function toRight(item: Item): number {
-  const repeat = item.repeatCol ?? 1;
-  const blockWidth = getBlockWidth(item.tileKey);
-  return (item.col + repeat * blockWidth) * SIZE;
-}
-
-export function toTop(item: Item): number {
-  return item.row * SIZE;
-}
-
-export function toBottom(item: Item): number {
-  const repeat = item.repeatRow ?? 1;
-  const blockHeight = getBlockHeight(item.tileKey);
-  return (item.row + repeat * blockHeight) * SIZE;
-}
-
 function isSolid(key: TileName): boolean {
   return (
     key === 'floor' ||
@@ -55,14 +22,6 @@ function isSolid(key: TileName): boolean {
     key === 'questionMark' ||
     key === 'empty'
   );
-}
-
-function min(items: Item[], pick: (b: Item) => number): number {
-  return Math.min(...items.map(pick));
-}
-
-function max(items: Item[], pick: (b: Item) => number): number {
-  return Math.max(...items.map(pick));
 }
 
 export function getBottomSolids(entity: ObjectState, level: Level): Item[] {
@@ -163,4 +122,12 @@ export function calcMinX(entity: ObjectState, level: Level): number {
     minX = max(left, (b) => toRight(b));
   }
   return minX;
+}
+
+function min(items: Item[], pick: (b: Item) => number): number {
+  return Math.min(...items.map(pick));
+}
+
+function max(items: Item[], pick: (b: Item) => number): number {
+  return Math.max(...items.map(pick));
 }

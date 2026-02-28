@@ -2,7 +2,6 @@ import { GUMBA_SPEED, HERO_PADDING } from './constants';
 import type { GumbaState } from './game-context';
 import type { Level } from './level';
 import { SIZE } from './palettes';
-import type { GumbaTileSet } from './gumba-tiles';
 import { getGumbaTile } from './gumba-tiles';
 import type { GameContext } from './game-context';
 import type { GumbaStart } from './types';

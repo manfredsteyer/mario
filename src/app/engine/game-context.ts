@@ -41,6 +41,7 @@ export type GameOptions = {
   risingCoins: RisingCoin[];
   animation: boolean;
   isFalling: boolean;
+  isJumping: boolean;
   hitTop: boolean;
   hitTopTimeStamp?: number;
 };
@@ -87,6 +88,7 @@ export function createInitialGameOptions() {
     risingCoins: [] as RisingCoin[],
     animation: false,
     isFalling: false,
+    isJumping: false,
     hitTop: false,
   };
 }

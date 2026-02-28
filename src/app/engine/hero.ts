@@ -1,4 +1,10 @@
-import { HERO_PADDING, VELOCITY_Y } from './constants';
+import {
+  HERO_PADDING,
+  JUMP_DURATION_MS,
+  JUMP_GRAVITY_PER_100MS,
+  JUMP_VELOCITY,
+  VELOCITY_Y,
+} from './constants';
 import { getHeroTile } from './hero-tiles';
 import { keyboard } from './keyboard';
 import { SIZE } from './palettes';
@@ -22,7 +28,9 @@ export function drawHero(ctx: GameContext): void {
 export function moveHero(ctx: GameContext): void {
   let hitGround = false;
   let hitTop = false;
-  const isJumping = keyboard.up && ctx.timeStamp - ctx.hero.jumpStart < 500;
+  ctx.isJumping =
+    keyboard.up && ctx.timeStamp - ctx.hero.jumpStart < JUMP_DURATION_MS;
+  const isJumping = ctx.isJumping;
   const initY = ctx.hero.position.y;
 
   if (!isJumping) {
@@ -65,7 +73,12 @@ export function goLeft(ctx: GameContext): void {
 
 function jump(ctx: GameContext, delta: number, timeStamp: number): boolean {
   const minY = calcMinY(ctx.hero, ctx.level);
-  const candY = ctx.hero.position.y - 2 * delta;
+  const timeInJumpMs = timeStamp - ctx.hero.jumpStart;
+  const upwardVelocity = Math.max(
+    0,
+    JUMP_VELOCITY - (timeInJumpMs / 100) * JUMP_GRAVITY_PER_100MS
+  );
+  const candY = ctx.hero.position.y - upwardVelocity * delta;
   const newY = Math.max(candY, minY);
 
   ctx.hero.position.y = newY;

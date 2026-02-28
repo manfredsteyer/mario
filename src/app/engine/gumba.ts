@@ -4,13 +4,13 @@ import type { Level } from './level';
 import { SIZE } from './palettes';
 import { getGumbaTile } from './gumba-tiles';
 import type { GameContext } from './game-context';
-import { calcMaxX, calcMinX } from './walls-optimized';
+import { calcMaxX, calcMinX } from './walls';
 
 export function resetGumbas(level?: Level): GumbaState[] {
   if (level?.gumbas?.length) {
     return level.gumbas.map(({ col, row }) => ({
       position: { x: col * SIZE, y: row * SIZE },
-      direction: 'left' as const,
+      direction: 'left',
       alive: true,
     }));
   }

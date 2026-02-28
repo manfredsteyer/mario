@@ -58,6 +58,19 @@ export type GameContext = GameOptions & {
   scrollOffset: number;
 };
 
+// Subset of GameContext for just drawing the level
+export type LevelDrawContext = Pick<
+  GameContext,
+  | 'level'
+  | 'context'
+  | 'width'
+  | 'height'
+  | 'scrollOffset'
+  | 'tiles'
+  | 'risingCoins'
+  | 'timeStamp'
+>;
+
 export function createInitialGameOptions() {
   return {
     speed: 10,

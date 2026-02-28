@@ -80,10 +80,7 @@ export function getRightSolidOptimized(
   const x = entity.position.x;
   const firstCol = Math.min(colCount - 1, Math.ceil(x / SIZE));
   const minRow = Math.max(0, Math.floor(y / SIZE));
-  const maxRowIndex = Math.min(
-    rowCount - 1,
-    Math.floor((y + SIZE - 1) / SIZE)
-  );
+  const maxRowIndex = Math.min(rowCount - 1, Math.ceil(y / SIZE));
 
   const boxTop = y;
   const boxBottom = y + SIZE;
@@ -114,48 +111,37 @@ export function getLeftSolidOptimized(
   const x = entity.position.x;
   const maxCol = Math.max(0, Math.floor((x + HERO_PADDING) / SIZE));
   const minRow = Math.max(0, Math.floor(y / SIZE));
-  const maxRowIndex = Math.min(
-    rowCount - 1,
-    Math.floor((y + SIZE - 1) / SIZE)
-  );
+  const maxRowIndex = Math.min(rowCount - 1, Math.ceil(y / SIZE));
 
   const boxTop = y;
   const boxBottom = y + SIZE;
-
-  /** Bei mehrspaltigen Blöcken (z. B. pipeTop) die Zelle mit dem größten toRight nehmen. */
-  let best: Item = NULL_ITEM;
-  let bestRight = -1;
 
   for (let col = maxCol; col >= 0; col--) {
     for (let row = minRow; row <= maxRowIndex; row++) {
       const cell = levelGrid[row]?.[col];
       if (
         isSolid(cell.tileKey) &&
-        toRight(cell) >= x + HERO_PADDING &&
+        toRight(cell) <= x + HERO_PADDING &&
         toTop(cell) < boxBottom &&
         toBottom(cell) > boxTop
       ) {
-        const cellRight = toRight(cell);
-        if (cellRight > bestRight) {
-          bestRight = cellRight;
-          best = cell;
-        }
+        return cell;
       }
     }
   }
-  return best;
+  return NULL_ITEM;
 }
 
 export function calcMaxY(entity: ObjectState, level: Level): number {
   const bottom = getBottomSolidOptimized(entity, level);
   if (bottom.tileKey === 'air') return Infinity;
-  return toTop(bottom) - SIZE;
+  return bottom.row * SIZE - SIZE;
 }
 
 export function calcMinY(entity: ObjectState, level: Level): number {
   const above = getAboveSolidOptimized(entity, level);
   if (above.tileKey === 'air') return -Infinity;
-  return toBottom(above);
+  return above.row * SIZE + SIZE;
 }
 
 export function calcMaxX(entity: ObjectState, level: Level): number {

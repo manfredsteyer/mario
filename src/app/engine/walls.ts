@@ -1,113 +1,134 @@
-import { toBottom, toLeft, toRight, toTop } from './coordinates';
-import { HERO_PADDING } from './constants';
+import {
+  toBottom,
+  toLeft,
+  toRight,
+  toTop,
+} from './coordinates';
 import { SIZE } from './palettes';
-import { isSolid, type Item } from './tiles';
+import { isSolid, NULL_ITEM, type Item } from './tiles';
 import type { Level, ObjectState } from './types';
 
-export function getBottomSolids(entity: ObjectState, level: Level): Item[] {
-  const y = entity.position.y;
-  const leftX = entity.position.x + SIZE - HERO_PADDING;
-  const rightX = entity.position.x + HERO_PADDING;
+export function getBottomSolidOptimized(
+  entity: ObjectState,
+  level: Level
+): Item {
+  const { levelGrid, rowCount, colCount } = level;
 
-  return level.items.filter((item) => {
-    return (
-      toTop(item) > y &&
-      toLeft(item) < leftX &&
-      toRight(item) > rightX &&
-      isSolid(item.tileKey)
-    );
-  });
-}
-
-export function getAboveSolids(entity: ObjectState, level: Level): Item[] {
-  const y = entity.position.y;
-  const leftX = entity.position.x + SIZE - HERO_PADDING;
-  const rightX = entity.position.x + HERO_PADDING;
-
-  return level.items.filter((item) => {
-    return (
-      toBottom(item) <= y &&
-      toLeft(item) < leftX &&
-      toRight(item) > rightX &&
-      isSolid(item.tileKey)
-    );
-  });
-}
-
-export function getRightSolids(entity: ObjectState, level: Level): Item[] {
   const y = entity.position.y;
   const x = entity.position.x;
 
-  return level.items.filter((item) => {
-    return (
-      toLeft(item) >= x &&
-      toTop(item) <= y &&
-      toBottom(item) >= y &&
-      isSolid(item.tileKey)
-    );
-  });
+  const startRow = Math.floor(y / SIZE) + 1;
+  const leftCol = Math.max(0, Math.floor(x / SIZE));
+  const rightCol = Math.min(colCount - 1, Math.ceil(x  / SIZE));
+
+  for (let row = startRow; row < rowCount; row++) {
+    for (let col = leftCol; col <= rightCol; col++) {
+      const cell = levelGrid[row][col];
+      if (isSolid(cell.tileKey)) {
+        return cell;
+      }
+    }
+  }
+  return NULL_ITEM;
 }
 
-export function getLeftSolids(entity: ObjectState, level: Level): Item[] {
+export function getAboveSolidOptimized(
+  entity: ObjectState,
+  level: Level
+): Item {
+  const { levelGrid, colCount } = level;
+
   const y = entity.position.y;
   const x = entity.position.x;
 
-  return level.items.filter((item) => {
-    return (
-      toRight(item) <= x + HERO_PADDING &&
-      toTop(item) <= y &&
-      toBottom(item) >= y &&
-      isSolid(item.tileKey)
-    );
-  });
+  const startRow = Math.floor(y / SIZE) - 1;
+  const leftCol = Math.max(0, Math.floor(x / SIZE));
+  const rightCol = Math.min(
+    colCount - 1,
+    Math.ceil(x  / SIZE)
+  );
+
+  for (let row = startRow; row >= 0; row--) {
+    for (let col = leftCol; col <= rightCol; col++) {
+      const cell = levelGrid[row][col];
+      if (isSolid(cell.tileKey)) {
+        return cell;
+      }
+    }
+  }
+  return NULL_ITEM;
+}
+
+export function getRightSolidOptimized(
+  entity: ObjectState,
+  level: Level
+): Item {
+  const { levelGrid, rowCount, colCount } = level;
+
+  const y = entity.position.y;
+  const x = entity.position.x;
+  const startCol = Math.min(colCount - 1, Math.ceil(x / SIZE));
+  const upperRow = Math.max(0, Math.floor(y / SIZE));
+  const lowerRow = Math.min(rowCount - 1, Math.ceil(y / SIZE));
+
+  for (let col = startCol; col < colCount; col++) {
+    for (let row = upperRow; row <= lowerRow; row++) {
+      const cell = levelGrid[row][col];
+      if (isSolid(cell.tileKey)) {
+        return cell;
+      }
+    }
+  }
+  return NULL_ITEM;
+}
+
+export function getLeftSolidOptimized(
+  entity: ObjectState,
+  level: Level
+): Item {
+  const { levelGrid, rowCount, colCount } = level;
+
+  const y = entity.position.y;
+  const x = entity.position.x;
+
+  const startCol = Math.min(colCount - 1, Math.max(0, Math.floor(x / SIZE)));
+  const upperRow = Math.max(0, Math.floor(y / SIZE));
+  const lowerRow = Math.min(
+    rowCount - 1,
+    Math.ceil(y / SIZE)
+  );
+
+  for (let col = startCol; col >= 0; col--) {
+    for (let row = upperRow; row <= lowerRow; row++) {
+      const cell = levelGrid[row][col];
+      if (isSolid(cell.tileKey)) {
+        return cell;
+      }
+    }
+  }
+  return NULL_ITEM;
 }
 
 export function calcMaxY(entity: ObjectState, level: Level): number {
-  const bottom = getBottomSolids(entity, level);
-
-  let maxY = Infinity;
-  if (bottom.length > 0) {
-    const maxRow = min(bottom, (b) => b.row);
-    maxY = maxRow * SIZE - SIZE;
-  }
-  return maxY;
+  const bottom = getBottomSolidOptimized(entity, level);
+  if (bottom.tileKey === 'air') return Infinity;
+  return toTop(bottom) - SIZE;
 }
 
 export function calcMinY(entity: ObjectState, level: Level): number {
-  const above = getAboveSolids(entity, level);
-
-  let minY = -Infinity;
-  if (above.length > 0) {
-    const minRow = max(above, (b) => b.row);
-    minY = minRow * SIZE + SIZE;
-  }
-  return minY;
+  const above = getAboveSolidOptimized(entity, level);
+  if (above.tileKey === 'air') return -Infinity;
+  return toBottom(above);
 }
 
 export function calcMaxX(entity: ObjectState, level: Level): number {
-  const right = getRightSolids(entity, level);
-
-  let maxX = Infinity;
-  if (right.length > 0) {
-    const minCol = min(right, (b) => toLeft(b));
-    maxX = minCol - SIZE;
-  }
-  return maxX;
+  const right = getRightSolidOptimized(entity, level);
+  if (right.tileKey === 'air') return Infinity;
+  return toLeft(right) - SIZE;
 }
 
 export function calcMinX(entity: ObjectState, level: Level): number {
-  const left = getLeftSolids(entity, level);
-  let minX = -Infinity;
-  if (left.length > 0) {
-    minX = max(left, (b) => toRight(b));
-  }
-  return minX;
-}
-
-function min(items: Item[], pick: (b: Item) => number): number {
-  return Math.min(...items.map(pick));
-}
-
-function max(items: Item[], pick: (b: Item) => number): number {
-  return Math.max(...items.map(pick));
+  const left = getLeftSolidOptimized(entity, level);
+  if (left.tileKey === 'air') return -Infinity;
+  return toRight(left);
 }

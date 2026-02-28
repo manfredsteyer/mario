@@ -16,7 +16,7 @@ import { HttpProgressEvent } from '@angular/common/http';
 //
 //  In this example, we treat the game "engine" as a black box
 //
-import { playLevel, renderLevel, stopAnimation } from '../engine/level';
+import { playLevel, renderLevel, stopGame } from '../engine/level';
 import { Style } from '../engine/palettes';
 import { HeroMapLoader } from '../data/hero-map-loader';
 import { EnemiesMapLoader } from '../data/enemies-map-loader';
@@ -66,7 +66,7 @@ export class LevelComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    stopAnimation();
+    stopGame();
   }
 
   togglePlay() {

@@ -5,7 +5,7 @@ import { SIZE } from './palettes';
 import { toBottom, toLeft, toRight } from './coordinates';
 import type { GameContext } from './game-context';
 import type { Item } from './tiles';
-import { calcMaxX, calcMaxY, calcMinX, calcMinY } from './walls-optimized';
+import { calcMaxX, calcMaxY, calcMinX, calcMinY } from './walls';
 
 export function drawHero(ctx: GameContext): void {
   const tile = getHeroTile(
@@ -51,7 +51,7 @@ export function goRight(ctx: GameContext): void {
   const hero = ctx.hero;
   const maxX = calcMaxX(hero, ctx.level);
   const candX = hero.position.x + 1 * ctx.delta;
-  hero.position.x = Math.min(candX, maxX + HERO_PADDING);
+  hero.position.x = Math.min(candX, maxX);
   ctx.direction = 'right';
 }
 
@@ -59,15 +59,13 @@ export function goLeft(ctx: GameContext): void {
   const hero = ctx.hero;
   const minX = calcMinX(hero, ctx.level);
   const candX = hero.position.x - 1 * ctx.delta;
-  hero.position.x = Math.max(candX, minX - HERO_PADDING);
+  hero.position.x = Math.max(candX, minX);
   ctx.direction = 'left';
 }
 
 function jump(ctx: GameContext, delta: number, timeStamp: number): boolean {
   const minY = calcMinY(ctx.hero, ctx.level);
   const candY = ctx.hero.position.y - 2 * delta;
-
-  console.log('minY', minY, 'candY', candY);
   const newY = Math.max(candY, minY);
 
   ctx.hero.position.y = newY;
@@ -140,7 +138,6 @@ export function checkHitQuestionMark(ctx: GameContext): void {
     ctx.risingCoins.push({ col: hitCol, row: hitRow, startTime: timeStamp });
   }
 
-  // Update levelGrid so the entire block shows the new tiles
   const { levelGrid } = ctx.level;
   for (let c = 0; c < repeatCol; c++) {
     const col = baseCol + c;

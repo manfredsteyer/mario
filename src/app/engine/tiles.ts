@@ -1,13 +1,14 @@
 import { addTransparency } from './color-utils';
+import type { LevelDrawContext } from './game-context';
 import { getPalettes, Palette, Palettes, SIZE, Style } from './palettes';
 
 export type Tile =
   | ImageBitmap
   | (ImageBitmap | null)[]
   | (ImageBitmap | null)[][];
-export type NormalizedTile = ImageBitmap[][];
+type NormalizedTile = ImageBitmap[][];
 
-export type BaseTileSet = {
+type BaseTileSet = {
   cloudTopLeft: ImageBitmap;
   cloudTopMiddle: ImageBitmap;
   cloudTopRight: ImageBitmap;
@@ -41,12 +42,11 @@ export type BaseTileSet = {
   pipeRight: ImageBitmap;
   treeTop: ImageBitmap;
   treeBottom: ImageBitmap;
-  /** Transparent tile for empty cells and collected state */
   air: ImageBitmap;
   collected: ImageBitmap;
 };
 
-export type TileCollections = {
+type TileCollections = {
   treeCrown: Tile;
   smallHill: Tile;
   hill: Tile;
@@ -72,68 +72,18 @@ export type TileName = keyof TileSet;
 
 export type Item = {
   tileKey: TileName;
-  /** Tile for drawing; set on grid cells, optional on placement items (then resolved via tileKey) */
-  tile?: Tile | null;
+  tile?: ImageBitmap;
 } & DrawOptions;
 
 export const NULL_ITEM: Item = {
   tileKey: 'air',
-  tile: null,
+  tile: undefined,
   col: 0,
   row: 0,
 };
 
-/** Same shape as TileCollections but values are 2D arrays of cell keys (string | null). */
-export type KeyTileCollections = {
-  [K in keyof TileCollections]: (string | null)[][];
-};
-
-const keyBaseTileSet = {
-  cloudTopLeft: 'cloudTopLeft',
-  cloudTopMiddle: 'cloudTopMiddle',
-  cloudTopRight: 'cloudTopRight',
-  cloudBottomLeft: 'cloudBottomLeft',
-  cloudBottomMiddle: 'cloudBottomMiddle',
-  cloudBottomRight: 'cloudBottomRight',
-  waves: 'waves',
-  water: 'water',
-  floor: 'floor',
-  solid: 'solid',
-  empty: 'empty',
-  brick: 'brick',
-  stump: 'stump',
-  questionMark: 'questionMark',
-  coin: 'coin',
-  topLeft: 'topLeft',
-  topMiddle: 'topMiddle',
-  topRight: 'topRight',
-  bushLeft: 'bushLeft',
-  bushMiddle: 'bushMiddle',
-  bushRight: 'bushRight',
-  hillLeft: 'hillLeft',
-  hillInnerLeft: 'hillInnerLeft',
-  hillMiddle: 'hillMiddle',
-  hillInnerRight: 'hillInnerRight',
-  hillRight: 'hillRight',
-  hillTop: 'hillTop',
-  pipeTopLeft: 'pipeTopLeft',
-  pipeLeft: 'pipeLeft',
-  pipeTopRight: 'pipeTopRight',
-  pipeRight: 'pipeRight',
-  treeTop: 'treeTop',
-  treeBottom: 'treeBottom',
-  air: 'air',
-  collected: 'collected',
-} as unknown as BaseTileSet;
-
-/** One-time key collections: name → 2D array of cell keys (null = air). Use as single source for tile/collection names. */
-export function getKeyCollections(): KeyTileCollections {
-  return createCollections(keyBaseTileSet) as unknown as KeyTileCollections;
-}
-
 export function isSolid(key: TileName): boolean {
   return (
-    key !== 'air' &&
     (key === 'floor' ||
       key === 'brick' ||
       key === 'solid' ||
@@ -152,16 +102,7 @@ type NormalizedDrawTileOptions = {
   pixelOffsetY: number;
 };
 
-export const defaultDrawTileOptions: NormalizedDrawTileOptions = {
-  col: 0,
-  row: 0,
-  repeatCol: 1,
-  repeatRow: 1,
-  pixelOffsetX: 0,
-  pixelOffsetY: 0,
-};
-
-export type TileSize = {
+type TileSize = {
   cols: number;
   rows: number;
 };
@@ -175,7 +116,7 @@ export async function loadTiles(
   return { ...tiles, ...collections };
 }
 
-export function createCollections(tiles: BaseTileSet): TileCollections {
+function createCollections(tiles: BaseTileSet): TileCollections {
   return {
     treeCrown: [[tiles.treeTop], [tiles.treeBottom]],
     smallHill: [
@@ -283,45 +224,16 @@ async function createTiles(bitmap: ImageBitmap, palettes: Palettes) {
   return tiles;
 }
 
-export type DrawTileContext = {
-  context: CanvasRenderingContext2D;
-  tiles: TileSet;
-  scrollOffset: number;
-};
 
-export function drawTile(ctx: DrawTileContext, item: Item): void {
-  const tile = item.tile;
-  if (!tile) {
+export function drawTile(ctx: LevelDrawContext, item: Item): void {
+  if (!item.tile) {
     return;
   }
-
-  const { tileKey: _tileKey, tile: _tile, ...options } = item;
-  const normOptions: NormalizedDrawTileOptions = {
-    ...defaultDrawTileOptions,
-    ...options,
-  };
-
-  const normTile = normalizeTile(tile);
-  const size = getTileSize(normTile);
-
-  for (let colRep = 0; colRep < normOptions.repeatCol; colRep++) {
-    for (let rowRep = 0; rowRep < normOptions.repeatRow; rowRep++) {
-      for (let colOffset = 0; colOffset < size.cols; colOffset++) {
-        for (let rowOffset = 0; rowOffset < size.rows; rowOffset++) {
-          const col = options.col + colOffset + colRep * size.cols;
-          const row = options.row + rowOffset + rowRep * size.rows;
-          const image = normTile[rowOffset][colOffset];
-          if (image) {
-            ctx.context.drawImage(
-              image,
-              SIZE * col + ctx.scrollOffset + normOptions.pixelOffsetX,
-              SIZE * row + normOptions.pixelOffsetY
-            );
-          }
-        }
-      }
-    }
-  }
+  ctx.context.drawImage(
+    item.tile,
+    SIZE * item.col + ctx.scrollOffset,
+    SIZE * item.row
+  );
 }
 
 export function normalizeTile(tile: Tile): ImageBitmap[][] {
@@ -332,17 +244,6 @@ export function normalizeTile(tile: Tile): ImageBitmap[][] {
     return [tile] as ImageBitmap[][];
   }
   return tile as ImageBitmap[][];
-}
-
-/** Get a single cell from a tile (for grid building). */
-export function getTileCell(
-  tile: Tile,
-  row: number,
-  col: number
-): ImageBitmap | null {
-  const norm = normalizeTile(tile);
-  const cell = norm[row]?.[col];
-  return cell ?? null;
 }
 
 export function getTileSize(tile: NormalizedTile): TileSize {
@@ -373,7 +274,6 @@ export async function extractTiles(tilesMap: Blob, style: Style) {
   const bitmap = await createImageBitmap(tilesMap);
   const correctedBitmap = await addTransparency(bitmap, '#9494ff');
   const palettes = getPalettes(style);
-  console.log('palettes', palettes);
   const tiles = await loadTiles(correctedBitmap, palettes);
   return tiles;
 }

@@ -9,13 +9,13 @@ import { isSolid, NULL_ITEM, type Item } from './tiles';
 import type { Level, ObjectState } from './types';
 
 export function getBottomSolidOptimized(
-  entity: ObjectState,
+  hero: ObjectState,
   level: Level
 ): Item {
   const { levelGrid, rowCount, colCount } = level;
 
-  const y = entity.position.y;
-  const x = entity.position.x;
+  const y = hero.position.y;
+  const x = hero.position.x;
 
   const startRow = Math.floor(y / SIZE) + 1;
   const leftCol = Math.max(0, Math.floor(x / SIZE));
@@ -32,8 +32,8 @@ export function getBottomSolidOptimized(
   return NULL_ITEM;
 }
 
-export function calcMaxY(entity: ObjectState, level: Level): number {
-  const bottom = getBottomSolidOptimized(entity, level);
+export function calcMaxY(hero: ObjectState, level: Level): number {
+  const bottom = getBottomSolidOptimized(hero, level);
   if (bottom.tileKey === 'air') {
     return Infinity;
   }
@@ -41,13 +41,13 @@ export function calcMaxY(entity: ObjectState, level: Level): number {
 }
 
 export function getAboveSolidOptimized(
-  entity: ObjectState,
+  hero: ObjectState,
   level: Level
 ): Item {
   const { levelGrid, colCount } = level;
 
-  const y = entity.position.y;
-  const x = entity.position.x;
+  const y = hero.position.y;
+  const x = hero.position.x;
 
   const startRow = Math.floor(y / SIZE) - 1;
   const leftCol = Math.max(0, Math.floor(x / SIZE));
@@ -67,8 +67,8 @@ export function getAboveSolidOptimized(
   return NULL_ITEM;
 }
 
-export function calcMinY(entity: ObjectState, level: Level): number {
-  const above = getAboveSolidOptimized(entity, level);
+export function calcMinY(hero: ObjectState, level: Level): number {
+  const above = getAboveSolidOptimized(hero, level);
   if (above.tileKey === 'air') {
     return -Infinity;
   }
@@ -76,13 +76,13 @@ export function calcMinY(entity: ObjectState, level: Level): number {
 }
 
 export function getRightSolidOptimized(
-  entity: ObjectState,
+  hero: ObjectState,
   level: Level
 ): Item {
   const { levelGrid, rowCount, colCount } = level;
 
-  const y = entity.position.y;
-  const x = entity.position.x;
+  const y = hero.position.y;
+  const x = hero.position.x;
   const startCol = Math.min(colCount - 1, Math.ceil(x / SIZE));
   const upperRow = Math.max(0, Math.floor(y / SIZE));
   const lowerRow = Math.min(rowCount - 1, Math.ceil(y / SIZE));
@@ -98,8 +98,8 @@ export function getRightSolidOptimized(
   return NULL_ITEM;
 }
 
-export function calcMinX(entity: ObjectState, level: Level): number {
-  const left = getLeftSolidOptimized(entity, level);
+export function calcMinX(hero: ObjectState, level: Level): number {
+  const left = getLeftSolidOptimized(hero, level);
   if (left.tileKey === 'air') {
     return -Infinity;
   }
@@ -107,13 +107,13 @@ export function calcMinX(entity: ObjectState, level: Level): number {
 }
 
 export function getLeftSolidOptimized(
-  entity: ObjectState,
+  hero: ObjectState,
   level: Level
 ): Item {
   const { levelGrid, rowCount, colCount } = level;
 
-  const y = entity.position.y;
-  const x = entity.position.x;
+  const y = hero.position.y;
+  const x = hero.position.x;
 
   const startCol = Math.min(colCount - 1, Math.max(0, Math.floor(x / SIZE)));
   const upperRow = Math.max(0, Math.floor(y / SIZE));
@@ -133,8 +133,8 @@ export function getLeftSolidOptimized(
   return NULL_ITEM;
 }
 
-export function calcMaxX(entity: ObjectState, level: Level): number {
-  const right = getRightSolidOptimized(entity, level);
+export function calcMaxX(hero: ObjectState, level: Level): number {
+  const right = getRightSolidOptimized(hero, level);
   if (right.tileKey === 'air') {
     return Infinity;
   }

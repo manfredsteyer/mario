@@ -138,7 +138,8 @@ function runGameLoop(gameOptions: GameOptions): void {
   drawHero(ctx);
   drawGumbas(ctx);
 
-  drawGrid(ctx);
+  // Just for demo purposes
+  // drawGrid(ctx);
 
   if (didHeroDie(ctx)) {
     resetLevelOnDeath(ctx);

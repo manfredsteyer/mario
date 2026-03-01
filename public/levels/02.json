@@ -110,5 +110,10 @@
     { "tileKey": "coin", "col": 48, "row": 7 },
     { "tileKey": "coin", "col": 48, "row": 6 },
     { "tileKey": "coin", "col": 47, "row": 6 }
+  ], "gumbas": [
+    { "col": 16, "row": 12 },
+    { "col": 28, "row": 12 },
+    { "col": 58, "row": 12 }
+
   ]
 }

@@ -16,8 +16,10 @@ import { HttpProgressEvent } from '@angular/common/http';
 //
 //  In this example, we treat the game "engine" as a black box
 //
+import { runHeroDemo } from '../engine/hero-demo';
 import { playLevel, renderLevel, stopGame } from '../engine/level';
 import { Style } from '../engine/palettes';
+import { config } from '../config';
 import { HeroMapLoader } from '../data/hero-map-loader';
 import { EnemiesMapLoader } from '../data/enemies-map-loader';
 import { BlurOnChangeDirective } from '../shared/blur-on-change.directive';
@@ -60,8 +62,18 @@ export class LevelComponent implements OnDestroy {
       this.initCanvas();
     });
 
+    // this.runMiniDemo();
+
     effect(() => {
       this.render();
+    });
+  }
+
+  private runMiniDemo() {
+    effect(() => {
+      const canvas = this.canvas()?.nativeElement;
+      if (!canvas) return;
+      runHeroDemo(canvas);
     });
   }
 

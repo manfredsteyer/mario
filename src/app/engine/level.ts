@@ -208,12 +208,6 @@ function getOffset(_level: Level): number {
   return 0;
 }
 
-function scrollLevel(ctx: GameContext): void {
-  const center = ctx.width / SCALE / 2;
-  ctx.renderX = Math.min(ctx.hero.position.x, center - SIZE);
-  ctx.scrollOffset = -1 * (ctx.hero.position.x - ctx.renderX);
-}
-
 function checkFellOff(ctx: GameContext): void {
   const bottom = ctx.height / SCALE;
   ctx.fellOff = ctx.hero.position.y > bottom;
@@ -242,15 +236,15 @@ function resetLevelOnDeath(ctx: GameContext): void {
 
 export function drawGrid(ctx: GameContext): void {
   const { context, width, height, scrollOffset } = ctx;
-  const firstCol = Math.floor(-scrollOffset / SIZE);
-  const lastCol = Math.ceil((width - scrollOffset) / SIZE);
+  const firstCol = Math.floor(scrollOffset / SIZE);
+  const lastCol = Math.ceil((width + scrollOffset) / SIZE);
   const lastRow = Math.ceil(height / SIZE);
 
   context.strokeStyle = 'rgba(255, 255, 255, 0.25)';
   context.lineWidth = 1;
 
   for (let col = firstCol; col <= lastCol; col++) {
-    const x = col * SIZE + scrollOffset;
+    const x = col * SIZE - scrollOffset;
     context.beginPath();
     context.moveTo(x, 0);
     context.lineTo(x, height);
@@ -265,6 +259,14 @@ export function drawGrid(ctx: GameContext): void {
   }
 }
 
+function scrollLevel(ctx: GameContext): void {
+  const center = ctx.width / SCALE / 2;
+  const x = ctx.hero.position.x;
+
+  ctx.renderX = Math.min(x, center - SIZE);
+  ctx.scrollOffset = (x - ctx.renderX);
+}
+
 function drawLevel(ctx: LevelDrawContext): void {
   const { level, context, width, height, scrollOffset } = ctx;
   const { levelGrid, rowCount, colCount } = level;
@@ -274,21 +276,13 @@ function drawLevel(ctx: LevelDrawContext): void {
 
   drawRisingCoins(ctx);
 
-  const firstCol = Math.max(0, Math.floor(-scrollOffset / SIZE) - 1);
+  const firstCol = Math.max(0, Math.floor(scrollOffset / SIZE) - 1);
   const lastCol = Math.min(
     colCount - 1,
-    Math.ceil((width - scrollOffset) / SIZE) + 1
-  );
-  const lastRow = Math.min(
-    rowCount - 1,
-    Math.ceil(height / SIZE) - 1
+    Math.ceil((width + scrollOffset) / SIZE) + 1
   );
 
-  if (rowCount === 0 || colCount === 0 || firstCol > lastCol) {
-    return;
-  }
-
-  for (let row = 0; row <= lastRow; row++) {
+  for (let row = 0; row < rowCount; row++) {
     for (let col = firstCol; col <= lastCol; col++) {
       const cell = levelGrid[row][col];
         drawTile(ctx, cell);

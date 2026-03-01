@@ -110,7 +110,7 @@ export function drawGumbas(ctx: GameContext): void {
       continue;
     }
     const tile = getGumbaTile(ctx.timeStamp, ctx.gumbaTiles);
-    const x = gumba.position.x + ctx.scrollOffset;
+    const x = gumba.position.x - ctx.scrollOffset;
     const y = gumba.position.y;
     ctx.context.drawImage(tile, x, y);
   }

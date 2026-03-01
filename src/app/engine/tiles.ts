@@ -231,7 +231,7 @@ export function drawTile(ctx: LevelDrawContext, item: Item): void {
   }
   ctx.context.drawImage(
     item.tile,
-    SIZE * item.col + ctx.scrollOffset,
+    SIZE * item.col - ctx.scrollOffset,
     SIZE * item.row
   );
 }

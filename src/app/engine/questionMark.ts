@@ -15,7 +15,7 @@ export function drawRisingCoins(ctx: LevelDrawContext): void {
     stillRising.push(rc);
     const upProgress = progress <= 0.5 ? progress * 2 : (1 - progress) * 2;
     const yOffset = upProgress * RISE_DISTANCE;
-    const x = SIZE * rc.col + ctx.scrollOffset;
+    const x = SIZE * rc.col - ctx.scrollOffset;
     const y = SIZE * rc.row - yOffset;
     ctx.context.drawImage(coinTile, x, y);
   }

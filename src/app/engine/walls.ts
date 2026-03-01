@@ -12,23 +12,9 @@ export function getBottomSolidOptimized(
   hero: ObjectState,
   level: Level
 ): Item {
-  const { levelGrid, rowCount, colCount } = level;
 
-  const y = hero.position.y;
-  const x = hero.position.x;
+  // TODO 2: Find first solid item below hero
 
-  const startRow = Math.floor(y / SIZE) + 1;
-  const leftCol = Math.max(0, Math.floor(x / SIZE));
-  const rightCol = Math.min(colCount - 1, Math.ceil(x  / SIZE));
-
-  for (let row = startRow; row < rowCount; row++) {
-    for (let col = leftCol; col <= rightCol; col++) {
-      const cell = levelGrid[row][col];
-      if (isSolid(cell.tileKey)) {
-        return cell;
-      }
-    }
-  }
   return NULL_ITEM;
 }
 

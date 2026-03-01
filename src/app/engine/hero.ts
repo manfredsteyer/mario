@@ -182,21 +182,14 @@ export function checkHitQuestionMark(ctx: GameContext): void {
 }
 
 function applyGravity(ctx: GameContext): GravityStatus {
-  const y = ctx.hero.position.y;
-  const maxY = calcMaxY(ctx.hero, ctx.level);
+  
+  // TODO 1: Implement velocity
+  
+  // 1.1: Check how far the hero can fall 
+  // 1.2: Increase velocity while falling
+  // 1.3: Incrase y by velocity
+  //
+  // You need: ctx.hero, getMaxY
 
-  const velocity = ctx.hero.fallVelocity + FALL_GRAVITY * ctx.delta;
-  const candY = y + velocity * ctx.delta;
-
-  const newY = Math.min(maxY, candY);
-  ctx.hero.position.y = newY;
-
-  if (newY !== y) {
-    ctx.hero.fallVelocity = velocity;
-    return 'FALLING';
-  }
-  else {
-    ctx.hero.fallVelocity = 0;
-    return 'NOT_FALLING';
-  }
+  return 'NOT_FALLING';
 }

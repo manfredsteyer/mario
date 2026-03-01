@@ -2,6 +2,13 @@
 
 In this lab, you will implement selected aspects of the ngMario side scrolling platformer game.
 
+The goals of these labs are:
+
+- Having fun!
+- Learning or repeating typical game development patterns
+
+Besides this, such labs are a nice way to train programming skills and a good fit for hackathons.
+
 
 ## Task 1: Gravity
 
@@ -30,7 +37,7 @@ In `src/app/engine/walls.ts`, find out what's the first tile that stops you from
 
 In `src/app/engine/level.ts`, implement side scrolling:
 
-- When reacing the screen's center, instead of moving the hero, scroll the level
+- When reaching the screen's center, instead of moving the hero, scroll the level
 - `renderX` is the position where the hero is paint in the window
 - `scrollOffset` defines how much to scroll
 

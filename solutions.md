@@ -3,6 +3,8 @@
 ## Lab 1: Apply Gravity
 
 ```ts
+// src/app/engine/hero.ts
+
 function applyGravity(ctx: GameContext): GravityStatus {
   const y = ctx.hero.position.y;
   const maxY = 12 * SIZE;
@@ -27,6 +29,8 @@ function applyGravity(ctx: GameContext): GravityStatus {
 ## Lab 2: Check for Wallss
 
 ```ts
+// src/app/engine/walls.ts
+
 export function getAboveSolidOptimized(
   entity: ObjectState,
   level: Level
@@ -56,8 +60,12 @@ export function getAboveSolidOptimized(
 ```
 
 ```ts
+// src/app/engine/hero.ts
+
 function applyGravity(ctx: GameContext): GravityStatus {
   const y = ctx.hero.position.y;
+
+  // Call calcMaxY
   const maxY = calcMaxY(ctx.hero, ctx.level);
 
   const velocity = ctx.hero.fallVelocity + FALL_GRAVITY * ctx.delta;
@@ -80,6 +88,8 @@ function applyGravity(ctx: GameContext): GravityStatus {
 ## Lab 3: Side Scrolling
 
 ```ts
+// src/app/engine/level.ts
+
 function scrollLevel(ctx: GameContext): void {
   const center = ctx.width / SCALE / 2;
   const x = ctx.hero.position.x;
@@ -90,6 +100,8 @@ function scrollLevel(ctx: GameContext): void {
 ```
 
 ```ts
+// src/app/engine/level.ts
+
 function drawLevel(ctx: LevelDrawContext): void {
   const { level, context, width, height, scrollOffset } = ctx;
   const { levelGrid, rowCount, colCount } = level;
@@ -111,5 +123,24 @@ function drawLevel(ctx: LevelDrawContext): void {
         drawTile(ctx, cell);
     }
   }
+}
+```
+
+## Lab 4: Collision Detection
+
+
+```ts
+// src/app/engine/gumba.ts
+
+export function checkHeroGumbaCollision(ctx: GameContext): void {
+  [...]
+
+    const overlaps =
+      heroRight > gumbaLeft &&
+      heroLeft < gumbaRight &&
+      heroBottom > gumbaTop &&
+      heroTop < gumbaBottom;
+
+  [...]
 }
 ```

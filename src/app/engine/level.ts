@@ -165,6 +165,7 @@ function getInitialState(): {
     hero: {
       position: { x: 16, y: 0 },
       acceleration: 0,
+      fallStart: 0,
       jumpStart: 0,
       runStart: 0,
     },

@@ -3,7 +3,6 @@ import {
   JUMP_DURATION_MS,
   JUMP_GRAVITY_PER_100MS,
   JUMP_VELOCITY,
-  VELOCITY_Y,
 } from './constants';
 import { getHeroTile } from './hero-tiles';
 import { keyboard } from './keyboard';
@@ -12,6 +11,8 @@ import { toBottom, toLeft, toRight } from './coordinates';
 import type { GameContext } from './game-context';
 import type { Item } from './tiles';
 import { calcMaxX, calcMaxY, calcMinX, calcMinY } from './walls';
+
+export type GravityStatus = 'NOT_FALLING' | 'FALLING';
 
 export function drawHero(ctx: GameContext): void {
   const tile = getHeroTile(
@@ -35,7 +36,8 @@ export function moveHero(ctx: GameContext): void {
 
   if (!isJumping) {
     ctx.hero.jumpStart = 0;
-    hitGround = applyGravity(ctx);
+    const gravityStatus = applyGravity(ctx);
+    hitGround = (gravityStatus === 'NOT_FALLING');
   } else {
     hitTop = jump(ctx, ctx.delta, ctx.timeStamp);
   }
@@ -167,11 +169,23 @@ export function checkHitQuestionMark(ctx: GameContext): void {
   ctx.hitTopTimeStamp = undefined;
 }
 
-function applyGravity(ctx: GameContext): boolean {
-  const maxY = calcMaxY(ctx.hero, ctx.level);
+function applyGravity(ctx: GameContext): GravityStatus {
+  
   const y = ctx.hero.position.y;
-  const candY = y + VELOCITY_Y * ctx.delta;
+  const maxY = calcMaxY(ctx.hero, ctx.level);
+
+  const acceleration = ctx.hero.acceleration + 0.10 * ctx.delta;
+  const candY = y + acceleration;
+
   const newY = Math.min(maxY, candY);
   ctx.hero.position.y = newY;
-  return newY === y;
+
+  if (newY !== y) {
+    ctx.hero.acceleration = acceleration;
+    return 'FALLING';
+  }
+  else {
+    ctx.hero.acceleration = 0;
+    return 'NOT_FALLING';
+  }
 }

@@ -15,6 +15,7 @@ export type RisingCoin = {
 export type HeroState = ObjectState & {
   acceleration: number;
   jumpStart: number;
+  fallStart: number;
   runStart: number;
 };
 
@@ -82,6 +83,7 @@ export function createInitialGameOptions() {
       position: { x: 16, y: 0 },
       acceleration: 0,
       jumpStart: 0,
+      fallStart: 0,
       runStart: 0,
     },
     gumbas: [] as GumbaState[],

@@ -78,13 +78,13 @@ export function checkHeroGumbaCollision(ctx: GameContext): void {
     const gumbaTop = gumba.position.y;
     const gumbaBottom = gumbaTop + SIZE;
 
-    const overlaps =
+    const isCollition =
       heroRight > gumbaLeft &&
       heroLeft < gumbaRight &&
       heroBottom > gumbaTop &&
       heroTop < gumbaBottom;
 
-    if (!overlaps) {
+    if (!isCollition) {
       continue;
     }
 

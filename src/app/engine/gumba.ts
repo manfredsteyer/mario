@@ -78,7 +78,7 @@ export function checkHeroGumbaCollision(ctx: GameContext): void {
     const gumbaTop = gumba.position.y;
     const gumbaBottom = gumbaTop + SIZE;
 
-    // TODO 4: Check for collision
+    // TODO 5: Check for collision
     const isCollition = false;
 
     if (!isCollition) {

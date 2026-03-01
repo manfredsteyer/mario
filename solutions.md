@@ -26,7 +26,7 @@ function applyGravity(ctx: GameContext): GravityStatus {
 }
 ```
 
-## Lab 2: Check for Wallss
+## Lab 2: Check for Floor
 
 ```ts
 // src/app/engine/walls.ts
@@ -99,35 +99,25 @@ function scrollLevel(ctx: GameContext): void {
 }
 ```
 
+## Lab 4: Only Paint View Port
+
 ```ts
 // src/app/engine/level.ts
 
 function drawLevel(ctx: LevelDrawContext): void {
-  const { level, context, width, height, scrollOffset } = ctx;
-  const { levelGrid, rowCount, colCount } = level;
-
-  context.fillStyle = level.backgroundColor;
-  context.fillRect(0, 0, width, height);
-
-  drawRisingCoins(ctx);
+  [...]
 
   const firstCol = Math.max(0, Math.floor(scrollOffset / SIZE) - 1);
   const lastCol = Math.min(
     colCount - 1,
-    Math.ceil((width + scrollOffset) / SIZE) + 1
+    Math.ceil(((width / SCALE) + scrollOffset) / SIZE) + 1
   );
 
-  for (let row = 0; row < rowCount; row++) {
-    for (let col = firstCol; col <= lastCol; col++) {
-      const cell = levelGrid[row][col];
-        drawTile(ctx, cell);
-    }
-  }
+  [...]
 }
 ```
 
-## Lab 4: Collision Detection
-
+## Lab 5: Collision Detection
 
 ```ts
 // src/app/engine/gumba.ts
@@ -135,7 +125,7 @@ function drawLevel(ctx: LevelDrawContext): void {
 export function checkHeroGumbaCollision(ctx: GameContext): void {
   [...]
 
-    const overlaps =
+    const collision =
       heroRight > gumbaLeft &&
       heroLeft < gumbaRight &&
       heroBottom > gumbaTop &&

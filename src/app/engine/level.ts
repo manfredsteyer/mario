@@ -277,7 +277,7 @@ function drawLevel(ctx: LevelDrawContext): void {
 
   drawRisingCoins(ctx);
 
-  // TODO 3: Adjust these variables to only render view window
+  // TODO 4: Adjust these variables to only render view window
   const firstCol = 0;
   const lastCol = colCount - 1;
 

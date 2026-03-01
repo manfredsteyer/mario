@@ -21,8 +21,8 @@ export function buildLevelGrid(level: Level, tiles: TileSet): Item[][] {
   for (const item of items) {
     const tile = tiles[item.tileKey as keyof TileSet];
     if (!tile) {
-      continue
-    };
+      continue;
+    }
     addTileToGrid(tile, item, grid);
   }
   return grid;

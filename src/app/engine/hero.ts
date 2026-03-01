@@ -49,8 +49,11 @@ export function moveHero(ctx: GameContext): void {
     ctx.isJumping = true;
   }
 
-  if (keyboard.left) goLeft(ctx);
-  else if (keyboard.right) goRight(ctx);
+  if (keyboard.left) {
+    goLeft(ctx);
+  } else if (keyboard.right) {
+    goRight(ctx);
+  }
 
   ctx.hero.runStart =
     (keyboard.left || keyboard.right) ? ctx.hero.runStart || ctx.timeStamp : 0;
@@ -100,7 +103,9 @@ function jump(ctx: GameContext, delta: number, timeStamp: number): JumpStatus {
 }
 
 export function checkHitQuestionMark(ctx: GameContext): void {
-  if (!ctx.hitTop) return;
+  if (!ctx.hitTop) {
+    return;
+  }
   const timeStamp = ctx.hitTopTimeStamp ?? ctx.timeStamp;
 
   const y = ctx.hero.position.y;
@@ -145,7 +150,9 @@ export function checkHitQuestionMark(ctx: GameContext): void {
 
     const otherItems: Item[] = [];
     for (let i = 0; i < repeatCol; i++) {
-      if (i === hitColIndex) continue;
+      if (i === hitColIndex) {
+        continue;
+      }
       otherItems.push({
         ...block,
         col: baseCol + i,

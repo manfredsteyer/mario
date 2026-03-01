@@ -32,6 +32,14 @@ export function getBottomSolidOptimized(
   return NULL_ITEM;
 }
 
+export function calcMaxY(entity: ObjectState, level: Level): number {
+  const bottom = getBottomSolidOptimized(entity, level);
+  if (bottom.tileKey === 'air') {
+    return Infinity;
+  }
+  return toTop(bottom) - SIZE;
+}
+
 export function getAboveSolidOptimized(
   entity: ObjectState,
   level: Level
@@ -59,6 +67,14 @@ export function getAboveSolidOptimized(
   return NULL_ITEM;
 }
 
+export function calcMinY(entity: ObjectState, level: Level): number {
+  const above = getAboveSolidOptimized(entity, level);
+  if (above.tileKey === 'air') {
+    return -Infinity;
+  }
+  return toBottom(above);
+}
+
 export function getRightSolidOptimized(
   entity: ObjectState,
   level: Level
@@ -80,6 +96,14 @@ export function getRightSolidOptimized(
     }
   }
   return NULL_ITEM;
+}
+
+export function calcMinX(entity: ObjectState, level: Level): number {
+  const left = getLeftSolidOptimized(entity, level);
+  if (left.tileKey === 'air') {
+    return -Infinity;
+  }
+  return toRight(left);
 }
 
 export function getLeftSolidOptimized(
@@ -109,26 +133,10 @@ export function getLeftSolidOptimized(
   return NULL_ITEM;
 }
 
-export function calcMaxY(entity: ObjectState, level: Level): number {
-  const bottom = getBottomSolidOptimized(entity, level);
-  if (bottom.tileKey === 'air') return Infinity;
-  return toTop(bottom) - SIZE;
-}
-
-export function calcMinY(entity: ObjectState, level: Level): number {
-  const above = getAboveSolidOptimized(entity, level);
-  if (above.tileKey === 'air') return -Infinity;
-  return toBottom(above);
-}
-
 export function calcMaxX(entity: ObjectState, level: Level): number {
   const right = getRightSolidOptimized(entity, level);
-  if (right.tileKey === 'air') return Infinity;
+  if (right.tileKey === 'air') {
+    return Infinity;
+  }
   return toLeft(right) - SIZE;
-}
-
-export function calcMinX(entity: ObjectState, level: Level): number {
-  const left = getLeftSolidOptimized(entity, level);
-  if (left.tileKey === 'air') return -Infinity;
-  return toRight(left);
 }

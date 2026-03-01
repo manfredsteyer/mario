@@ -72,7 +72,9 @@ export class LevelComponent implements OnDestroy {
   private runMiniDemo() {
     effect(() => {
       const canvas = this.canvas()?.nativeElement;
-      if (!canvas) return;
+      if (!canvas) {
+        return;
+      }
       runHeroDemo(canvas);
     });
   }

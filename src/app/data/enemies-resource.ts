@@ -13,7 +13,9 @@ export function createEnemiesResource(
   return resource({
     params,
     loader: ({ params }) => {
-      if (!params?.map) throw new Error('enemies map required');
+      if (!params?.map) {
+        throw new Error('enemies map required');
+      }
       return extractGumbaTiles(params.map);
     },
   });

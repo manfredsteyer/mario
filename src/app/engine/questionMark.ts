@@ -9,7 +9,9 @@ export function drawRisingCoins(ctx: LevelDrawContext): void {
   const stillRising: typeof ctx.risingCoins = [];
   for (const rc of ctx.risingCoins) {
     const progress = (ctx.timeStamp - rc.startTime) / RISE_DURATION_MS;
-    if (progress >= 1) continue;
+    if (progress >= 1) {
+      continue;
+    }
     stillRising.push(rc);
     const upProgress = progress <= 0.5 ? progress * 2 : (1 - progress) * 2;
     const yOffset = upProgress * RISE_DISTANCE;

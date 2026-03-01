@@ -18,7 +18,9 @@ export async function addTransparency(
   canvas.height = imageBitmap.height;
 
   const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Unable to get 2D context');
+  if (!ctx) {
+    throw new Error('Unable to get 2D context');
+  }
 
   ctx.drawImage(imageBitmap, 0, 0);
 

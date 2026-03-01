@@ -13,7 +13,8 @@ export type RisingCoin = {
 };
 
 export type HeroState = ObjectState & {
-  acceleration: number;
+  fallVelocity: number;
+  jumpVelocity: number;
   jumpStart: number;
   fallStart: number;
   runStart: number;
@@ -81,7 +82,8 @@ export function createInitialGameOptions() {
     direction: 'right' as Direction,
     hero: {
       position: { x: 16, y: 0 },
-      acceleration: 0,
+      fallVelocity: 0,
+      jumpVelocity: 0,
       jumpStart: 0,
       fallStart: 0,
       runStart: 0,

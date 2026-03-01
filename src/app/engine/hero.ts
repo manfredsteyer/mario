@@ -1,8 +1,8 @@
 import {
+  FALL_GRAVITY,
   HERO_PADDING,
-  JUMP_DURATION_MS,
-  JUMP_GRAVITY_PER_100MS,
-  JUMP_VELOCITY,
+  INITIAL_JUMP_VELOCITY,
+  JUMP_GRAVITY,
 } from './constants';
 import { getHeroTile } from './hero-tiles';
 import { keyboard } from './keyboard';
@@ -13,6 +13,7 @@ import type { Item } from './tiles';
 import { calcMaxX, calcMaxY, calcMinX, calcMinY } from './walls';
 
 export type GravityStatus = 'NOT_FALLING' | 'FALLING';
+export type JumpStatus = 'NOT_JUMPING' | 'JUMPING';
 
 export function drawHero(ctx: GameContext): void {
   const tile = getHeroTile(
@@ -28,26 +29,28 @@ export function drawHero(ctx: GameContext): void {
 
 export function moveHero(ctx: GameContext): void {
   let hitGround = false;
-  let hitTop = false;
-  ctx.isJumping =
-    keyboard.up && ctx.timeStamp - ctx.hero.jumpStart < JUMP_DURATION_MS;
-  const isJumping = ctx.isJumping;
   const initY = ctx.hero.position.y;
 
-  if (!isJumping) {
-    ctx.hero.jumpStart = 0;
-    const gravityStatus = applyGravity(ctx);
+  if (!keyboard.up) {
+    ctx.isJumping = false;
+    ctx.hero.jumpVelocity = 0;
+  }
+
+  if (!ctx.isJumping) {
+   const gravityStatus = applyGravity(ctx);
     hitGround = (gravityStatus === 'NOT_FALLING');
   } else {
-    hitTop = jump(ctx, ctx.delta, ctx.timeStamp);
+    const status = jump(ctx, ctx.delta, ctx.timeStamp);
+    ctx.isJumping = (status === 'JUMPING');
+    ctx.hitTop = (status === 'NOT_JUMPING');
   }
 
   if (keyboard.up && hitGround) {
-    ctx.hero.jumpStart = ctx.timeStamp;
+    ctx.isJumping = true;
   }
 
-  if (keyboard.left && !hitTop) goLeft(ctx);
-  else if (keyboard.right && !hitTop) goRight(ctx);
+  if (keyboard.left) goLeft(ctx);
+  else if (keyboard.right) goRight(ctx);
 
   ctx.hero.runStart =
     (keyboard.left || keyboard.right) ? ctx.hero.runStart || ctx.timeStamp : 0;
@@ -73,25 +76,27 @@ export function goLeft(ctx: GameContext): void {
   ctx.direction = 'left';
 }
 
-function jump(ctx: GameContext, delta: number, timeStamp: number): boolean {
+function jump(ctx: GameContext, delta: number, timeStamp: number): JumpStatus {
+  
+  const y = ctx.hero.position.y;
   const minY = calcMinY(ctx.hero, ctx.level);
-  const timeInJumpMs = timeStamp - ctx.hero.jumpStart;
-  const upwardVelocity = Math.max(
-    0,
-    JUMP_VELOCITY - (timeInJumpMs / 100) * JUMP_GRAVITY_PER_100MS
-  );
-  const candY = ctx.hero.position.y - upwardVelocity * delta;
+
+  const formerVelocity = ctx.hero.jumpVelocity || INITIAL_JUMP_VELOCITY;
+  const velocity = Math.max(0, formerVelocity - JUMP_GRAVITY * delta);
+  const candY = y - velocity * delta;
   const newY = Math.max(candY, minY);
 
   ctx.hero.position.y = newY;
 
-  if (newY === minY) {
-    ctx.hitTop = true;
-    ctx.hitTopTimeStamp = timeStamp;
-    ctx.hero.jumpStart = 0;
-    return true;
+  if (newY === y) {
+    ctx.hero.jumpVelocity = 0;
+    return 'NOT_JUMPING';
   }
-  return false;
+  else {
+    ctx.hero.jumpVelocity = velocity;
+    return 'JUMPING';
+  } 
+
 }
 
 export function checkHitQuestionMark(ctx: GameContext): void {
@@ -170,22 +175,21 @@ export function checkHitQuestionMark(ctx: GameContext): void {
 }
 
 function applyGravity(ctx: GameContext): GravityStatus {
-  
   const y = ctx.hero.position.y;
   const maxY = calcMaxY(ctx.hero, ctx.level);
 
-  const acceleration = ctx.hero.acceleration + 0.10 * ctx.delta;
-  const candY = y + acceleration;
+  const velocity = ctx.hero.fallVelocity + FALL_GRAVITY * ctx.delta;
+  const candY = y + velocity * ctx.delta;
 
   const newY = Math.min(maxY, candY);
   ctx.hero.position.y = newY;
 
   if (newY !== y) {
-    ctx.hero.acceleration = acceleration;
+    ctx.hero.fallVelocity = velocity;
     return 'FALLING';
   }
   else {
-    ctx.hero.acceleration = 0;
+    ctx.hero.fallVelocity = 0;
     return 'NOT_FALLING';
   }
 }

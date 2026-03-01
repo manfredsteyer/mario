@@ -1,7 +1,11 @@
+# Solution
+
+## Lab 1: Apply Gravity
+
 ```ts
 function applyGravity(ctx: GameContext): GravityStatus {
   const y = ctx.hero.position.y;
-  const maxY = calcMaxY(ctx.hero, ctx.level);
+  const maxY = 12 * SIZE;
 
   const velocity = ctx.hero.fallVelocity + FALL_GRAVITY * ctx.delta;
   const candY = y + velocity * ctx.delta;
@@ -19,6 +23,8 @@ function applyGravity(ctx: GameContext): GravityStatus {
   }
 }
 ```
+
+## Lab 2: Check for Wallss
 
 ```ts
 export function getAboveSolidOptimized(
@@ -46,5 +52,27 @@ export function getAboveSolidOptimized(
     }
   }
   return NULL_ITEM;
+}
+```
+
+```ts
+function applyGravity(ctx: GameContext): GravityStatus {
+  const y = ctx.hero.position.y;
+  const maxY = calcMaxY(ctx.hero, ctx.level);
+
+  const velocity = ctx.hero.fallVelocity + FALL_GRAVITY * ctx.delta;
+  const candY = y + velocity * ctx.delta;
+
+  const newY = Math.min(maxY, candY);
+  ctx.hero.position.y = newY;
+
+  if (newY !== y) {
+    ctx.hero.fallVelocity = velocity;
+    return 'FALLING';
+  }
+  else {
+    ctx.hero.fallVelocity = 0;
+    return 'NOT_FALLING';
+  }
 }
 ```

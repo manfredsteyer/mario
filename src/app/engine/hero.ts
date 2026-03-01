@@ -184,12 +184,6 @@ export function checkHitQuestionMark(ctx: GameContext): void {
 function applyGravity(ctx: GameContext): GravityStatus {
   
   // TODO 1: Implement velocity
-  
-  // 1.1: Check how far the hero can fall 
-  // 1.2: Increase velocity while falling
-  // 1.3: Incrase y by velocity
-  //
-  // You need: ctx.hero, getMaxY
 
   return 'NOT_FALLING';
 }

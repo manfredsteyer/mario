@@ -76,3 +76,40 @@ function applyGravity(ctx: GameContext): GravityStatus {
   }
 }
 ```
+
+## Lab 3: Side Scrolling
+
+```ts
+function scrollLevel(ctx: GameContext): void {
+  const center = ctx.width / SCALE / 2;
+  const x = ctx.hero.position.x;
+
+  ctx.renderX = Math.min(x, center - SIZE);
+  ctx.scrollOffset = (x - ctx.renderX);
+}
+```
+
+```ts
+function drawLevel(ctx: LevelDrawContext): void {
+  const { level, context, width, height, scrollOffset } = ctx;
+  const { levelGrid, rowCount, colCount } = level;
+
+  context.fillStyle = level.backgroundColor;
+  context.fillRect(0, 0, width, height);
+
+  drawRisingCoins(ctx);
+
+  const firstCol = Math.max(0, Math.floor(scrollOffset / SIZE) - 1);
+  const lastCol = Math.min(
+    colCount - 1,
+    Math.ceil((width + scrollOffset) / SIZE) + 1
+  );
+
+  for (let row = 0; row < rowCount; row++) {
+    for (let col = firstCol; col <= lastCol; col++) {
+      const cell = levelGrid[row][col];
+        drawTile(ctx, cell);
+    }
+  }
+}
+```

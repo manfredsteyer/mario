@@ -263,8 +263,9 @@ function scrollLevel(ctx: GameContext): void {
   const center = ctx.width / SCALE / 2;
   const x = ctx.hero.position.x;
 
-  ctx.renderX = Math.min(x, center - SIZE);
-  ctx.scrollOffset = (x - ctx.renderX);
+  // TODO 3: Adjust these variables
+  ctx.renderX = x;
+  ctx.scrollOffset = 0;
 }
 
 function drawLevel(ctx: LevelDrawContext): void {
@@ -276,11 +277,9 @@ function drawLevel(ctx: LevelDrawContext): void {
 
   drawRisingCoins(ctx);
 
-  const firstCol = Math.max(0, Math.floor(scrollOffset / SIZE) - 1);
-  const lastCol = Math.min(
-    colCount - 1,
-    Math.ceil((width + scrollOffset) / SIZE) + 1
-  );
+  // TODO 3: Adjust these variables to only render view window
+  const firstCol = 0;
+  const lastCol = colCount - 1;
 
   for (let row = 0; row < rowCount; row++) {
     for (let col = firstCol; col <= lastCol; col++) {

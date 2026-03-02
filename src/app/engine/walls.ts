@@ -12,8 +12,10 @@ export function getBottomSolid(
   hero: ObjectState,
   level: Level
 ): Item {
+  // row <--> y       col <--> x       
 
   // TODO 2: Find first solid item below hero
+  //   + call calcMaxY in hero.ts
 
   return NULL_ITEM;
 }

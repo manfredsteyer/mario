@@ -184,6 +184,7 @@ export function checkHitQuestionMark(ctx: GameContext): void {
 function applyGravity(ctx: GameContext): GravityStatus {
   
   // TODO 1: Implement gravity
+  //   - respect gravity + time delta 
 
   return 'NOT_FALLING';
 }

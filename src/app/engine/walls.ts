@@ -34,7 +34,7 @@ export function getBottomSolid(
 
 export function calcMaxY(hero: ObjectState, level: Level): number {
   const bottom = getBottomSolid(hero, level);
-  if (bottom.tileKey === 'air') {
+  if (bottom === NULL_ITEM) {
     return Infinity;
   }
   return toTop(bottom) - SIZE;
@@ -69,7 +69,7 @@ export function getAboveSolid(
 
 export function calcMinY(hero: ObjectState, level: Level): number {
   const above = getAboveSolid(hero, level);
-  if (above.tileKey === 'air') {
+  if (above === NULL_ITEM) {
     return -Infinity;
   }
   return toBottom(above);
@@ -100,7 +100,7 @@ export function getRightSolid(
 
 export function calcMinX(hero: ObjectState, level: Level): number {
   const left = getLeftSolid(hero, level);
-  if (left.tileKey === 'air') {
+  if (left === NULL_ITEM) {
     return -Infinity;
   }
   return toRight(left);
@@ -135,7 +135,7 @@ export function getLeftSolid(
 
 export function calcMaxX(hero: ObjectState, level: Level): number {
   const right = getRightSolid(hero, level);
-  if (right.tileKey === 'air') {
+  if (right === NULL_ITEM) {
     return Infinity;
   }
   return toLeft(right) - SIZE;

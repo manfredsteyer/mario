@@ -92,15 +92,6 @@ export function isSolid(key: TileName): boolean {
   );
 }
 
-type NormalizedDrawTileOptions = {
-  col: number;
-  row: number;
-  repeatCol: number;
-  repeatRow: number;
-  pixelOffsetX: number;
-  pixelOffsetY: number;
-};
-
 type TileSize = {
   cols: number;
   rows: number;

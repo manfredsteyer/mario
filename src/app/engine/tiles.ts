@@ -84,12 +84,11 @@ export const NULL_ITEM: Item = {
 
 export function isSolid(key: TileName): boolean {
   return (
-    (key === 'floor' ||
-      key === 'brick' ||
-      key === 'solid' ||
-      key.startsWith('pipe') ||
-      key === 'questionMark' ||
-      key === 'empty')
+    key === 'floor' ||
+    key === 'brick' ||
+    key === 'solid' ||
+    key.startsWith('pipe') ||
+    key === 'questionMark'
   );
 }
 
@@ -174,7 +173,6 @@ async function createTiles(bitmap: ImageBitmap, palettes: Palettes) {
     stump: getTile(bitmap, palettes.p1, 1, 3),
     empty: getTile(bitmap, palettes.p1, 3, 0),
 
-
     // Interactive tiles
     questionMark: getTile(bitmap, palettes.p3, 0, 0),
     coin: getTile(bitmap, palettes.p3, 0, 1),
@@ -224,7 +222,6 @@ async function createTiles(bitmap: ImageBitmap, palettes: Palettes) {
   return tiles;
 }
 
-
 export function drawTile(ctx: LevelDrawContext, item: Item): void {
   if (!item.tile) {
     return;
@@ -232,7 +229,7 @@ export function drawTile(ctx: LevelDrawContext, item: Item): void {
   ctx.context.drawImage(
     item.tile,
     SIZE * item.col - ctx.scrollOffset,
-    SIZE * item.row
+    SIZE * item.row,
   );
 }
 
@@ -277,4 +274,3 @@ export async function extractTiles(tilesMap: Blob, style: Style) {
   const tiles = await loadTiles(correctedBitmap, palettes);
   return tiles;
 }
-

@@ -8,7 +8,7 @@ import { SIZE } from './palettes';
 import { isSolid, NULL_ITEM, type Item } from './tiles';
 import type { Level, ObjectState } from './types';
 
-export function getBottomSolidOptimized(
+export function getBottomSolid(
   hero: ObjectState,
   level: Level
 ): Item {
@@ -33,14 +33,14 @@ export function getBottomSolidOptimized(
 }
 
 export function calcMaxY(hero: ObjectState, level: Level): number {
-  const bottom = getBottomSolidOptimized(hero, level);
+  const bottom = getBottomSolid(hero, level);
   if (bottom.tileKey === 'air') {
     return Infinity;
   }
   return toTop(bottom) - SIZE;
 }
 
-export function getAboveSolidOptimized(
+export function getAboveSolid(
   hero: ObjectState,
   level: Level
 ): Item {
@@ -68,14 +68,14 @@ export function getAboveSolidOptimized(
 }
 
 export function calcMinY(hero: ObjectState, level: Level): number {
-  const above = getAboveSolidOptimized(hero, level);
+  const above = getAboveSolid(hero, level);
   if (above.tileKey === 'air') {
     return -Infinity;
   }
   return toBottom(above);
 }
 
-export function getRightSolidOptimized(
+export function getRightSolid(
   hero: ObjectState,
   level: Level
 ): Item {
@@ -99,14 +99,14 @@ export function getRightSolidOptimized(
 }
 
 export function calcMinX(hero: ObjectState, level: Level): number {
-  const left = getLeftSolidOptimized(hero, level);
+  const left = getLeftSolid(hero, level);
   if (left.tileKey === 'air') {
     return -Infinity;
   }
   return toRight(left);
 }
 
-export function getLeftSolidOptimized(
+export function getLeftSolid(
   hero: ObjectState,
   level: Level
 ): Item {
@@ -134,7 +134,7 @@ export function getLeftSolidOptimized(
 }
 
 export function calcMaxX(hero: ObjectState, level: Level): number {
-  const right = getRightSolidOptimized(hero, level);
+  const right = getRightSolid(hero, level);
   if (right.tileKey === 'air') {
     return Infinity;
   }

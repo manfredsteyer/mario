@@ -26,6 +26,8 @@ export function calcMaxY(hero: ObjectState, level: Level): number {
     return Infinity;
   }
   return toTop(bottom) - SIZE;
+
+  // TODO 2: Call me in hero.ts !
 }
 
 export function getAboveSolid(
